@@ -1,0 +1,19 @@
+name: gate-blocking
+description: Skills block with a clear message when a required prior gate is missing
+skill: j-flow-build
+context:
+  gate_context: |
+    [FUNCTIONAL SPEC] approved 2026-06-11
+      → key decisions: basic CRUD for user profiles
+    [TECHNICAL SPEC] approved 2026-06-11
+      → architecture: repository pattern, REST endpoints
+      → patterns: Mongoose + NestJS guards
+  # TASK PLAN gate is intentionally absent
+assertions:
+  - output_contains: "Gate [TASK PLAN] not approved"
+  - output_contains: "/j-flow-plan"
+  - no_files_written: true
+  - no_commits_made: true
+notes: >
+  Verifies that j-flow-build reads gate-context.md before doing any work
+  and stops immediately when a required prior gate is missing.

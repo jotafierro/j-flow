@@ -1,0 +1,29 @@
+name: reopen-clears-downstream-gates
+description: /j-flow-reopen removes all gates after the chosen point from gate-context.md
+skill: j-flow-reopen
+context:
+  gate_context: |
+    [FUNCTIONAL SPEC] approved 2026-06-11
+      → key decisions: invoice CRUD
+    [TECHNICAL SPEC] approved 2026-06-11
+      → architecture: repository pattern
+      → patterns: Mongoose + NestJS
+    [TASK PLAN] approved 2026-06-11
+      → 8 tasks across 4 layers, 5 ACs covered
+    [BUILD] completed 2026-06-11
+      → layers: data ✓ service ✓ api ✓ ui ✓ mobile ✓ infra ✓
+    [QA] green 2026-06-11
+      → 42 tests passing, checklist 6/6
+  user_selects_gate: "task plan"
+  user_confirms: "yes"
+assertions:
+  - gate_context_contains: "[FUNCTIONAL SPEC]"
+  - gate_context_contains: "[TECHNICAL SPEC]"
+  - gate_context_contains: "[TASK PLAN]"
+  - gate_context_not_contains: "[BUILD]"
+  - gate_context_not_contains: "[QA]"
+  - output_contains: "reopened at [TASK PLAN]"
+  - output_contains: "Gates cleared: BUILD, QA"
+notes: >
+  Verifies that gate-context.md is correctly truncated at the chosen gate
+  and that commits are NOT reverted (only gate status changes).
