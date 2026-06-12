@@ -1,0 +1,114 @@
+---
+name: j-flow-spec
+description: Generate functional spec (default) via dialogue, or technical spec (technical argument) via j-flow-architect agent. Both produce approval gates. Usage: /j-flow-spec [technical]
+---
+
+# j-flow-spec
+
+## Gate Check
+
+Find the active feature (see j-flow-shared: "How to Find Active Feature").
+Read `.specs/{slug}/gate-context.md`.
+
+**For `technical` argument only:** Require `[FUNCTIONAL SPEC] approved`.
+If missing or stale: "Gate [FUNCTIONAL SPEC] not approved. Run /j-flow-spec first."
+
+**For default mode:** No prior gate required (it's the first gate).
+
+---
+
+## Mode: Functional Spec (default `/j-flow-spec`)
+
+Generate the functional spec through a dialogue. Ask questions ONE AT A TIME — wait for each answer before asking the next.
+
+### Questions
+
+1. **What does this feature do?** (describe from the user's perspective in 1-2 sentences)
+2. **Who uses it?** (which user roles interact with this feature)
+3. **What triggers it?** (user action, event, cron schedule, etc.)
+4. **What are the acceptance criteria?**
+   Guide: "List conditions that must be true for this feature to be complete. Format each as: 'Given {context}, when {action}, then {outcome}'. Aim for 3-8 ACs."
+5. **What is explicitly out of scope?** (what this feature does NOT do)
+6. **Any constraints?** (performance, security, compliance, UX)
+
+### Draft and Confirm
+
+After collecting all answers, draft `functional-spec.md` and show it to the user:
+
+```markdown
+# Functional Spec — {slug}
+Date: {today's date}
+
+## Summary
+{1-2 sentence description from question 1}
+
+## Users
+{roles from question 2}
+
+## Trigger
+{from question 3}
+
+## Acceptance Criteria
+- AC1: Given {context}, when {action}, then {outcome}
+- AC2: ...
+(number all ACs sequentially: AC1, AC2, AC3...)
+
+## Out of Scope
+- {explicit exclusion from question 5}
+
+## Constraints
+- {constraint from question 6}
+```
+
+Ask: "Does this spec look right? Reply 'approved' to proceed, or tell me what to change."
+
+If the user requests changes, make them and show the updated draft again.
+
+### Approval
+
+When the user replies 'approved' (or equivalent confirmation):
+1. Write `.specs/{slug}/functional-spec.md`
+2. Append to `.specs/{slug}/gate-context.md`:
+   ```
+   [FUNCTIONAL SPEC] approved {today's date}
+     → key decisions: {1-line summary of main scope decisions}
+   ```
+3. Print:
+   ```
+   Functional spec approved and saved ✓
+   Next step: /j-flow-spec technical
+   ```
+
+---
+
+## Mode: Technical Spec (`/j-flow-spec technical`)
+
+### Dispatch j-flow-architect
+
+Provide the agent with:
+- Full contents of `.specs/{slug}/functional-spec.md`
+- Full contents of `.specs/.agents/j-flow-architect.md` (agent memory)
+- Instruction: "Generate a complete technical spec following your Technical Spec Format. Every decision must reference an AC. No speculative features."
+
+### Draft and Confirm
+
+Show the agent's output to the user as a draft `technical-spec.md`. Ask:
+"Does this technical spec look right? Reply 'approved' to proceed, or tell me what to change."
+
+If the user requests changes, apply them to the draft and show again.
+
+### Approval
+
+When approved:
+1. Write `.specs/{slug}/technical-spec.md`
+2. Append to `.specs/{slug}/gate-context.md`:
+   ```
+   [TECHNICAL SPEC] approved {today's date}
+     → architecture: {1-line summary of main architecture decisions}
+     → patterns: {key patterns chosen, e.g. "repository pattern, JWT guards, Riverpod"}
+   ```
+3. Print:
+   ```
+   Technical spec approved and saved ✓
+   Next step: /j-flow-plan
+   ```
