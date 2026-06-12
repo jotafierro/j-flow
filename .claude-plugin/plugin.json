@@ -2,7 +2,9 @@
   "name": "j-flow",
   "version": "1.0.0",
   "description": "Gate-based Spec-Driven Development workflow for MongoDB + NestJS + React + Flutter projects.",
-  "author": "jotafierro",
+  "author": {
+    "name": "jotafierro"
+  },
   "homepage": "https://github.com/jotafierro/j-flow",
   "repository": "https://github.com/jotafierro/j-flow",
   "license": "MIT",
