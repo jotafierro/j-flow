@@ -1,0 +1,24 @@
+name: qa-red-green
+description: QA gate writes a red report and blocks review when a test stage fails
+skill: j-flow-qa
+context:
+  gate_context: |
+    [BUILD] completed 2026-06-11
+      → layers: data ✓ service ✓ api ✓ ui ✓ mobile ✓ infra ✓
+  stage_1_exit_code: 1
+  stage_1_output: |
+    FAIL apps/api/src/auth/auth.service.spec.ts
+      ● AuthService › login › should return 401 for wrong password
+        Expected: 401
+        Received: 200
+assertions:
+  - writes_file: ".specs/{slug}/qa-report.md"
+  - qa_report_gate: red
+  - qa_report_contains: "auth.service.spec.ts"
+  - gate_context_contains: "[QA] red"
+  - gate_context_contains: "BLOCKED"
+  - output_contains: "/j-flow-build --fix"
+  - review_gate_blocked: true
+notes: >
+  Verifies the full failure path: test output captured in qa-report.md,
+  gate-context.md updated with red status, /j-flow-review blocked.

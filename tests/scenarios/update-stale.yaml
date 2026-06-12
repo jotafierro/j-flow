@@ -1,0 +1,22 @@
+name: update-marks-downstream-stale
+description: /j-flow-update marks downstream gates as stale when a spec is changed
+skill: j-flow-update
+context:
+  gate_context: |
+    [FUNCTIONAL SPEC] approved 2026-06-11
+    [TECHNICAL SPEC] approved 2026-06-11
+    [TASK PLAN] approved 2026-06-11
+    [BUILD] completed 2026-06-11
+    [QA] green 2026-06-11
+  user_updates: "task plan"
+  change_description: "add AC6 for email notification on invoice creation"
+assertions:
+  - gate_context_contains: "[TASK PLAN] approved"
+  - gate_context_contains: "[BUILD] completed 2026-06-11 [stale]"
+  - gate_context_contains: "[QA] green 2026-06-11 [stale]"
+  - gate_context_not_contains: "[FUNCTIONAL SPEC].*stale"
+  - gate_context_not_contains: "[TECHNICAL SPEC].*stale"
+  - output_contains: "Stale gates: BUILD, QA, REVIEW"
+notes: >
+  Verifies that only downstream gates become stale (functional and technical
+  specs remain approved since only the task plan was changed).
