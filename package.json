@@ -1,0 +1,13 @@
+{
+  "name": "j-flow",
+  "version": "1.0.0",
+  "description": "Gate-based SDD workflow plugin for Claude Code",
+  "private": true,
+  "scripts": {
+    "validate": "node tests/validate.js",
+    "test": "node tests/validate.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
