@@ -52,13 +52,13 @@ for (const skill of EXPECTED_SKILLS) {
     assert(fs.existsSync(path.join(ROOT, 'skills', skill)), `missing skills/${skill}/`);
   });
 
-  check(`${skill} skill file exists`, () => {
-    const skillFile = path.join(ROOT, 'skills', skill, `${skill}.md`);
-    assert(fs.existsSync(skillFile), `missing skills/${skill}/${skill}.md`);
+  check(`${skill} SKILL.md exists`, () => {
+    const skillFile = path.join(ROOT, 'skills', skill, 'SKILL.md');
+    assert(fs.existsSync(skillFile), `missing skills/${skill}/SKILL.md`);
   });
 
   check(`${skill} has frontmatter`, () => {
-    const skillFile = path.join(ROOT, 'skills', skill, `${skill}.md`);
+    const skillFile = path.join(ROOT, 'skills', skill, 'SKILL.md');
     const content = fs.readFileSync(skillFile, 'utf8');
     assert(content.startsWith('---'), 'must start with --- frontmatter');
     assert(content.includes('name:'), 'frontmatter missing name:');
