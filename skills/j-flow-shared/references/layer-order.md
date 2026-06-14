@@ -1,0 +1,42 @@
+# Build Layer Order
+
+Fixed implementation order for j-flow. Applied by `/j-flow-plan` (task grouping) and `/j-flow-build` (execution sequencing).
+
+| Layer | Type | Content | Agent |
+|-------|------|---------|-------|
+| 1 | `data` | Mongoose schemas + DTOs + indexes | j-flow-backend |
+| 2 | `service` | NestJS services + business logic + unit tests | j-flow-backend |
+| 3 | `api` | Controllers + guards + pipes + NestJS E2E specs (`*.e2e-spec.ts`) | j-flow-backend |
+| 4 | `ui` | React components + hooks + pages + Storybook stories | j-flow-frontend |
+| 5 | `mobile` | Flutter screens + widgets + providers + Widgetbook + `integration_test` | j-flow-mobile |
+| 6 | `infra` | Docker + CI/CD + deployment config + env vars | j-flow-devops |
+
+## Execution order
+
+`1 → 2 → 3 → 4 → 5 → 6`
+
+Layers run sequentially. Each layer commits independently. The api layer (3) must complete before ui (4) or mobile (5) start, because they consume API contracts.
+
+## Skipping layers
+
+Layers with no tasks in `tasks.json` are skipped. Document the omission in `gate-context.md` after build:
+
+```
+[BUILD] completed 2026-06-12
+  → layers: data ✓ service ✓ api ✓ ui ✓ mobile - infra -
+```
+
+Use `-` for skipped layers, `✓` for completed layers.
+
+## Test placement
+
+| Test type | Lives in | Written by |
+|-----------|----------|------------|
+| Unit (backend) | `apps/api/src/**/*.spec.ts` | j-flow-backend (service layer) |
+| Unit (frontend) | `packages/ui/src/**/*.test.tsx`, `apps/web/**/*.test.tsx` | j-flow-frontend (ui layer) |
+| Unit (mobile) | `apps/mobile/test/**/*_test.dart` | j-flow-mobile (mobile layer) |
+| NestJS E2E | `apps/api/test/*.e2e-spec.ts` | j-flow-backend (api layer) |
+| Flutter integration | `apps/mobile/integration_test/*_test.dart` | j-flow-mobile (mobile layer) |
+| Playwright E2E | `apps/e2e/tests/*.spec.ts` | j-flow-quality (qa phase) |
+| Storybook stories | `packages/ui/src/**/*.stories.tsx` | j-flow-frontend (ui layer) |
+| Widgetbook entries | `apps/mobile/widgetbook/lib/**/*.dart` | j-flow-mobile (mobile layer) |
