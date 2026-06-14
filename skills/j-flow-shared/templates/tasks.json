@@ -1,0 +1,100 @@
+{
+  "slug": "{slug}",
+  "created": "{YYYY-MM-DD}",
+  "layers": {
+    "data": [
+      {
+        "id": "data-1",
+        "title": "Create {Name} Mongoose schema and DTOs",
+        "agent": "j-flow-backend",
+        "spec_refs": ["AC-1"],
+        "files": [
+          "apps/api/src/{module}/schemas/{name}.schema.ts",
+          "apps/api/src/{module}/dto/create-{name}.dto.ts",
+          "apps/api/src/{module}/dto/{name}-response.dto.ts"
+        ],
+        "dependencies": [],
+        "status": "pending"
+      }
+    ],
+    "service": [
+      {
+        "id": "service-1",
+        "title": "Implement {Name}Service",
+        "agent": "j-flow-backend",
+        "spec_refs": ["AC-1", "AC-2", "DD-1"],
+        "files": [
+          "apps/api/src/{module}/{name}.service.ts",
+          "apps/api/src/{module}/{name}.service.spec.ts"
+        ],
+        "dependencies": ["data-1"],
+        "status": "pending"
+      }
+    ],
+    "api": [
+      {
+        "id": "api-1",
+        "title": "Create {Name}Controller + NestJS E2E spec",
+        "agent": "j-flow-backend",
+        "spec_refs": ["AC-2"],
+        "files": [
+          "apps/api/src/{module}/{name}.controller.ts",
+          "apps/api/test/{name}.e2e-spec.ts"
+        ],
+        "dependencies": ["service-1"],
+        "status": "pending"
+      }
+    ],
+    "ui": [
+      {
+        "id": "ui-1",
+        "title": "Build {Name} components + Storybook stories",
+        "agent": "j-flow-frontend",
+        "spec_refs": ["AC-3"],
+        "files": [
+          "packages/ui/src/{name}/{Name}.tsx",
+          "packages/ui/src/{name}/{Name}.stories.tsx",
+          "apps/web/src/app/{route}/page.tsx"
+        ],
+        "dependencies": ["api-1"],
+        "status": "pending"
+      }
+    ],
+    "mobile": [
+      {
+        "id": "mobile-1",
+        "title": "Build {Name} screen + Widgetbook entry + integration_test",
+        "agent": "j-flow-mobile",
+        "spec_refs": ["AC-3"],
+        "files": [
+          "apps/mobile/lib/screens/{name}_screen.dart",
+          "apps/mobile/widgetbook/lib/widgets/{name}.dart",
+          "apps/mobile/integration_test/{name}_test.dart"
+        ],
+        "dependencies": ["api-1"],
+        "status": "pending"
+      }
+    ],
+    "infra": [
+      {
+        "id": "infra-1",
+        "title": "Infra deltas — {describe: env vars, Docker, CI}",
+        "agent": "j-flow-devops",
+        "spec_refs": [],
+        "files": [
+          ".env.example",
+          ".github/workflows/ci.yml"
+        ],
+        "dependencies": ["api-1"],
+        "status": "pending",
+        "note": "Layer 6 (infra) is opt-in — remove this section if feature requires no infra changes."
+      }
+    ]
+  },
+  "ac_coverage": {
+    "AC-1": ["data-1", "service-1"],
+    "AC-2": ["api-1"],
+    "AC-3": ["ui-1", "mobile-1"]
+  },
+  "uncovered_acs": []
+}
