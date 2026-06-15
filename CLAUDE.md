@@ -10,8 +10,10 @@ node tests/validate.js   # structural tests (no LLM needed)
 
 ## Skill structure
 
-Each skill lives at `skills/{skill-name}/{skill-name}.md`.
+Each skill lives at `skills/{skill-name}/SKILL.md`.
 Each agent lives at `agents/{agent-name}.md`.
+Shared templates at `skills/j-flow-shared/templates/`.
+Shared references at `skills/j-flow-shared/references/`.
 
 ## Installation
 
