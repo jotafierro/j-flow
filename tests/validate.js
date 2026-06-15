@@ -39,7 +39,7 @@ check('required fields', () => {
 
 // ── skills ───────────────────────────────────────────────────────────────────
 const EXPECTED_SKILLS = [
-  'j-flow-shared', 'j-flow-project', 'j-flow-scaffold', 'j-flow-start',
+  'j-flow-shared', 'j-flow-project', 'j-flow-scaffold', 'j-flow-recommend', 'j-flow-start',
   'j-flow-spec', 'j-flow-plan', 'j-flow-build', 'j-flow-qa',
   'j-flow-review', 'j-flow-finish', 'j-flow-release', 'j-flow-reopen',
   'j-flow-update', 'j-flow-check',
