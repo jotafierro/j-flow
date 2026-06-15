@@ -24,12 +24,12 @@ claude plugin install j-flow --scope project
 git -C ~/j-flow pull && claude plugin update j-flow
 ```
 
-> **Requirement:** `/j-flow-init` requires an existing git repository. Run `git init` first if needed.
+> **Requirement:** `/j-flow-project` requires an existing git repository. Run `git init` first if needed.
 
 ## Quick Start
 
 ```
-/j-flow-init              # one-time project setup (PRODUCT.md, DESIGN.md, Playwright, agent memory)
+/j-flow-project           # one-time project setup (PRODUCT.md, DESIGN.md, agent memory, auto-triggers scaffold)
 /j-flow-start {slug}      # begin a new feature
 /j-flow-spec              # write functional spec via dialogue
 /j-flow-spec technical    # write technical spec via j-flow-architect agent
@@ -45,7 +45,8 @@ git -C ~/j-flow pull && claude plugin update j-flow
 
 | Skill | Purpose |
 |-------|---------|
-| `/j-flow-init` | One-time project setup — PRODUCT.md, DESIGN.md, Playwright config, agent memory |
+| `/j-flow-project [--update] [--from FILE] [--from-design FILE]` | Define project — PRODUCT.md, DESIGN.md, agent memory; first run auto-triggers scaffold |
+| `/j-flow-scaffold [--review]` | Generate monorepo scaffold (React + Vite, NestJS, Flutter); `--review` is read-only |
 | `/j-flow-start {slug}` | Initialize feature — git branch, `.specs/{slug}/`, gate-context |
 | `/j-flow-spec` | Functional spec via dialogue → approval gate |
 | `/j-flow-spec technical` | Technical spec via j-flow-architect → approval gate |
@@ -78,4 +79,4 @@ git -C ~/j-flow pull && claude plugin update j-flow
 node tests/validate.js
 ```
 
-Checks all 13 skills and 7 agents have valid structure and frontmatter. No LLM required.
+Checks all 14 skills, 7 agents, shared templates, and references have valid structure and frontmatter. No LLM required.

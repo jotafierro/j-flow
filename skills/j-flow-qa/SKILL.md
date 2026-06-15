@@ -15,7 +15,8 @@ If missing: "Gate [BUILD] not completed. Run /j-flow-build first."
 
 Dispatch the **j-flow-quality** agent with:
 - Full contents of `.specs/{slug}/review-guide.md`
-- Instruction: "Run all 6 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md. For the manual checklist (stage 6), present each item from review-guide.md to the user and record their pass/fail response."
+- Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/qa-report.md` for the output structure
+- Instruction: "Run all 6 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, include exact failure output for any red stage. For the manual checklist (stage 6), present each item from review-guide.md to the user and record their pass/fail response."
 
 ### Stages the agent runs:
 

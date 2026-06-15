@@ -37,78 +37,18 @@ One AC can map to multiple layers (e.g. a create-user feature touches data + ser
 
 ### Step 3: Generate tasks.json
 
-Build a JSON structure grouping tasks by layer, each with an id, description, the ACs it covers, and the files it will create or modify:
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/tasks.json`. Use it as the structural baseline. Populate `layers`, `ac_coverage`, and `uncovered_acs` from the actual feature (slug, today's date, tasks per layer, AC mapping).
 
-```json
-{
-  "slug": "{slug}",
-  "created": "{today's date}",
-  "layers": {
-    "data": [
-      {
-        "id": "data-1",
-        "description": "Create User Mongoose schema and DTOs",
-        "ac": ["AC1", "AC2"],
-        "files": [
-          "apps/api/src/users/schemas/user.schema.ts",
-          "apps/api/src/users/dto/create-user.dto.ts",
-          "apps/api/src/users/dto/user-response.dto.ts"
-        ]
-      }
-    ],
-    "service": [],
-    "api": [],
-    "ui": [],
-    "mobile": [],
-    "infra": []
-  },
-  "ac_coverage": {
-    "AC1": ["data-1", "service-1", "api-1"],
-    "AC2": ["ui-1", "mobile-1"]
-  },
-  "uncovered_acs": []
-}
-```
+Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` for the correct layer sequence and which agent handles each layer.
 
 **Coverage validation:** If `uncovered_acs` is not empty, stop:
 "Warning: the following ACs have no tasks assigned: {list}. Add tasks before proceeding."
 
 ### Step 4: Generate review-guide.md
 
-```markdown
-# Review Guide — {slug}
-Generated: {today's date}
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md`. Substitute placeholders with feature-specific content: slug, today's date, AC list, environment setup details, and manual test steps derived from the ACs.
 
-## Requirements
-{list each AC as a numbered requirement}
-1. AC1: {full text}
-2. AC2: {full text}
-
-## Environment Setup
-- Run `docker compose up -d` (MongoDB, Redis)
-- Run backend: `pnpm --filter @{project}/api dev` (port 3000)
-- Run frontend: `pnpm --filter @{project}/web dev` (port 3001)
-- Run mobile: `flutter run` from `apps/mobile/`
-- Required seed data: {any fixtures, or "none"}
-- Feature flags or env vars: {any, or "none"}
-
-## Manual Test Steps
-
-{For each AC, 2-5 step test scenario}
-
-### AC1: {brief title}
-1. {action — be specific, e.g. "Navigate to /dashboard"}
-2. {observe result — be specific, e.g. "Verify the invoice list shows 3 items"}
-3. {verify side effect — e.g. "Check MongoDB: db.invoices.find() returns 3 documents"}
-
-### AC2: {brief title}
-1. ...
-
-## Approval Criteria
-
-All manual test steps pass with no blockers → feature approved for review.
-Any blocker found → run /j-flow-build --fix, then re-run /j-flow-qa.
-```
+Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format.
 
 ### Step 5: Show and confirm
 

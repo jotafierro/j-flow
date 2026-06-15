@@ -33,32 +33,9 @@ Generate the functional spec through a dialogue. Ask questions ONE AT A TIME —
 
 ### Draft and Confirm
 
-After collecting all answers, draft `functional-spec.md` and show it to the user:
+After collecting all answers, read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/functional-spec.md`. Substitute placeholders with the answers from the dialogue above. Show the draft to the user.
 
-```markdown
-# Functional Spec — {slug}
-Date: {today's date}
-
-## Summary
-{1-2 sentence description from question 1}
-
-## Users
-{roles from question 2}
-
-## Trigger
-{from question 3}
-
-## Acceptance Criteria
-- AC1: Given {context}, when {action}, then {outcome}
-- AC2: ...
-(number all ACs sequentially: AC1, AC2, AC3...)
-
-## Out of Scope
-- {explicit exclusion from question 5}
-
-## Constraints
-- {constraint from question 6}
-```
+Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format requirements.
 
 Ask: "Does this spec look right? Reply 'approved' to proceed, or tell me what to change."
 
@@ -88,7 +65,9 @@ When the user replies 'approved' (or equivalent confirmation):
 Provide the agent with:
 - Full contents of `.specs/{slug}/functional-spec.md`
 - Full contents of `.specs/.agents/j-flow-architect.md` (agent memory)
-- Instruction: "Generate a complete technical spec following your Technical Spec Format. Every decision must reference an AC. No speculative features."
+- Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/technical-spec.md` for the output structure
+- Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for style constraints
+- Instruction: "Generate a complete technical spec following the template structure. Every decision must reference an AC. No speculative features."
 
 ### Draft and Confirm
 

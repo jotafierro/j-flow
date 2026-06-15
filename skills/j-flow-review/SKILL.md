@@ -21,7 +21,9 @@ Provide the agent with:
 - Full contents of `.specs/{slug}/tasks.json`
 - Full contents of `.specs/{slug}/review-guide.md`
 - Full contents of `.specs/.agents/j-flow-reviewer.md` (agent memory)
-- Instruction: "Audit the implementation against the technical spec. Check for spec conformance, stack pattern violations, security gaps, performance issues, and speculative code. Produce review-findings.md."
+- Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-findings.md` for the output structure
+- Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for style constraints
+- Instruction: "Audit the implementation against the technical spec. Check for spec conformance, stack pattern violations, security gaps, performance issues, and speculative code. Produce review-findings.md following the template: populate Critical/Major/Minor sections with findings."
 
 ### Show Findings
 
