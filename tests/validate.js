@@ -39,10 +39,10 @@ check('required fields', () => {
 
 // ── skills ───────────────────────────────────────────────────────────────────
 const EXPECTED_SKILLS = [
-  'j-flow-shared', 'j-flow-init', 'j-flow-start', 'j-flow-spec',
-  'j-flow-plan', 'j-flow-build', 'j-flow-qa', 'j-flow-review',
-  'j-flow-finish', 'j-flow-release', 'j-flow-reopen', 'j-flow-update',
-  'j-flow-check',
+  'j-flow-shared', 'j-flow-project', 'j-flow-scaffold', 'j-flow-start',
+  'j-flow-spec', 'j-flow-plan', 'j-flow-build', 'j-flow-qa',
+  'j-flow-review', 'j-flow-finish', 'j-flow-release', 'j-flow-reopen',
+  'j-flow-update', 'j-flow-check',
 ];
 
 console.log('\nskills/');
@@ -85,6 +85,48 @@ for (const agent of EXPECTED_AGENTS) {
     assert(content.includes('name:'), 'missing name:');
     assert(content.includes('description:'), 'missing description:');
     assert(content.includes('tools:'), 'missing tools:');
+  });
+}
+
+// ── templates ────────────────────────────────────────────────────────────────
+const EXPECTED_TEMPLATES = [
+  'meta.md', 'gate-context.md', 'functional-spec.md', 'technical-spec.md',
+  'tasks.json', 'review-guide.md', 'qa-report.md', 'review-findings.md',
+  'feature-readme.md', 'product.md', 'design.md', 'specs-index.md', 'changelog.md',
+];
+
+console.log('\nshared templates/');
+
+for (const tpl of EXPECTED_TEMPLATES) {
+  check(`templates/${tpl} exists`, () => {
+    const p = path.join(ROOT, 'skills/j-flow-shared/templates', tpl);
+    assert(fs.existsSync(p), `missing: ${p}`);
+  });
+}
+
+const EXPECTED_AGENT_TEMPLATES = [
+  'j-flow-architect.md', 'j-flow-backend.md', 'j-flow-frontend.md',
+  'j-flow-mobile.md', 'j-flow-devops.md', 'j-flow-quality.md', 'j-flow-reviewer.md',
+];
+
+for (const tpl of EXPECTED_AGENT_TEMPLATES) {
+  check(`templates/agents/${tpl} exists`, () => {
+    const p = path.join(ROOT, 'skills/j-flow-shared/templates/agents', tpl);
+    assert(fs.existsSync(p), `missing: ${p}`);
+  });
+}
+
+// ── references ───────────────────────────────────────────────────────────────
+const EXPECTED_REFERENCES = [
+  'gate-rules.md', 'layer-order.md', 'code-style.md', 'agent-scopes.md',
+];
+
+console.log('\nshared references/');
+
+for (const ref of EXPECTED_REFERENCES) {
+  check(`references/${ref} exists`, () => {
+    const p = path.join(ROOT, 'skills/j-flow-shared/references', ref);
+    assert(fs.existsSync(p), `missing: ${p}`);
   });
 }
 

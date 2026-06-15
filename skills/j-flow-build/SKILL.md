@@ -21,7 +21,7 @@ If neither: "Nothing to fix — QA gate is green and review has no open findings
 
 ### Layer Sequence
 
-Execute layers in this fixed order. Skip empty layers (no tasks).
+Execute layers in the fixed order defined in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md`. Skip empty layers (no tasks).
 
 1. `data` → **j-flow-backend**
 2. `service` → **j-flow-backend**
@@ -29,6 +29,8 @@ Execute layers in this fixed order. Skip empty layers (no tasks).
 4. `ui` → **j-flow-frontend** (also writes Storybook stories)
 5. `mobile` → **j-flow-mobile** (also writes Widgetbook entries + integration_test)
 6. `infra` → **j-flow-devops**
+
+See `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` for the full layer→agent mapping and each agent's responsibilities.
 
 ### Per-Layer Dispatch
 
@@ -42,6 +44,7 @@ For each layer with tasks:
    - The ACs being implemented (from functional-spec.md)
    - The technical patterns for this layer (from technical-spec.md)
    - Agent memory (from .specs/.agents/{agent}.md)
+   - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for coding conventions
    - Instruction: "Implement exactly what the tasks require. No extra features or abstractions. Write unit tests in the same pass. Follow the technical spec patterns."
 5. After agent completes, commit the layer:
 

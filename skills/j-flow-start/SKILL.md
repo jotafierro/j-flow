@@ -17,7 +17,7 @@ Initialize a new feature branch and spec folder.
 
 ## Prerequisites
 
-- `/j-flow-init` has been run (`.specs/.agents/` directory exists)
+- `/j-flow-project` has been run (`.specs/.agents/` directory exists)
 - You are on the `develop` branch (or main if no develop exists)
 
 ## Process
@@ -32,7 +32,7 @@ Initialize a new feature branch and spec folder.
 ### Step 2: Verify agent memory exists
 
 Check `.specs/.agents/` exists. If not:
-"Agent memory not found. Run /j-flow-init first."
+"Agent memory not found. Run /j-flow-project first."
 
 ### Step 3: Create git branch
 
@@ -47,29 +47,10 @@ If branch already exists: "Branch feature/{slug} already exists. Delete it first
 Create `.specs/{slug}/` with two files:
 
 **meta.md:**
-```markdown
-# Feature: {slug}
-
-**Branch:** feature/{slug}
-**Created:** {today's date}
-**Stack:** MongoDB + NestJS + React + Flutter
-
-## Gates
-- [ ] Functional spec
-- [ ] Technical spec
-- [ ] Task plan
-- [ ] Build
-- [ ] QA
-- [ ] Review
-- [ ] Finish
-```
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute placeholders: `{slug}` with the feature slug, `{today's date}` with today's date in ISO 8601. Write to `.specs/{slug}/meta.md`.
 
 **gate-context.md:**
-```markdown
-# Gate Context — {slug}
-
-(phases append to this file as they complete)
-```
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/gate-context.md`. Substitute `{slug}` with the feature slug. Write to `.specs/{slug}/gate-context.md`.
 
 ### Step 5: Load and summarize agent memory
 

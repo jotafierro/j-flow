@@ -8,35 +8,14 @@ description: Generate feature README, update CHANGELOG [Unreleased], consolidate
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.
-Require `[REVIEW] approved`.
+Require `[REVIEW] approved` (see `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format).
 If missing or stale: "Gate [REVIEW] not approved. Run /j-flow-review first."
 
 ## Process
 
 ### Step 1: Generate feature README
 
-Write `.specs/{slug}/README.md`:
-
-```markdown
-# {slug}
-Date: {today's date}
-Branch: feature/{slug}
-
-## Summary
-{1-paragraph summary of what was built and why}
-
-## Acceptance Criteria
-| AC | Description | Status |
-|----|-------------|--------|
-| AC1 | {description} | ✓ |
-| AC2 | {description} | ✓ |
-
-## Key Files Added/Modified
-{list of main files, grouped by layer}
-
-## Patterns Introduced
-{any new patterns, conventions, or technical decisions worth noting — leave empty if nothing non-obvious}
-```
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/feature-readme.md`. Substitute placeholders: slug, today's date, branch name, AC table (from functional-spec.md), key files list (grouped by layer from tasks.json), and patterns introduced. Write to `.specs/{slug}/README.md`.
 
 ### Step 2: Update CHANGELOG.md
 
