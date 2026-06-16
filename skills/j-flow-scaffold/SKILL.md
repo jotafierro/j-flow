@@ -137,6 +137,37 @@ Continue? (yes/no)
 
 If user says no, stop.
 
+### Step 1b: Read DESIGN.md theme defaults
+
+Open `DESIGN.md` in the project root. Search for the default theme declaration using these patterns:
+- A line containing `**Default mode:** dark` or `**Default mode:** light`
+- A line containing `**Default theme:** dark` or `**Default theme:** light`
+- A line in the Color Tokens section that says "Light mode" or "Dark mode" first and notes "(default)"
+
+If found: set `default_theme = "dark"` or `"light"` and print `"Detected default theme: {value}"`.
+
+If NOT found (DESIGN.md is absent or doesn't specify a default), ask the user:
+```
+DESIGN.md does not specify a default theme.
+
+Which mode should the scaffolded apps default to?
+  1. Light
+  2. Dark
+
+Enter 1 or 2:
+```
+Store the answer as `default_theme` (`"light"` for 1, `"dark"` for 2).
+
+Also extract color tokens from DESIGN.md for use in generated files. Look for a Color Tokens table with Light and Dark columns. Record:
+- `color_bg_light`, `color_fg_light`, `color_primary_light`
+- `color_bg_dark`, `color_fg_dark`, `color_primary_dark`
+
+If DESIGN.md is missing or has no color token table, use these fallbacks:
+- Light: bg `#ffffff`, fg `#0a0a0a`, primary `#3b82f6`
+- Dark: bg `#0a0a0a`, fg `#fafafa`, primary `#60a5fa`
+
+Use `default_theme` and the extracted color tokens in all subsequent steps that generate welcome screens (web, admin, mobile, widgetbook, storybook).
+
 ### Step 2: Create root config FIRST (before running CLIs)
 
 Write these files at the project root:
@@ -511,6 +542,63 @@ declare module '*.css';
 declare module '*.module.css';
 ```
 
+**Replace default Vite welcome content for apps/web:**
+
+DELETE `apps/web/src/App.css` (the default Vite CSS is not aligned with DESIGN.md).
+
+REPLACE `apps/web/src/App.tsx` with:
+```tsx
+import './index.css';
+
+export default function App() {
+  return (
+    <main className="app-shell">
+      <h1 className="app-title">{Project Name}</h1>
+    </main>
+  );
+}
+```
+
+REPLACE `apps/web/src/index.css` with a minimal stylesheet using DESIGN.md color tokens:
+```css
+:root {
+  --color-bg: {color_bg_light};
+  --color-fg: {color_fg_light};
+  --color-primary: {color_primary_light};
+}
+
+[data-theme="dark"] {
+  --color-bg: {color_bg_dark};
+  --color-fg: {color_fg_dark};
+  --color-primary: {color_primary_dark};
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { background: var(--color-bg); color: var(--color-fg); font-family: system-ui, sans-serif; }
+
+.app-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+.app-title {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-primary);
+}
+```
+Substitute `{color_bg_light}`, `{color_fg_light}`, `{color_primary_light}`, `{color_bg_dark}`, `{color_fg_dark}`, `{color_primary_dark}` with actual hex values from DESIGN.md (or fallbacks if missing).
+
+Edit `apps/web/src/main.tsx` to inject the default theme on `<html>` before React renders. Add this line before `ReactDOM.createRoot(...)`:
+```ts
+document.documentElement.dataset.theme = '{default_theme}';
+```
+
 Write `apps/web/.env.example`:
 ```
 VITE_API_URL=http://localhost:3000/api/v1
@@ -530,12 +618,54 @@ Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST u
 }
 ```
 
+Apply the same welcome-screen replacements as apps/web, except the title text in `App.tsx` must be `{Project Name} — admin`.
+
 Write `apps/admin/.env.example`:
 ```
 VITE_API_URL=http://localhost:3000/api/v1
 ```
 
 Also write `apps/admin/.env` as a copy of `apps/admin/.env.example`.
+
+**Smoke tests for apps/web (vitest):**
+
+Add `apps/web/src/App.test.tsx`:
+```tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+describe('App', () => {
+  it('renders the project title', () => {
+    render(<App />);
+    expect(screen.getByText('{Project Name}')).toBeInTheDocument();
+  });
+});
+```
+
+Add `apps/web/vitest.config.ts`:
+```ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/setup-tests.ts'],
+  },
+});
+```
+
+Add `apps/web/src/setup-tests.ts`:
+```ts
+import '@testing-library/jest-dom';
+```
+
+Add devDeps to `apps/web/package.json`: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitest/ui` (use real version ranges).
+
+If apps/admin was generated, add the same smoke test files there too. The test title text must be `'{Project Name} — admin'` to match the admin App.tsx.
 
 **apps/e2e (Playwright):**
 ```bash
@@ -545,6 +675,14 @@ cd ..
 
 Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`. Set `baseURL` in `playwright.config.ts` to `http://localhost:3001`.
 
+**Install Playwright browser binaries:**
+
+`pnpm create playwright` with `--install-deps=false` skips OS-level deps (apt-get) but does NOT download browser binaries. After scaffolding apps/e2e, run:
+```bash
+cd apps/e2e && pnpm exec playwright install chromium && cd ../..
+```
+This downloads the chromium binary so `pnpm test` works first try without a manual browser install step. It is a one-time download (~120MB) and takes under 30 seconds.
+
 **apps/mobile (Flutter):**
 ```bash
 cd apps && flutter create mobile --org com.{project} --platforms=ios,android,web --description="{project} mobile app"
@@ -553,7 +691,7 @@ cd ..
 
 Post-process:
 - Edit `apps/mobile/pubspec.yaml` to add deps: `flutter_riverpod: ^2.5.0`, `go_router: ^14.0.0`, `dio: ^5.4.0`
-- Edit `apps/mobile/lib/main.dart` to wrap with `ProviderScope`:
+- REPLACE `apps/mobile/lib/main.dart` with a DESIGN.md-aligned welcome screen:
 
 ```dart
 import 'package:flutter/material.dart';
@@ -570,12 +708,60 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '{Project Name}',
-      home: Scaffold(
-        appBar: AppBar(title: const Text('{Project Name}')),
-        body: const Center(child: Text('Hello, j-flow!')),
+      themeMode: ThemeMode.{themeMode},
+      theme: ThemeData.light(useMaterial3: true).copyWith(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color({primaryLightHex})),
+      ),
+      darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color({primaryDarkHex}),
+          brightness: Brightness.dark,
+        ),
+      ),
+      home: const HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: Center(
+        child: Text(
+          '{Project Name}',
+          style: theme.textTheme.displayMedium?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
+}
+```
+
+Substitution rules for the mobile main.dart:
+- `{themeMode}`: `dark` if `default_theme === 'dark'`, otherwise `light`
+- `{primaryLightHex}`: `color_primary_light` as `0xFF` + 6 uppercase hex digits (e.g. `0xFF3B82F6`)
+- `{primaryDarkHex}`: `color_primary_dark` as `0xFF` + 6 uppercase hex digits (e.g. `0xFF60A5FA`)
+
+REPLACE `apps/mobile/test/widget_test.dart` with a test that matches the new app (replaces the broken counter test):
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/main.dart';
+
+void main() {
+  testWidgets('App boots and shows project title', (tester) async {
+    await tester.pumpWidget(const ProviderScope(child: MyApp()));
+    expect(find.text('{Project Name}'), findsOneWidget);
+  });
 }
 ```
 
@@ -593,7 +779,7 @@ If `--project-name` is not supported (older Flutter), fallback: after `flutter c
 
 Post-process `apps/mobile/widgetbook/pubspec.yaml` to add `widgetbook: ^3.0.0`, `widgetbook_annotation: ^3.0.0`, and dev_dep `widgetbook_generator: ^3.0.0`.
 
-Replace `apps/mobile/widgetbook/lib/main.dart` with:
+Replace `apps/mobile/widgetbook/lib/main.dart` with a DESIGN.md-aligned catalog:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -608,12 +794,43 @@ class WidgetbookApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Widgetbook.material(
-      directories: const [],
+      directories: [
+        WidgetbookCategory(
+          name: 'Foundation',
+          children: [
+            WidgetbookComponent(
+              name: 'Welcome',
+              useCases: [
+                WidgetbookUseCase(
+                  name: 'Default',
+                  builder: (context) => Scaffold(
+                    backgroundColor: const Color({bgHex}),
+                    body: Center(
+                      child: Text(
+                        '{Project Name}',
+                        style: const TextStyle(
+                          color: Color({primaryHex}),
+                          fontSize: 36,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
       addons: const [],
     );
   }
 }
 ```
+
+Substitution rules for the widgetbook main.dart:
+- `{bgHex}`: use `color_bg_dark` if `default_theme === 'dark'`, else `color_bg_light`, formatted as `0xFF` + 6 uppercase hex digits
+- `{primaryHex}`: use `color_primary_dark` if `default_theme === 'dark'`, else `color_primary_light`, same format
 
 Replace `apps/mobile/widgetbook/test/widget_test.dart` with a passing test that matches the new package name:
 ```dart
@@ -637,12 +854,109 @@ cd packages/ui && npx -y storybook@latest init --type=react-vite --yes --no-dev 
 cd ../..
 ```
 
-`storybook init` creates `src/stories/` with examples — keep them (user can see Storybook isn't empty).
+`storybook init` creates `src/stories/` with default Button/Header/Page examples — DELETE that directory entirely:
+```bash
+rm -rf packages/ui/src/stories
+```
 
-Add `packages/ui/src/index.ts`:
+Generate a DESIGN.md-aligned Welcome component instead.
+
+Write `packages/ui/src/components/Welcome.tsx`:
+```tsx
+import './welcome.css';
+
+export type WelcomeProps = {
+  projectName: string;
+  variant?: 'light' | 'dark';
+};
+
+export function Welcome({ projectName, variant = '{default_theme}' }: WelcomeProps) {
+  return (
+    <div className={`welcome welcome--${variant}`}>
+      <h1 className="welcome__title">{projectName}</h1>
+      <p className="welcome__tag">Design System Starter</p>
+    </div>
+  );
+}
+```
+(Substitute `{default_theme}` with the actual value, e.g. `'dark'` or `'light'`.)
+
+Write `packages/ui/src/components/welcome.css`:
+```css
+.welcome {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  font-family: system-ui, sans-serif;
+}
+
+.welcome--light {
+  --bg: {color_bg_light};
+  --fg: {color_fg_light};
+  --primary: {color_primary_light};
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.welcome--dark {
+  --bg: {color_bg_dark};
+  --fg: {color_fg_dark};
+  --primary: {color_primary_dark};
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.welcome__title {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 700;
+  color: var(--primary);
+  text-align: center;
+}
+
+.welcome__tag {
+  font-size: 1rem;
+  opacity: 0.6;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+```
+(Substitute color token hex values from DESIGN.md or fallbacks.)
+
+Write `packages/ui/src/components/Welcome.stories.tsx`:
+```tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { Welcome } from './Welcome';
+
+const meta: Meta<typeof Welcome> = {
+  component: Welcome,
+  parameters: { layout: 'fullscreen' },
+  args: { projectName: '{Project Name}' },
+};
+export default meta;
+
+type Story = StoryObj<typeof Welcome>;
+
+export const Light: Story = { args: { variant: 'light' } };
+export const Dark: Story = { args: { variant: 'dark' } };
+```
+
+Update `packages/ui/.storybook/preview.ts` to set the default background per `default_theme`. If `default_theme === 'dark'`, add:
+```ts
+parameters: {
+  backgrounds: {
+    default: 'dark',
+    values: [
+      { name: 'light', value: '{color_bg_light}' },
+      { name: 'dark', value: '{color_bg_dark}' },
+    ],
+  },
+},
+```
+If `default_theme === 'light'`, set `default: 'light'` instead.
+
+Write `packages/ui/src/index.ts`:
 ```typescript
-// Re-export components here
-export * from './stories/Button';
+export * from './components/Welcome';
 ```
 
 **packages/domain:**
@@ -750,6 +1064,8 @@ docker compose up -d
 | Storybook | `pnpm --filter @{project}/ui storybook` | http://localhost:6006 |
 | Widgetbook | `cd apps/mobile/widgetbook && flutter run -d chrome` | browser |
 | Mailhog UI | (started by docker compose) | http://localhost:8025 |
+| Storybook docs | see [docs/STORYBOOK.md](docs/STORYBOOK.md) | |
+| Widgetbook docs | see [docs/WIDGETBOOK.md](docs/WIDGETBOOK.md) | |
 
 ## Verify it works
 
@@ -778,6 +1094,93 @@ This project uses `j-flow` for Spec-Driven Development. See [.specs/README.md](.
 ```
 ````
 
+### Step 5b: Generate docs/STORYBOOK.md and docs/WIDGETBOOK.md
+
+Create a `docs/` directory if it doesn't exist. Write these two documentation files into the TARGET repo.
+
+Write `docs/STORYBOOK.md`:
+````markdown
+# Storybook — {Project Name}
+
+Storybook 8 catalog for the React design system in `packages/ui`.
+
+## Run
+
+```bash
+pnpm --filter @{project}/ui storybook
+# Opens http://localhost:6006
+```
+
+## Where stories live
+
+- `packages/ui/src/components/*.tsx` — components
+- `packages/ui/src/components/*.stories.tsx` — stories co-located with components
+
+## Adding a story
+
+```tsx
+// MyComponent.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { MyComponent } from './MyComponent';
+
+const meta: Meta<typeof MyComponent> = { component: MyComponent };
+export default meta;
+export const Default: StoryObj<typeof MyComponent> = { args: { ... } };
+```
+
+## Design tokens
+
+Tokens live in [`DESIGN.md`](../DESIGN.md). Use CSS variables exposed via the design-system stylesheet; never hardcode colors.
+
+## Default theme
+
+This project's default theme is **{default_theme}** (configured in `packages/ui/.storybook/preview.ts`).
+````
+
+Write `docs/WIDGETBOOK.md`:
+````markdown
+# Widgetbook — {Project Name}
+
+Widgetbook 3 catalog for the Flutter app in `apps/mobile`.
+
+## Run
+
+```bash
+cd apps/mobile/widgetbook
+flutter pub get
+flutter run -d chrome   # or -d macos
+```
+
+## Where entries live
+
+- `apps/mobile/widgetbook/lib/main.dart` — root Widgetbook app
+- `apps/mobile/widgetbook/lib/components/*.dart` — component catalog entries
+
+## Adding an entry
+
+```dart
+WidgetbookComponent(
+  name: 'MyWidget',
+  useCases: [
+    WidgetbookUseCase(
+      name: 'Default',
+      builder: (context) => MyWidget(...),
+    ),
+  ],
+)
+```
+
+## Design tokens
+
+Tokens live in [`DESIGN.md`](../DESIGN.md). The mobile theme is in `apps/mobile/lib/main.dart` — derived from the same tokens.
+
+## Default theme
+
+This project's default theme is **{default_theme}**.
+````
+
+(Substitute `{Project Name}`, `{project}`, and `{default_theme}` with actual values when writing these files.)
+
 ### Step 6: Update CHANGELOG.md
 
 Read `CHANGELOG.md`. Under `## [Unreleased]`, append:
@@ -788,8 +1191,13 @@ Read `CHANGELOG.md`. Under `## [Unreleased]`, append:
 - [01-infra-base] Docker Compose with MongoDB, Redis, Mailhog
 - [01-infra-base] GitHub Actions CI pipeline
 - [01-infra-base] Health endpoint at GET /api/v1/health
-- [01-infra-base] Storybook + Widgetbook catalogs with example stories
+- [01-infra-base] Storybook + Widgetbook catalogs with Welcome component (DESIGN.md tokens)
 - [01-infra-base] Root README.md with local development instructions
+- [01-infra-base] Default theme detection from DESIGN.md (asks user if missing)
+- [01-infra-base] Centered welcome screens for web, admin, mobile, widgetbook, storybook (DESIGN.md tokens)
+- [01-infra-base] Smoke tests (vitest) for web and admin
+- [01-infra-base] Playwright browser auto-install on scaffold
+- [01-infra-base] docs/STORYBOOK.md and docs/WIDGETBOOK.md
 ```
 
 ### Step 7: Initialize .specs/01-infra-base/
