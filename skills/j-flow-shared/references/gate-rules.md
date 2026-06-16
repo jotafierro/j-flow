@@ -10,6 +10,7 @@
 | Build completed | `build_status: completed` | `/j-flow-qa` |
 | QA green | `qa_status: green` | `/j-flow-review` |
 | Review approved | `review_status: approved` | `/j-flow-finish` |
+| Finish completed | `finish_status: completed` | (terminal — proceed to `/j-flow-release`) |
 
 ## Gate status values
 
@@ -42,11 +43,13 @@ Reopening at phase X resets X and all downstream gates back to `pending`. Commit
 
 | Reopen at | Resets |
 |-----------|--------|
-| functional | functional + technical + tasks + build + qa + review |
-| technical | technical + tasks + build + qa + review |
-| tasks | tasks + build + qa + review |
-| build | build + qa + review |
-| qa | qa + review |
+| functional | functional + technical + tasks + build + qa + review + finish |
+| technical | technical + tasks + build + qa + review + finish |
+| tasks | tasks + build + qa + review + finish |
+| build | build + qa + review + finish |
+| qa | qa + review + finish |
+| review | review + finish |
+| finish | finish |
 
 ## gate-context.md format (append-only)
 
@@ -67,6 +70,9 @@ Examples:
   → architecture: NestJS module + Mongoose schema + React Query hooks
   → patterns: repository pattern, zod DTOs
 
+[TASK PLAN] approved 2026-06-12
+  → N tasks across N layers, N ACs covered
+
 [BUILD] completed 2026-06-12
   → layers: data ✓ service ✓ api ✓ ui ✓ mobile ✓ infra ✓
 
@@ -75,6 +81,9 @@ Examples:
 
 [REVIEW] approved 2026-06-12
   → 2 findings resolved
+
+[FINISH] completed 2026-06-12
+  → README + CHANGELOG + PR to develop
 ```
 
 ## Stale marker (from /j-flow-update)
