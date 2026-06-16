@@ -102,16 +102,28 @@ Stop. Do not write any files.
 
 Read existing files and build `detection_map`. Read `PRODUCT.md`:
 - **Project name:** read the **Name** field. Use as `{project}` slug (lowercase-hyphenated, e.g. "My App" → "my-app"). Keep original casing as `{Project Name}` for display strings.
-- **Admin detection:** Scan **Audience** and **Core Features** sections for keywords: "admin", "admin panel", "back-office", "dashboard". Set `wants_admin: true` if any found.
+- **Admin detection (candidate):** Scan **Audience** and **Core Features** sections for keywords: "admin", "admin panel", "back-office", "dashboard". Record as `admin_hint: detected | not detected`. Do NOT set `wants_admin` yet.
 
-List what's missing. Show user a plan of what will be created:
+**Always ask the user explicitly before continuing:**
+
+```
+Generate apps/admin (React admin panel on port 3002)?
+  PRODUCT.md hint: {detected/not detected}
+
+1. Yes — generate apps/admin
+2. No — skip
+```
+
+Set `wants_admin: true` only if the user answers 1 (yes).
+
+Then show the scaffold plan and ask for final confirmation:
 
 ```
 Scaffold plan:
   Root config:        package.json, turbo.json, pnpm-workspace.yaml, docker-compose.yml, .github/workflows/ci.yml, .env.example, .gitignore, tsconfig.json
   apps/api:           NestJS (via @nestjs/cli)
   apps/web:           React + Vite (via pnpm create vite)
-  apps/admin:         React + Vite (wants_admin detected in PRODUCT.md)
+  apps/admin:         React + Vite (port 3002)   ← only shown if wants_admin: true
   apps/e2e:           Playwright (via pnpm create playwright)
   apps/mobile:        Flutter (via flutter create)
   apps/mobile/widgetbook: Flutter Widgetbook
@@ -163,7 +175,14 @@ packages:
 ```json
 {
   "name": "{project}",
+  "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.25.0"
+    }
+  },
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
@@ -177,8 +196,7 @@ packages:
   },
   "engines": {
     "node": ">=20"
-  },
-  "packageManager": "pnpm@9.0.0"
+  }
 }
 ```
 
@@ -298,15 +316,12 @@ jobs:
 
 **`.env.example`**
 ```
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/{project}
-REDIS_URL=redis://localhost:6379
-JWT_ACCESS_SECRET=change-me-access
-JWT_REFRESH_SECRET=change-me-refresh
-EMAIL_PROVIDER=smtp
-SMTP_HOST=localhost
-SMTP_PORT=1025
-VITE_API_URL=http://localhost:3000/api/v1
+# Docker Compose (local dev)
+MONGO_INITDB_DATABASE={project}_dev
+MONGO_INITDB_ROOT_USERNAME=root
+MONGO_INITDB_ROOT_PASSWORD=changeme
+
+# Each app has its own .env.example — see apps/{api,web,admin}/.env.example
 ```
 
 ### Step 3: Create packages/config first (other tsconfigs extend from here)
@@ -345,6 +360,8 @@ VITE_API_URL=http://localhost:3000/api/v1
   }
 }
 ```
+
+Note: Do NOT add `baseUrl` to any tsconfig (root, packages/config, or apps/*). `baseUrl` is deprecated in TypeScript 5+ when using `moduleResolution: "bundler"`. If path aliases are needed, use `paths` directly without `baseUrl`. If a CLI (e.g. NestJS) generates a tsconfig with `baseUrl: "."`, remove it before post-processing is complete.
 
 **`packages/config/eslint.base.js`**
 ```javascript
@@ -402,6 +419,31 @@ export class HealthModule {}
 
 Import `HealthModule` into `apps/api/src/app.module.ts` and add `MongooseModule.forRoot(process.env.MONGODB_URI!)`.
 
+Write `apps/api/.env.example`:
+```
+# Server
+PORT=3000
+
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/{project}_dev
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# JWT
+JWT_ACCESS_SECRET=changeme-access-secret
+JWT_REFRESH_SECRET=changeme-refresh-secret
+JWT_ACCESS_TTL=15m
+JWT_REFRESH_TTL=30d
+
+# Email (dev: Mailhog, prod: Resend)
+EMAIL_PROVIDER=mailhog
+SMTP_HOST=localhost
+SMTP_PORT=1025
+```
+
+Also write `apps/api/.env` as a copy of `apps/api/.env.example` so the API runs out of the box.
+
 **apps/web (React + Vite):**
 ```bash
 cd apps && pnpm create vite@latest web --template react-ts
@@ -422,9 +464,23 @@ declare module '*.css';
 declare module '*.module.css';
 ```
 
-**apps/admin (only if `wants_admin: true`):**
+Write `apps/web/.env.example`:
+```
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+Also write `apps/web/.env` as a copy of `apps/web/.env.example`.
+
+**apps/admin (only if user confirms — see Detection step):**
 
 Same as apps/web but on port 3002, name `@{project}/admin`.
+
+Write `apps/admin/.env.example`:
+```
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+Also write `apps/admin/.env` as a copy of `apps/admin/.env.example`.
 
 **apps/e2e (Playwright):**
 ```bash
@@ -472,9 +528,13 @@ class MyApp extends StatelessWidget {
 
 **apps/mobile/widgetbook (Flutter Widgetbook):**
 ```bash
-cd apps/mobile && flutter create widgetbook --template=app --platforms=web,macos --description="Widgetbook catalog"
+cd apps/mobile && flutter create widgetbook --template=app --platforms=web,macos --description="Widgetbook catalog" --project-name=widgetbook_app
 cd ../..
 ```
+
+The `--project-name=widgetbook_app` flag sets the pubspec `name:` field to `widgetbook_app` while keeping the directory as `widgetbook/`, preventing a self-reference when adding the `widgetbook` package as a dependency.
+
+If `--project-name` is not supported (older Flutter), fallback: after `flutter create`, immediately edit `apps/mobile/widgetbook/pubspec.yaml` to change `name: widgetbook` → `name: widgetbook_app` BEFORE adding any widgetbook deps.
 
 Post-process `apps/mobile/widgetbook/pubspec.yaml` to add `widgetbook: ^3.0.0`, `widgetbook_annotation: ^3.0.0`, and dev_dep `widgetbook_generator: ^3.0.0`.
 
@@ -497,6 +557,20 @@ class WidgetbookApp extends StatelessWidget {
       addons: const [],
     );
   }
+}
+```
+
+Replace `apps/mobile/widgetbook/test/widget_test.dart` with a passing test that matches the new package name:
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:widgetbook_app/main.dart';
+
+void main() {
+  testWidgets('WidgetbookApp builds', (WidgetTester tester) async {
+    await tester.pumpWidget(const WidgetbookApp());
+    expect(find.byType(MaterialApp), findsOneWidget);
+  });
 }
 ```
 
@@ -769,5 +843,6 @@ Then invoke `/j-flow-recommend`.
 - Never run `pnpm install` or `flutter pub get` — those go in the README instructions for the user
 - Verify prerequisites (node, pnpm, flutter) before running anything
 - Use `--skip-git` flags where supported so we maintain a single commit at the end
-- Read PRODUCT.md to detect `wants_admin` (keywords: "admin", "admin panel", "back-office")
+- Read PRODUCT.md to detect admin hint (keywords: "admin", "admin panel", "back-office"), then ALWAYS ask the user explicitly before generating apps/admin
+- Never add `baseUrl` to any tsconfig — use `paths` only when needed, without `baseUrl`
 - Project name derivation: always read from `PRODUCT.md` **Name** field. Convert to lowercase-hyphenated slug for package names (`{project}`). Use original casing for display names in source files (`{Project Name}`).
