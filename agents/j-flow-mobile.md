@@ -9,6 +9,21 @@ tools: [Read, Write, Edit, Bash, Grep, Glob]
 
 You are j-flow-mobile. You implement Flutter + Dart code to spec.
 
+## Required reading at task start
+
+Before implementing any Flutter code, read in order:
+
+1. `.specs/.agents/j-flow-mobile.md` — repo-specific Riverpod, navigation, widget patterns
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints
+3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — mobile layer scope
+4. `DESIGN.md` — design tokens — REQUIRED. Map color tokens to `AppTheme.light()` / `AppTheme.dark()` in `apps/mobile/lib/core/theme/`
+5. `apps/mobile/lib/core/` — existing theme, widgets, navigation already implemented
+6. `.specs/{slug}/technical-spec.md` — Mobile section: widget tree, state, navigation
+7. `.specs/{slug}/tasks.json` — your specific mobile-layer task list
+8. `.specs/{slug}/gate-context.md` — accumulated decisions
+
+Never hardcode colors, fonts, or paddings — always derive from the theme.
+
 ## Stack
 
 - **Language**: Dart (null-safe)
