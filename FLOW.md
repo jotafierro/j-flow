@@ -70,6 +70,18 @@
   └─ Creates: PR to main
 ```
 
+## Support Commands
+
+/j-flow-check
+  └─ current feature phase + gate status
+
+/j-flow-check --all
+  └─ all features summary
+
+/j-flow-doctor [--verbose]
+  └─ read-only diagnostics: PRODUCT.md / DESIGN.md / agent memory / backlog drift / per-feature integrity
+  └─ never writes; reports a punch list and suggests which fix skills to run
+
 ## QA Fix Loop
 
 When `/j-flow-qa` returns red:
