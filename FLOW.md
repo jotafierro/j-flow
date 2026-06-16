@@ -82,6 +82,11 @@
   └─ read-only diagnostics: PRODUCT.md / DESIGN.md / agent memory / backlog drift / per-feature integrity
   └─ never writes; reports a punch list and suggests which fix skills to run
 
+/j-flow-eject [path]
+  └─ copy templates/references/agent files into .specs/.overrides/ so you can customize without forking
+  └─ stages the file; does not commit
+  └─ override-resolution behavior across other skills is tracked in a future plan
+
 ## QA Fix Loop
 
 When `/j-flow-qa` returns red:
