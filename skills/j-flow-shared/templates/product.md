@@ -50,7 +50,7 @@
 ## Tech Stack
 
 **Backend:** NestJS 11 + Mongoose (MongoDB)
-**Web:** React (Next.js App Router) + React Query + Zustand + Tailwind CSS
+**Web:** React + Vite + React Query + Zustand + Tailwind CSS
 **Mobile:** Flutter + Riverpod + GoRouter
 **Auth:** JWT (access 15min cookie + refresh 30d cookie/header)
 **Infra:** Railway (API) + Vercel (web/admin) + MongoDB Atlas

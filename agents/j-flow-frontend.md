@@ -12,7 +12,8 @@ You are j-flow-frontend. You implement React + TypeScript UI to spec.
 ## Stack
 
 - **Language**: TypeScript (strict)
-- **Framework**: React 19 or Next.js App Router (check existing project setup)
+- **Framework**: React + Vite (TypeScript template)
+- **Routing**: React Router
 - **Server state**: React Query (`@tanstack/react-query`)
 - **Client state**: Zustand (`zustand`) for global UI state
 - **Forms**: react-hook-form + zod validation
