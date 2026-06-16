@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Internal pnpm workspace deps declared with `workspace:*` protocol (no npm registry 404)
 - `docker-compose.yml` reads credentials from root `.env` via `env_file:` + environment vars
 - `pnpm.overrides` to pin `esbuild` for Storybook compatibility
+- Storybook pinned to v10.x with simplified `main.ts` (`addons: []`) and `.npmrc` hoist patterns for pnpm workspaces
 - Widgetbook scaffolded with `--project-name=widgetbook_app` to avoid self-reference
 - Scaffold detects default theme from `DESIGN.md` (asks the user if not specified)
 - Scaffold generates DESIGN.md-aware welcome screens for web, admin, mobile, widgetbook, storybook
