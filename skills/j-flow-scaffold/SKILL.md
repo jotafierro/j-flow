@@ -235,11 +235,17 @@ auto-install-peers=true
 strict-peer-dependencies=false
 ```
 
-**`docker-compose.yml`**
+**`docker-compose.yml`** — reads credentials from root `.env` (loaded via `env_file`):
 ```yaml
 services:
   mongo:
     image: mongo:7
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
     volumes:
@@ -259,6 +265,8 @@ services:
 volumes:
   mongo_data:
 ```
+
+Also write `.env` at root as a copy of `.env.example` (so `docker compose up` works out of the box). Add a note in the post-scaffold output telling the user to change the default credentials before production.
 
 **`.github/workflows/ci.yml`**
 ```yaml
@@ -389,7 +397,15 @@ cd ..
 
 Post-process `apps/api/package.json`:
 - Rename to `@{project}/api`
-- Add Mongoose deps: `@nestjs/mongoose`, `mongoose`, `@nestjs/jwt`, `@nestjs/passport`, `passport`, `passport-jwt`, `@types/passport-jwt`, `class-validator`, `class-transformer`
+- Add deps: `@nestjs/config` (REQUIRED — without it `.env` is never loaded), `@nestjs/mongoose`, `mongoose`, `@nestjs/jwt`, `@nestjs/passport`, `passport`, `passport-jwt`, `@types/passport-jwt`, `class-validator`, `class-transformer`
+- Add a `dev` script alias (NestJS CLI generates `start:dev` only — alias it as `dev` so commands match the root README):
+  ```json
+  "scripts": {
+    "dev": "nest start --watch",
+    "start:dev": "nest start --watch",
+    ... rest of nest defaults ...
+  }
+  ```
 - Set port in `apps/api/src/main.ts`: `app.setGlobalPrefix('api/v1')` and `await app.listen(process.env.PORT ?? 3000)`
 - Apply `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })`
 
@@ -417,7 +433,29 @@ import { HealthController } from './health.controller';
 export class HealthModule {}
 ```
 
-Import `HealthModule` into `apps/api/src/app.module.ts` and add `MongooseModule.forRoot(process.env.MONGODB_URI!)`.
+Replace `apps/api/src/app.module.ts` with:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { HealthModule } from './health/health.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRootAsync({
+      useFactory: () => ({
+        uri: process.env.MONGODB_URI ?? 'mongodb://localhost:27017/{project}_dev',
+      }),
+    }),
+    HealthModule,
+  ],
+})
+export class AppModule {}
+```
+
+`ConfigModule.forRoot({ isGlobal: true })` is what actually loads `.env` — without it, `process.env.MONGODB_URI` is undefined at boot. Substitute `{project}` with the actual project name when writing this file. The fallback URI matches the docker-compose default DB (`MONGO_INITDB_DATABASE={project}_dev`).
 
 Write `apps/api/.env.example`:
 ```
