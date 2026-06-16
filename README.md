@@ -61,6 +61,7 @@ git -C ~/j-flow pull && claude plugin update j-flow
 | `/j-flow-update` | Update specs mid-feature, mark downstream gates stale |
 | `/j-flow-check` | Current feature phase + gate status |
 | `/j-flow-check --all` | All features summary |
+| `/j-flow-doctor [--verbose]` | Read-only health check — drift, missing artifacts, backlog vs gates inconsistency |
 
 ## Stack
 
