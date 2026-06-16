@@ -264,7 +264,11 @@ packages:
 ```
 auto-install-peers=true
 strict-peer-dependencies=false
+public-hoist-pattern[]=*storybook*
+public-hoist-pattern[]=@storybook/*
 ```
+
+The `public-hoist-pattern` lines are REQUIRED for Storybook to work inside a pnpm workspace — without them, the `storybook` CLI cannot resolve `@storybook/core` from a hoisted location. Confirmed against Storybook 10.x docs.
 
 **`docker-compose.yml`** — reads credentials from root `.env` (loaded via `env_file`):
 ```yaml
@@ -848,7 +852,42 @@ void main() {
 
 **packages/ui (React design system + Storybook):**
 
-Create `packages/ui/package.json` (name `@{project}/ui`, type module, main `src/index.ts`, deps react+react-dom, devDeps typescript), then:
+Create `packages/ui/package.json` first. Storybook 10.x folded `addon-essentials`, `addon-interactions`, `addon-blocks`, and `@storybook/react` into the core — devDeps simplified:
+
+```json
+{
+  "name": "@{project}/ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@storybook/react-vite": "^10.0.0",
+    "storybook": "^10.0.0",
+    "vite": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.0"
+  }
+}
+```
+
+Do NOT add `@storybook/react`, `@storybook/blocks`, `@storybook/addon-essentials`, or `@storybook/addon-interactions` — they no longer exist as standalone packages in v10.
+
+Then run init (skips install — root `pnpm install` later resolves everything via workspace + the `.npmrc` hoist patterns we wrote in Step 2):
+
 ```bash
 cd packages/ui && npx -y storybook@latest init --type=react-vite --yes --no-dev --skip-install
 cd ../..
@@ -858,6 +897,25 @@ cd ../..
 ```bash
 rm -rf packages/ui/src/stories
 ```
+
+`storybook init` also generates `.storybook/main.ts` with legacy `addons: ['@storybook/addon-essentials', '@storybook/addon-interactions']` references that no longer exist in v10. REPLACE `packages/ui/.storybook/main.ts` with:
+
+```typescript
+import type { StorybookConfig } from '@storybook/react-vite';
+
+const config: StorybookConfig = {
+  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  addons: [],
+  framework: {
+    name: '@storybook/react-vite',
+    options: {},
+  },
+};
+
+export default config;
+```
+
+`addons: []` is intentional — essentials/interactions/blocks are part of core in v10 and listing them as addons causes `Cannot find module '@storybook/addon-essentials'` at startup.
 
 Generate a DESIGN.md-aligned Welcome component instead.
 
@@ -922,9 +980,9 @@ Write `packages/ui/src/components/welcome.css`:
 ```
 (Substitute color token hex values from DESIGN.md or fallbacks.)
 
-Write `packages/ui/src/components/Welcome.stories.tsx`:
+Write `packages/ui/src/components/Welcome.stories.tsx`. **Storybook 10+ requires `@storybook/react-vite` for types, not `@storybook/react`:**
 ```tsx
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Welcome } from './Welcome';
 
 const meta: Meta<typeof Welcome> = {
@@ -1120,7 +1178,7 @@ pnpm --filter @{project}/ui storybook
 
 ```tsx
 // MyComponent.stories.tsx
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MyComponent } from './MyComponent';
 
 const meta: Meta<typeof MyComponent> = { component: MyComponent };
