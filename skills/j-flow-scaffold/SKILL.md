@@ -452,7 +452,16 @@ cd ..
 
 Post-process `apps/web/package.json`:
 - Rename to `@{project}/web`
-- Add deps: `@tanstack/react-query`, `zustand`, `react-hook-form`, `zod`, `@hookform/resolvers`, `react-router-dom`, `tailwindcss`, `@{project}/ui`, `@{project}/api-client`, `@{project}/domain`
+- Add external deps: `@tanstack/react-query`, `zustand`, `react-hook-form`, `zod`, `@hookform/resolvers`, `react-router-dom`, `tailwindcss` (use real version ranges)
+- Add internal workspace deps with `workspace:*` protocol — REQUIRED for pnpm to link locally instead of trying npm registry:
+  ```json
+  "dependencies": {
+    "@{project}/ui": "workspace:*",
+    "@{project}/api-client": "workspace:*",
+    "@{project}/domain": "workspace:*",
+    ... external deps ...
+  }
+  ```
 - Add scripts: `lint`, `type-check: tsc --noEmit`, `test: vitest`
 - Change `dev` script port to 3001: `vite --port 3001`
 - Change `preview` script port to 3001: `vite preview --port 3001`
@@ -473,7 +482,15 @@ Also write `apps/web/.env` as a copy of `apps/web/.env.example`.
 
 **apps/admin (only if user confirms — see Detection step):**
 
-Same as apps/web but on port 3002, name `@{project}/admin`.
+Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST use `workspace:*` protocol:
+```json
+"dependencies": {
+  "@{project}/ui": "workspace:*",
+  "@{project}/api-client": "workspace:*",
+  "@{project}/domain": "workspace:*",
+  ... external deps ...
+}
+```
 
 Write `apps/admin/.env.example`:
 ```
@@ -621,7 +638,18 @@ export type ISOCurrency = string;
 
 **packages/api-client:**
 
-**`packages/api-client/package.json`** (name `@{project}/api-client`, deps `@{project}/domain`)
+**`packages/api-client/package.json`** — name `@{project}/api-client`, with workspace dep:
+```json
+{
+  "name": "@{project}/api-client",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@{project}/domain": "workspace:*"
+  }
+}
+```
 
 **`packages/api-client/tsconfig.json`** — extends root
 
