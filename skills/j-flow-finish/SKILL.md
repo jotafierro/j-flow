@@ -5,6 +5,18 @@ description: Generate feature README, update CHANGELOG [Unreleased], consolidate
 
 # j-flow-finish
 
+## Required reading
+
+Before finishing, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate cascade rules
+2. `.specs/{slug}/gate-context.md` — all accumulated decisions to summarize in README
+3. `.specs/{slug}/functional-spec.md` — AC table for the README
+4. `.specs/{slug}/tasks.json` — files changed list
+5. `CHANGELOG.md` — current [Unreleased] section
+6. `.specs/.agents/*.md` — agent memory files to update with new learnings
+7. Template: `templates/feature-readme.md` — README format
+
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.

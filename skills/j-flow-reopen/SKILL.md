@@ -8,6 +8,14 @@ description: Reopen a feature to a prior gate. Clears gate-context.md from the c
 Reopen a finished or blocked feature by clearing gates from a chosen point forward.
 Does NOT revert commits — only gate status in `gate-context.md` is cleared.
 
+## Required reading
+
+Before reopening any gate, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — cascade rules: reopening at phase X resets X and all downstream gates
+2. `.specs/{slug}/meta.md` — current gate states
+3. `.specs/{slug}/gate-context.md` — accumulated decisions (will be rewritten by this skill)
+
 ## Usage
 
 ```

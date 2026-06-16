@@ -5,6 +5,20 @@ description: Generate task plan (tasks.json) and review guide (review-guide.md) 
 
 # j-flow-plan
 
+## Required reading
+
+Before generating the task plan, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer definitions and execution order
+3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — to know which agent owns which layer
+4. `PRODUCT.md` — tech stack reference
+5. `DESIGN.md` — required when planning ui or mobile tasks
+6. `.specs/{slug}/functional-spec.md` — extract every AC
+7. `.specs/{slug}/technical-spec.md` — implementation patterns to plan against
+8. `.specs/{slug}/gate-context.md` — accumulated decisions
+9. Templates: `templates/tasks.json`, `templates/review-guide.md`
+
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.

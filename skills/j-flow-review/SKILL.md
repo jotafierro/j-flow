@@ -5,6 +5,21 @@ description: Audit code quality against approved technical specs. Only reachable
 
 # j-flow-review
 
+## Required reading
+
+Before auditing, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer boundaries to check
+3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — agent ownership (to detect cross-boundary code)
+4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation rules to enforce
+5. `DESIGN.md` — required if review touches UI/mobile (token usage)
+6. `.specs/{slug}/functional-spec.md` — to verify ACs are met
+7. `.specs/{slug}/technical-spec.md` — to verify architecture is respected
+8. `.specs/{slug}/tasks.json` — to detect speculative code
+9. `.specs/{slug}/gate-context.md` — accumulated decisions
+10. Template: `templates/review-findings.md` — output format
+
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.

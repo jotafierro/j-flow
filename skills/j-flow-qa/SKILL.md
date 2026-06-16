@@ -5,6 +5,17 @@ description: Run full QA gate across 6 stages: unit tests, NestJS E2E, Flutter i
 
 # j-flow-qa
 
+## Required reading
+
+Before running QA, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and red/green semantics
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — j-flow-quality scope and what to test
+3. `.specs/{slug}/review-guide.md` — manual checklist + environment setup
+4. `.specs/{slug}/tasks.json` — to understand the feature scope
+5. `.specs/{slug}/gate-context.md` — accumulated decisions
+6. Template: `templates/qa-report.md` — output format
+
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.

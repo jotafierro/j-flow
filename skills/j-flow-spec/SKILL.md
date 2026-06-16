@@ -5,6 +5,18 @@ description: Generate functional spec (default) via dialogue, or technical spec 
 
 # j-flow-spec
 
+## Required reading
+
+Before drafting any spec, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and approval rules
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — design constraints for specs (used by /j-flow-spec technical)
+3. `PRODUCT.md` — product vision and tech stack to anchor decisions
+4. `DESIGN.md` — design system tokens (REQUIRED when the spec includes any UI or mobile work)
+5. `.specs/{slug}/gate-context.md` — prior gate decisions to keep continuity
+6. `.specs/{slug}/functional-spec.md` (only for `technical` mode) — the functional spec to base the technical spec on
+7. Templates: `templates/functional-spec.md` or `templates/technical-spec.md`
+
 ## Gate Check
 
 Find the active feature (see j-flow-shared: "How to Find Active Feature").

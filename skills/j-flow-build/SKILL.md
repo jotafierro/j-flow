@@ -5,6 +5,22 @@ description: Implement tasks from the approved plan. Dispatches domain agents by
 
 # j-flow-build
 
+## Required reading
+
+Before dispatching any agent, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer order to respect
+3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — to pick the right agent per layer
+4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints for agents to follow
+5. `PRODUCT.md` — tech stack reference
+6. `DESIGN.md` — REQUIRED to forward to j-flow-frontend and j-flow-mobile dispatches
+7. `.specs/{slug}/tasks.json` — the tasks per layer
+8. `.specs/{slug}/technical-spec.md` — patterns to enforce
+9. `.specs/{slug}/gate-context.md` — accumulated decisions
+
+When dispatching `j-flow-frontend` or `j-flow-mobile`, explicitly include `DESIGN.md` in the agent's context so they can map design tokens to React/Flutter implementation.
+
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.
