@@ -7,6 +7,15 @@ description: Initialize a new feature. Creates git branch, .specs/{slug}/ direct
 
 Initialize a new feature branch and spec folder.
 
+## Required reading
+
+Before initializing a feature, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — for the initial `gate-context.md` format and meta.md field names
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md` — the meta.md template (already used in the existing flow)
+3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/gate-context.md` — the gate-context.md seed
+4. `.specs/README.md` — the backlog, to verify the slug exists and isn't already started
+
 ## Usage
 
 ```

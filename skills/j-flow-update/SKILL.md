@@ -7,6 +7,15 @@ description: Update specs or task plan mid-feature due to changed requirements. 
 
 Update a feature's specs or task plan when requirements change mid-feature.
 
+## Required reading
+
+Before updating any spec or plan, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — stale marker rules
+2. `.specs/{slug}/meta.md` — current gate states
+3. `.specs/{slug}/gate-context.md` — accumulated decisions (will be marked stale)
+4. The artifact being updated: `functional-spec.md` / `technical-spec.md` / `tasks.json`
+
 ## Process
 
 ### Step 1: Find feature and show context

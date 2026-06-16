@@ -7,6 +7,14 @@ description: Show current feature status and gate progress. Use --all to list al
 
 Show feature status without modifying any files.
 
+## Required reading
+
+Before reporting status, read:
+
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate status interpretation (approved / green / completed / red / stale / changes-requested)
+2. `.specs/README.md` — backlog with status symbols
+3. `.specs/{slug}/meta.md` and `.specs/{slug}/gate-context.md` for the active feature
+
 ## Usage
 
 ```
