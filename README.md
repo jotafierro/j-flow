@@ -62,6 +62,7 @@ git -C ~/j-flow pull && claude plugin update j-flow
 | `/j-flow-check` | Current feature phase + gate status |
 | `/j-flow-check --all` | All features summary |
 | `/j-flow-doctor [--verbose]` | Read-only health check — drift, missing artifacts, backlog vs gates inconsistency |
+| `/j-flow-eject [path]` | Copy a template / reference / agent into `.specs/.overrides/` for customization |
 
 ## Stack
 
