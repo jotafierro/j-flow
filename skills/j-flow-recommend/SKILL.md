@@ -53,29 +53,32 @@ Lists complementary plugins, skills, and tools for the j-flow workflow.
 ### Step 2: Show recommended Storybook addons
 
 ```
-▸ @storybook/addon-a11y       — accessibility audits in stories
-▸ @storybook/addon-themes     — light/dark mode switcher
-▸ @storybook/addon-interactions — interaction testing
+▸ Recommended Storybook addons
+  · @storybook/addon-a11y         — accessibility audits in stories
+  · @storybook/addon-themes       — light/dark mode switcher
+  · @storybook/addon-interactions — interaction testing
 ```
 
 ### Step 3: Show useful tools
 
 ```
-▸ Mongo Express UI            docker run -p 8081:8081 --net host -e ME_CONFIG_MONGODB_URL=mongodb://localhost:27017 mongo-express
-▸ Bruno or Insomnia           API testing (alternatives to Postman)
-▸ Mongo Compass               GUI for MongoDB Atlas / local
-▸ react-query-devtools        included via @tanstack/react-query-devtools in dev
+▸ Useful tools
+  · Mongo Express UI       docker run -p 8081:8081 --net host -e ME_CONFIG_MONGODB_URL=mongodb://localhost:27017 mongo-express
+  · Bruno or Insomnia      API testing (alternatives to Postman)
+  · Mongo Compass          GUI for MongoDB Atlas / local
+  · react-query-devtools   included via @tanstack/react-query-devtools in dev
 ```
 
 ### Step 4: Show useful Claude Code built-in commands and skills
 
 ```
-▸ /verify           — verify a change actually works in the running app
-▸ /code-review      — review the current diff at configurable effort
-▸ /security-review  — security audit of pending changes
-▸ /simplify         — review + apply fixes to current diff
-▸ /insights         — analyze the session for patterns and improvement areas
-▸ /compact          — summarize the conversation to free up context window
+▸ Useful skills
+  · /verify           — verify a change actually works in the running app
+  · /code-review      — review the current diff at configurable effort
+  · /security-review  — security audit of pending changes
+  · /simplify         — review + apply fixes to current diff
+  · /insights         — analyze the session for patterns and improvement areas
+  · /compact          — summarize the conversation to free up context window
 ```
 
 ### Step 5: Print closing
@@ -92,3 +95,4 @@ Run /j-flow-check anytime to see current feature status.
 - This skill is read-only — never writes files
 - Safe to run multiple times
 - Does NOT install anything automatically — only shows commands
+- Output each step's template block verbatim — do not filter, omit, reorder, or summarize any item
