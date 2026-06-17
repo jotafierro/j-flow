@@ -677,7 +677,49 @@ cd apps && pnpm create playwright@latest e2e --quiet --browser=chromium --gha=fa
 cd ..
 ```
 
-Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`. Set `baseURL` in `playwright.config.ts` to `http://localhost:3001`.
+Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`.
+
+**Configure `apps/e2e/playwright.config.ts`** — set `baseURL` AND add a `webServer` block so `pnpm test` starts the web app automatically:
+
+```ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  reporter: 'list',
+  use: {
+    baseURL: 'http://localhost:3001',
+    trace: 'on-first-retry',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+  ],
+  webServer: {
+    command: 'pnpm --filter @{project}/web dev',
+    url: 'http://localhost:3001',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+});
+```
+
+`webServer` makes `pnpm --filter @{project}/e2e test` boot the web dev server on demand and shut it down afterward. `reuseExistingServer: !CI` lets local dev reuse an already-running web server.
+
+**Replace `apps/e2e/tests/health.spec.ts`** (the default `toHaveTitle` test fails because the welcome page sets the project name in the body, not the `<title>` tag):
+
+```ts
+import { test, expect } from '@playwright/test';
+
+test('homepage shows project title', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('body')).toContainText('{Project Name}');
+});
+```
+
+Use `toContainText` against `body` rather than `toHaveTitle`. Substitute `{Project Name}` with the actual product name from PRODUCT.md.
 
 **Install Playwright browser binaries:**
 
@@ -783,7 +825,8 @@ If `--project-name` is not supported (older Flutter), fallback: after `flutter c
 
 Post-process `apps/mobile/widgetbook/pubspec.yaml` to add `widgetbook: ^3.0.0`, `widgetbook_annotation: ^3.0.0`, and dev_dep `widgetbook_generator: ^3.0.0`.
 
-Replace `apps/mobile/widgetbook/lib/main.dart` with a DESIGN.md-aligned catalog:
+Replace `apps/mobile/widgetbook/lib/main.dart` with a DESIGN.md-aligned catalog. **IMPORTANT:** an empty `addons: []` causes Widgetbook 3 to render a blank/loading screen — always include `MaterialThemeAddon` (and `ViewportAddon` is highly recommended). Also use `WidgetbookFolder` and wrap the use-case content in a Material-themed Container instead of a bare `Scaffold` (bare Scaffold outside MaterialApp gets stuck on load):
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -799,7 +842,7 @@ class WidgetbookApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Widgetbook.material(
       directories: [
-        WidgetbookCategory(
+        WidgetbookFolder(
           name: 'Foundation',
           children: [
             WidgetbookComponent(
@@ -807,34 +850,73 @@ class WidgetbookApp extends StatelessWidget {
               useCases: [
                 WidgetbookUseCase(
                   name: 'Default',
-                  builder: (context) => Scaffold(
-                    backgroundColor: const Color({bgHex}),
-                    body: Center(
-                      child: Text(
-                        '{Project Name}',
-                        style: const TextStyle(
-                          color: Color({primaryHex}),
-                          fontSize: 36,
-                          fontWeight: FontWeight.w600,
+                  builder: (context) {
+                    final theme = Theme.of(context);
+                    return Material(
+                      color: theme.colorScheme.surface,
+                      child: Center(
+                        child: Text(
+                          '{Project Name}',
+                          style: theme.textTheme.displayMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ],
             ),
           ],
         ),
       ],
-      addons: const [],
+      addons: [
+        MaterialThemeAddon(
+          themes: [
+            WidgetbookTheme(
+              name: 'Light',
+              data: ThemeData.light(useMaterial3: true).copyWith(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color({primaryLightHex}),
+                ),
+              ),
+            ),
+            WidgetbookTheme(
+              name: 'Dark',
+              data: ThemeData.dark(useMaterial3: true).copyWith(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color({primaryDarkHex}),
+                  brightness: Brightness.dark,
+                ),
+              ),
+            ),
+          ],
+          initialTheme: WidgetbookTheme(
+            name: '{default_theme_capitalized}',
+            data: ThemeData.{default_theme}(useMaterial3: true),
+          ),
+        ),
+        ViewportAddon([
+          IosViewports.iPhone13,
+          AndroidViewports.samsungGalaxyS20,
+          IosViewports.iPadPro11Inches,
+        ]),
+        TextScaleAddon(),
+      ],
     );
   }
 }
 ```
 
-Substitution rules for the widgetbook main.dart:
-- `{bgHex}`: use `color_bg_dark` if `default_theme === 'dark'`, else `color_bg_light`, formatted as `0xFF` + 6 uppercase hex digits
-- `{primaryHex}`: use `color_primary_dark` if `default_theme === 'dark'`, else `color_primary_light`, same format
+Substitution rules:
+- `{primaryLightHex}`: `color_primary_light` formatted as `0xFF` + 6 uppercase hex digits (e.g. `0xFF3B82F6`)
+- `{primaryDarkHex}`: `color_primary_dark` formatted same way
+- `{default_theme}`: `'light'` or `'dark'` (lowercase)
+- `{default_theme_capitalized}`: `'Light'` or `'Dark'`
+- `{Project Name}`: from PRODUCT.md
+
+The Welcome use case mirrors the mobile app's home screen — same theme tokens, same title centered. Switching the theme addon between Light/Dark in the Widgetbook UI flips both screens consistently.
 
 Replace `apps/mobile/widgetbook/test/widget_test.dart` with a passing test that matches the new package name:
 ```dart
@@ -1124,6 +1206,7 @@ docker compose up -d
 | Mailhog UI | (started by docker compose) | http://localhost:8025 |
 | Storybook docs | see [docs/STORYBOOK.md](docs/STORYBOOK.md) | |
 | Widgetbook docs | see [docs/WIDGETBOOK.md](docs/WIDGETBOOK.md) | |
+| Playwright docs | see [docs/PLAYWRIGHT.md](docs/PLAYWRIGHT.md) | |
 
 ## Verify it works
 
@@ -1152,9 +1235,9 @@ This project uses `j-flow` for Spec-Driven Development. See [.specs/README.md](.
 ```
 ````
 
-### Step 5b: Generate docs/STORYBOOK.md and docs/WIDGETBOOK.md
+### Step 5b: Generate docs/STORYBOOK.md, docs/WIDGETBOOK.md, and docs/PLAYWRIGHT.md
 
-Create a `docs/` directory if it doesn't exist. Write these two documentation files into the TARGET repo.
+Create a `docs/` directory if it doesn't exist. Write these three documentation files into the TARGET repo.
 
 Write `docs/STORYBOOK.md`:
 ````markdown
@@ -1237,6 +1320,71 @@ Tokens live in [`DESIGN.md`](../DESIGN.md). The mobile theme is in `apps/mobile/
 This project's default theme is **{default_theme}**.
 ````
 
+Write `docs/PLAYWRIGHT.md`:
+````markdown
+# Playwright E2E — {Project Name}
+
+End-to-end browser tests for the web stack in `apps/e2e`. Runs against the React + Vite web app at `http://localhost:3001`.
+
+## Run
+
+```bash
+pnpm --filter @{project}/e2e test            # headless
+pnpm --filter @{project}/e2e test:headed     # headed (visible browser)
+pnpm --filter @{project}/e2e report          # open last HTML report
+```
+
+`playwright.config.ts` declares a `webServer` block that boots `pnpm --filter @{project}/web dev` automatically. No need to start the web app separately — locally Playwright reuses a running dev server if one is already up (`reuseExistingServer: !CI`); in CI it starts a fresh one.
+
+## Where tests live
+
+- `apps/e2e/tests/*.spec.ts` — test specs
+- `apps/e2e/lib/` — reusable fixtures, page objects, helpers
+- `apps/e2e/playwright.config.ts` — config (baseURL, projects, webServer)
+- `apps/e2e/global-setup.ts` — runs once before all tests (seed test data, warm services)
+
+## Adding a test
+
+```ts
+import { test, expect } from '@playwright/test';
+
+test('users can sign in', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByLabel('Email').fill('user@example.com');
+  await page.getByLabel('Password').fill('changeme');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL('/dashboard');
+});
+```
+
+Prefer semantic selectors (`getByRole`, `getByLabel`, `getByText`) over CSS selectors.
+
+## Browser binaries
+
+Browser binaries are installed during scaffold via `pnpm exec playwright install chromium`. If a fresh clone is missing them:
+
+```bash
+cd apps/e2e && pnpm exec playwright install chromium
+```
+
+## Debugging
+
+```bash
+pnpm --filter @{project}/e2e exec playwright test --debug   # opens Inspector
+pnpm --filter @{project}/e2e exec playwright codegen http://localhost:3001  # generate test from interactions
+```
+
+Failed runs save traces under `apps/e2e/test-results/`. Open one with:
+
+```bash
+pnpm --filter @{project}/e2e exec playwright show-trace test-results/<run>/trace.zip
+```
+
+## CI
+
+Playwright runs in the GitHub Actions workflow at `.github/workflows/ci.yml`. CI installs browser binaries and runs `pnpm --filter @{project}/e2e test` against a fresh web server boot.
+````
+
 (Substitute `{Project Name}`, `{project}`, and `{default_theme}` with actual values when writing these files.)
 
 ### Step 6: Update CHANGELOG.md
@@ -1255,7 +1403,7 @@ Read `CHANGELOG.md`. Under `## [Unreleased]`, append:
 - [01-infra-base] Centered welcome screens for web, admin, mobile, widgetbook, storybook (DESIGN.md tokens)
 - [01-infra-base] Smoke tests (vitest) for web and admin
 - [01-infra-base] Playwright browser auto-install on scaffold
-- [01-infra-base] docs/STORYBOOK.md and docs/WIDGETBOOK.md
+- [01-infra-base] docs/STORYBOOK.md, docs/WIDGETBOOK.md, and docs/PLAYWRIGHT.md
 ```
 
 ### Step 7: Initialize .specs/01-infra-base/
