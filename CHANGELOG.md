@@ -33,7 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scaffold runs `pnpm exec playwright install chromium` after creating apps/e2e
 - Scaffold generates smoke tests (vitest) for web and admin so `pnpm test` is green out of the box
 - Scaffold replaces Flutter `test/widget_test.dart` to match the replaced `main.dart` (default counter test is broken once main.dart is overwritten)
-- Scaffold generates `docs/STORYBOOK.md` and `docs/WIDGETBOOK.md`; README links to both
+- Scaffold generates `docs/STORYBOOK.md`, `docs/WIDGETBOOK.md`, and `docs/PLAYWRIGHT.md`; README links to all three
+- Playwright config includes a `webServer` block so `pnpm --filter @{project}/e2e test` boots the web app automatically
+- Sample E2E test uses body text assertion (`toContainText`) instead of `toHaveTitle` (welcome page sets title in body, not in `<title>`)
+- Widgetbook welcome uses `MaterialThemeAddon` + `ViewportAddon` + `TextScaleAddon` and theme-aware `Material` widget (empty addons cause Widgetbook 3 to stay on loading screen)
 - Per-app `.env.example` generated separately from root `.env.example` (root only carries docker-compose vars)
 - TypeScript tsconfigs generated without deprecated `baseUrl` (Plan TS 7.0)
 - `plugin.json` author field is an object (Claude Code plugin loader requirement)
