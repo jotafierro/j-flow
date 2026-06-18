@@ -38,6 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sample E2E test uses body text assertion (`toContainText`) instead of `toHaveTitle` (welcome page sets title in body, not in `<title>`)
 - Widgetbook welcome uses `MaterialThemeAddon` + `ViewportAddon` + `TextScaleAddon` and theme-aware `Material` widget (empty addons cause Widgetbook 3 to stay on loading screen)
 - Per-app `.env.example` generated separately from root `.env.example` (root only carries docker-compose vars)
+- Scaffold generates `apps/api/src/health/health.controller.spec.ts` so `pnpm --filter @{project}/api test` has at least one passing test (Jest exits 1 with 0 tests otherwise)
+- Scaffold merges `"types": ["node", "jest"]` into `apps/api/tsconfig.json` so the VS Code TS server resolves `describe`/`it`/`expect` in spec files (ts(2593))
+- Scaffold generates `apps/api/test/tsconfig.json` with `noEmit: true` and `rootDir: ".."` to fix ts(2593) and ts(6059) in editor for e2e specs
+- Scaffold patches `apps/api/test/app.e2e-spec.ts` `.expect()` callback with explicit type `(res: { body: { status: string } })` to fix `@typescript-eslint/no-unsafe-member-access`
+- Widgetbook `initialTheme` now references the same instance from the `themes` list (`themes[index]`) — a new `WidgetbookTheme(...)` object with identical data failed the `themes.contains(initialTheme)` identity assertion at runtime
 - TypeScript tsconfigs generated without deprecated `baseUrl` (Plan TS 7.0)
 - `plugin.json` author field is an object (Claude Code plugin loader requirement)
 - Skill files use the `SKILL.md` filename (Claude Code plugin loader requirement)
