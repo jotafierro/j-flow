@@ -444,6 +444,17 @@ Post-process `apps/api/package.json`:
 - Set port in `apps/api/src/main.ts`: `app.setGlobalPrefix('api/v1')` and `await app.listen(process.env.PORT ?? 3000)`
 - Apply `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })`
 
+Post-process `apps/api/tsconfig.json`: add `"types": ["node", "jest"]` to `compilerOptions`. NestJS CLI does not include it, causing the VS Code TS language server to report ts(2593) (`describe`/`it`/`expect` not found) in spec files under `src/`. The CLI (`tsc`) resolves `@types` automatically, but the editor language server needs explicit declaration:
+```json
+{
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    ...rest of NestJS-generated compilerOptions unchanged...
+  }
+}
+```
+Merge — do not replace the full file. Only add the `types` entry.
+
 Generate health module files:
 
 **`apps/api/src/health/health.controller.ts`**
@@ -466,6 +477,29 @@ import { HealthController } from './health.controller';
 
 @Module({ controllers: [HealthController] })
 export class HealthModule {}
+```
+
+**`apps/api/src/health/health.controller.spec.ts`**
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { HealthController } from './health.controller';
+
+describe('HealthController', () => {
+  let controller: HealthController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [HealthController],
+    }).compile();
+    controller = module.get<HealthController>(HealthController);
+  });
+
+  it('returns ok status', () => {
+    const result = controller.check();
+    expect(result.status).toBe('ok');
+    expect(result.timestamp).toBeDefined();
+  });
+});
 ```
 
 Replace `apps/api/src/app.module.ts` with:
@@ -516,6 +550,32 @@ SMTP_PORT=1025
 ```
 
 Also write `apps/api/.env` as a copy of `apps/api/.env.example` so the API runs out of the box.
+
+**`apps/api/test/tsconfig.json`** — fixes ts(2593) (`describe`/`it` not found) and ts(6059) (`rootDir` mismatch) in the VS Code TS language server. The test dir imports from `../src/`, so the common source root becomes `..`; `noEmit` prevents emit conflicts with the main tsconfig:
+```json
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "noEmit": true,
+    "declaration": false,
+    "composite": false,
+    "incremental": false,
+    "rootDir": ".."
+  },
+  "include": ["**/*.ts"]
+}
+```
+
+**Patch `apps/api/test/app.e2e-spec.ts`** — the NestJS CLI generates an unsafe `res` type in the `.expect()` callback. Find the line:
+```typescript
+.expect((res) => {
+```
+and replace with:
+```typescript
+.expect((res: { body: { status: string } }) => {
+```
+This eliminates the `@typescript-eslint/no-unsafe-member-access` lint error on `res.body.status`.
 
 **apps/web (React + Vite):**
 ```bash
@@ -840,6 +900,26 @@ class WidgetbookApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themes = [
+      WidgetbookTheme(
+        name: 'Light',
+        data: ThemeData.light(useMaterial3: true).copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color({primaryLightHex}),
+          ),
+        ),
+      ),
+      WidgetbookTheme(
+        name: 'Dark',
+        data: ThemeData.dark(useMaterial3: true).copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color({primaryDarkHex}),
+            brightness: Brightness.dark,
+          ),
+        ),
+      ),
+    ];
+
     return Widgetbook.material(
       directories: [
         WidgetbookFolder(
@@ -873,29 +953,8 @@ class WidgetbookApp extends StatelessWidget {
       ],
       addons: [
         MaterialThemeAddon(
-          themes: [
-            WidgetbookTheme(
-              name: 'Light',
-              data: ThemeData.light(useMaterial3: true).copyWith(
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: const Color({primaryLightHex}),
-                ),
-              ),
-            ),
-            WidgetbookTheme(
-              name: 'Dark',
-              data: ThemeData.dark(useMaterial3: true).copyWith(
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: const Color({primaryDarkHex}),
-                  brightness: Brightness.dark,
-                ),
-              ),
-            ),
-          ],
-          initialTheme: WidgetbookTheme(
-            name: '{default_theme_capitalized}',
-            data: ThemeData.{default_theme}(useMaterial3: true),
-          ),
+          themes: themes,
+          initialTheme: themes[{default_theme_index}],
         ),
         ViewportAddon([
           IosViewports.iPhone13,
@@ -912,8 +971,7 @@ class WidgetbookApp extends StatelessWidget {
 Substitution rules:
 - `{primaryLightHex}`: `color_primary_light` formatted as `0xFF` + 6 uppercase hex digits (e.g. `0xFF3B82F6`)
 - `{primaryDarkHex}`: `color_primary_dark` formatted same way
-- `{default_theme}`: `'light'` or `'dark'` (lowercase)
-- `{default_theme_capitalized}`: `'Light'` or `'Dark'`
+- `{default_theme_index}`: `0` if `default_theme === 'light'`, `1` if `default_theme === 'dark'` — matches `themes[0]` = Light, `themes[1]` = Dark. **Critical:** `initialTheme` must reference the same object instance from the `themes` list — `themes.contains(initialTheme)` uses identity equality, so a new `WidgetbookTheme(...)` with the same data fails the assertion at runtime.
 - `{Project Name}`: from PRODUCT.md
 
 The Welcome use case mirrors the mobile app's home screen — same theme tokens, same title centered. Switching the theme addon between Light/Dark in the Widgetbook UI flips both screens consistently.
