@@ -322,32 +322,30 @@ jobs:
           - 27017:27017
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 9
+      - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: "pnpm"
 
       - run: pnpm install
+      - run: pnpm --filter @{project}/e2e exec playwright install --with-deps chromium
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm test
 
   flutter:
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('apps/mobile/pubspec.yaml') != '' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.x"
+          flutter-version: "3.41.x"
           channel: "stable"
 
       - run: flutter pub get
@@ -356,6 +354,12 @@ jobs:
       - run: flutter test
         working-directory: apps/mobile
 ```
+
+CI notes:
+- `pnpm/action-setup@v4` reads the version from `packageManager` in `package.json` — do NOT add a `version:` key, it conflicts.
+- `hashFiles()` is invalid in a job-level `if` (only works in step contexts) — the flutter job runs unconditionally since mobile always exists in this scaffold.
+- `playwright install --with-deps chromium` must run in CI before `pnpm test`; the local binary installed during scaffold is not committed.
+- `flutter-version: "3.41.x"` matches Dart `^3.11.5` from pubspec. Update this when bumping Flutter in the project.
 
 **`.env.example`**
 ```
@@ -441,7 +445,7 @@ Post-process `apps/api/package.json`:
     ... rest of nest defaults ...
   }
   ```
-- Set port in `apps/api/src/main.ts`: `app.setGlobalPrefix('api/v1')` and `await app.listen(process.env.PORT ?? 3000)`
+- Set port in `apps/api/src/main.ts`: `app.setGlobalPrefix('api/v1')` and `await app.listen(process.env.PORT ?? 3000)`. Call `bootstrap()` as `void bootstrap()` — NestJS CLI generates `bootstrap()` which is a floating promise and triggers `@typescript-eslint/no-floating-promises` in CI lint.
 - Apply `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })`
 
 Post-process `apps/api/tsconfig.json`: add `"types": ["node", "jest"]` to `compilerOptions`. NestJS CLI does not include it, causing the VS Code TS language server to report ts(2593) (`describe`/`it`/`expect` not found) in spec files under `src/`. The CLI (`tsc`) resolves `@types` automatically, but the editor language server needs explicit declaration:
