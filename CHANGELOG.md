@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI adds `playwright install --with-deps chromium` before `pnpm test` — local binary not committed, CI must install it
 - Flutter CI bumped to `3.41.x` to satisfy Dart `^3.11.5` in pubspec; removed invalid `hashFiles()` job-level `if` on flutter job
 - `apps/api/src/main.ts` calls `void bootstrap()` instead of bare `bootstrap()` to silence `@typescript-eslint/no-floating-promises`
+- Scaffold generates `CLAUDE.md` at project root with stack overview, dev commands, conventions, and key files — loaded by Claude Code on every session
 - Skill files use the `SKILL.md` filename (Claude Code plugin loader requirement)
 - `tests/validate.js` structural validator (91 checks)
 - 4 YAML scenario test specs under `tests/scenarios/`
