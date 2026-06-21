@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/j-flow-plan` clarification check: blocks task generation if any `[NEEDS CLARIFICATION]` markers remain in `functional-spec.md`, listing each unresolved item
 - `/j-flow-spec` partial-answer guidance: dialogue now instructs users to use the marker for incomplete answers; warns after approval if markers are present
 - `gate-rules.md` documents the clarification marker convention and its behavior across gates
+- Given/When/Then format for Acceptance Criteria in `functional-spec.md` template — `### AC-N — {name}` heading with `Given / When / Then:` structure replaces free-form bullets
+- `Functional scenarios` section moved to optional (bottom of template) — for complex multi-step flows only
+- `/j-flow-spec` dialogue question 4 updated to guide GWT format with example; draft step now converts free-form ACs to GWT before showing draft
+- `gate-rules.md` documents GWT AC format and backwards-compatibility with free-form specs
 
 ### Added
 - Initial j-flow plugin: gate-based SDD workflow for MongoDB + NestJS + React + Flutter
