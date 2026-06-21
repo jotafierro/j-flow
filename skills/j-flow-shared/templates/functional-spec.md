@@ -25,27 +25,32 @@ Remove the marker (replace it with the resolved content) before running /j-flow-
 
 {What initiates this feature? User action, event, schedule.}
 
-## Functional scenarios
+## Acceptance criteria
 
-### Scenario 1 — {Name}
+<!-- Each AC uses Given/When/Then format. Keep ACs atomic — one observable outcome per AC.
+     For complex multi-step flows, add a Functional scenarios section below. -->
 
-**Given** {precondition}
-**When** {action}
+### AC-1 — {short name}
+
+**Given** {precondition or system state}
+**When** {user action or system event}
 **Then:**
-- {outcome 1}
-- {outcome 2}
+- {observable outcome 1}
+- {observable outcome 2}
 
-### Scenario 2 — {Name}
+### AC-2 — {short name}
 
 **Given** ...
 **When** ...
-**Then:** ...
+**Then:**
+- ...
 
-## Acceptance criteria
+### AC-3 — {short name}
 
-- **AC-1** — {criterion}
-- **AC-2** — {criterion}
-- **AC-3** — {criterion}
+**Given** ...
+**When** ...
+**Then:**
+- ...
 
 ## Scope
 
@@ -66,3 +71,8 @@ Remove the marker (replace it with the resolved content) before running /j-flow-
 ## Risks
 
 - {risk and mitigation}
+
+## Functional scenarios (optional)
+
+<!-- Use this section only for complex multi-step user journeys that span multiple ACs.
+     Simple features: leave this section empty or delete it. -->

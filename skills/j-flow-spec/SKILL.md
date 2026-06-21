@@ -39,7 +39,16 @@ Generate the functional spec through a dialogue. Ask questions ONE AT A TIME —
 2. **Who uses it?** (which user roles interact with this feature)
 3. **What triggers it?** (user action, event, cron schedule, etc.)
 4. **What are the acceptance criteria?**
-   Guide: "List conditions that must be true for this feature to be complete. Format each as: 'Given {context}, when {action}, then {outcome}'. Aim for 3-8 ACs."
+   Guide: "List conditions that must be true for this feature to be complete. Use Given/When/Then format for each:
+     - **Given** {precondition or system state}
+     - **When** {user action or system event}
+     - **Then:** {observable outcomes, one per line}
+   Each AC should be atomic — one observable outcome per criterion. Aim for 3–8 ACs.
+   Example:
+     AC-1 — User login
+       Given the user is not authenticated
+       When they submit valid credentials
+       Then: they receive a JWT token, they are redirected to the dashboard"
 5. **What is explicitly out of scope?** (what this feature does NOT do)
 6. **Any constraints?** (performance, security, compliance, UX)
 
@@ -54,7 +63,7 @@ The spec can still be approved with markers present — this allows saving progr
 
 ### Draft and Confirm
 
-After collecting all answers, read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/functional-spec.md`. Substitute placeholders with the answers from the dialogue above. Show the draft to the user.
+After collecting all answers, read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/functional-spec.md`. Substitute placeholders with the answers from the dialogue above. When substituting ACs: format each as `### AC-N — {short name}` with `Given / When / Then:` structure following the template exactly. If the user provided free-form ACs during the dialogue, convert them to GWT format before writing the draft — show the conversion alongside the original text if the interpretation may not be obvious. Show the full draft to the user.
 
 Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format requirements.
 
