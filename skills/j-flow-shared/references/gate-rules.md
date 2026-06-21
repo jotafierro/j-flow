@@ -93,3 +93,7 @@ Mark downstream gates by appending ` [stale]`:
 - `[QA] green 2026-06-12 [stale]`
 
 Stale gates block subsequent skills the same as missing gates.
+
+## Clarification markers
+
+**`[NEEDS CLARIFICATION: {question}]`** — marker for unresolved questions in `functional-spec.md`. A functional spec may be approved with markers present (progress is saved). However, the PLAN gate will block until all markers are resolved. Markers in a technical spec are not recognized — resolve them at the functional level before running `/j-flow-spec technical`.

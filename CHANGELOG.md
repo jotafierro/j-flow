@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `[NEEDS CLARIFICATION: {question}]` marker convention in `functional-spec.md` template — lets users flag unresolved questions during spec dialogue without blocking approval
+- `/j-flow-plan` clarification check: blocks task generation if any `[NEEDS CLARIFICATION]` markers remain in `functional-spec.md`, listing each unresolved item
+- `/j-flow-spec` partial-answer guidance: dialogue now instructs users to use the marker for incomplete answers; warns after approval if markers are present
+- `gate-rules.md` documents the clarification marker convention and its behavior across gates
+
+### Added
 - Initial j-flow plugin: gate-based SDD workflow for MongoDB + NestJS + React + Flutter
 - 16 user-facing skills: `/j-flow-project`, `/j-flow-scaffold`, `/j-flow-start`, `/j-flow-spec`, `/j-flow-plan`, `/j-flow-build`, `/j-flow-qa`, `/j-flow-review`, `/j-flow-finish`, `/j-flow-release`, `/j-flow-reopen`, `/j-flow-update`, `/j-flow-check`, `/j-flow-doctor`, `/j-flow-eject`, `/j-flow-recommend`
 - 1 internal skill `/j-flow-shared` exposing templates and references (collapsed to a 30-line pointer doc)

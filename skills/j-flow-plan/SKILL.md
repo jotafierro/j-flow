@@ -25,6 +25,27 @@ Find the active feature. Read `.specs/{slug}/gate-context.md`.
 Require `[TECHNICAL SPEC] approved` and not stale.
 If missing or stale: "Gate [TECHNICAL SPEC] not approved. Run /j-flow-spec technical first."
 
+## Clarification check (blocking)
+
+After confirming the gate, read `.specs/{slug}/functional-spec.md`.
+
+Search for any occurrence of `[NEEDS CLARIFICATION` (case-insensitive).
+
+If any are found:
+- List each occurrence with its line context.
+- Print:
+  ```
+  [PLAN] BLOCKED — unresolved clarification markers found in functional-spec.md:
+
+    line {N}: {marker text}
+    ...
+
+  Resolve each [NEEDS CLARIFICATION] item (replace with the actual answer) before running /j-flow-plan.
+  ```
+- Stop. Do not generate tasks.
+
+If none found: continue to task generation.
+
 ## Process
 
 ### Step 1: Parse ACs
