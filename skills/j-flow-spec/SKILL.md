@@ -43,6 +43,15 @@ Generate the functional spec through a dialogue. Ask questions ONE AT A TIME —
 5. **What is explicitly out of scope?** (what this feature does NOT do)
 6. **Any constraints?** (performance, security, compliance, UX)
 
+### Handling partial answers
+
+If the user cannot answer a question fully during the dialogue (e.g. "not sure yet", "TBD", "need to check with the team"):
+- Record the partial answer.
+- Mark it in the draft with `[NEEDS CLARIFICATION: {the unresolved question}]`.
+- Example: `- **AC-3** — [NEEDS CLARIFICATION: should rate limiting apply to admin users too?]`
+
+The spec can still be approved with markers present — this allows saving progress. However, `/j-flow-plan` will block until all markers are resolved.
+
 ### Draft and Confirm
 
 After collecting all answers, read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/functional-spec.md`. Substitute placeholders with the answers from the dialogue above. Show the draft to the user.
@@ -67,6 +76,14 @@ When the user replies 'approved' (or equivalent confirmation):
    Functional spec approved and saved ✓
    Next step: /j-flow-spec technical
    ```
+
+After writing the gate entry, scan the written `functional-spec.md` for `[NEEDS CLARIFICATION` markers.
+If any found, print:
+```
+⚠ {N} unresolved [NEEDS CLARIFICATION] marker(s) in the spec.
+/j-flow-plan will block until they are resolved.
+Edit .specs/{slug}/functional-spec.md to replace each marker with the resolved content.
+```
 
 ---
 
