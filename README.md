@@ -48,8 +48,7 @@ git -C ~/j-flow pull && claude plugin update j-flow
 | `/j-flow-project [--update] [--from FILE] [--from-design FILE]` | Define project — PRODUCT.md, DESIGN.md, agent memory; first run auto-triggers scaffold |
 | `/j-flow-scaffold [--review]` | Generate monorepo scaffold (React + Vite, NestJS, Flutter); `--review` is read-only |
 | `/j-flow-start {slug}` | Initialize feature — git branch, `.specs/{slug}/`, gate-context |
-| `/j-flow-spec` | Functional spec via dialogue → approval gate |
-| `/j-flow-spec technical` | Technical spec via j-flow-architect → approval gate |
+| `/j-flow-spec [technical\|--explore]` | Functional spec via dialogue → approval gate; `technical` generates technical spec; `--explore` for lightweight scoping before committing |
 | `/j-flow-plan` | Task plan + review guide → approval gate |
 | `/j-flow-build` | Layered implementation by domain agent, unit tests per layer |
 | `/j-flow-build --fix` | Resolve QA or review findings |

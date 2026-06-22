@@ -19,6 +19,10 @@
   └─ feature/{slug} branch
   └─ .specs/{slug}/meta.md + gate-context.md
 
+/j-flow-spec --explore
+  └─ scoping dialogue before committing — no files written, ends with summary + offer to start real spec
+  └─ use when the feature is still vague or may need splitting
+
 /j-flow-spec
   └─ Dialogue: what/who/trigger/ACs/out-of-scope/constraints
   └─ Writes: .specs/{slug}/functional-spec.md
