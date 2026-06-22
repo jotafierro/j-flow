@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `[REVIEW]` gate context entry now records constitution check result
 - `README.md` documents `CONSTITUTION.md` in project file structure
 - `tests/validate.js` tracks `constitution.md` in `EXPECTED_TEMPLATES`
+- `/j-flow-analyze` — new read-only skill with 5 cross-consistency checks: unresolved clarification markers, AC→task coverage, task→AC traceability, AC→test coverage, system spec collision detection against `.specs/_system/`
+- `README.md` Skills table includes `/j-flow-analyze`
+- `FLOW.md` documents `/j-flow-analyze` under diagnostic commands
+- `tests/validate.js` tracks `j-flow-analyze` in `EXPECTED_SKILLS`
 
 ### Added
 - Initial j-flow plugin: gate-based SDD workflow for MongoDB + NestJS + React + Flutter
