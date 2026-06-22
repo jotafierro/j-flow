@@ -93,6 +93,7 @@ const EXPECTED_TEMPLATES = [
   'meta.md', 'gate-context.md', 'functional-spec.md', 'technical-spec.md',
   'tasks.json', 'review-guide.md', 'qa-report.md', 'review-findings.md',
   'feature-readme.md', 'product.md', 'design.md', 'specs-index.md', 'changelog.md',
+  'system-domain.md',
 ];
 
 console.log('\nshared templates/');

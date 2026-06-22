@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Functional scenarios` section moved to optional (bottom of template) — for complex multi-step flows only
 - `/j-flow-spec` dialogue question 4 updated to guide GWT format with example; draft step now converts free-form ACs to GWT before showing draft
 - `gate-rules.md` documents GWT AC format and backwards-compatibility with free-form specs
+- `templates/system-domain.md` — new template for per-domain living system spec files
+- `/j-flow-finish` new Step 3b: asks domain, merges feature ACs into `.specs/_system/{domain}.md`, shows diff before writing
+- `/j-flow-spec` now reads `.specs/_system/` as behavioral baseline before drafting; surfaces AC overlaps with existing system behavior
+- `README.md` documents `.specs/_system/` convention and purpose
+- `tests/validate.js` tracks `system-domain.md` in `EXPECTED_TEMPLATES`
 
 ### Added
 - Initial j-flow plugin: gate-based SDD workflow for MongoDB + NestJS + React + Flutter

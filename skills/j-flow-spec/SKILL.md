@@ -13,9 +13,10 @@ Before drafting any spec, read:
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — design constraints for specs (used by /j-flow-spec technical)
 3. `PRODUCT.md` — product vision and tech stack to anchor decisions
 4. `DESIGN.md` — design system tokens (REQUIRED when the spec includes any UI or mobile work)
-5. `.specs/{slug}/gate-context.md` — prior gate decisions to keep continuity
-6. `.specs/{slug}/functional-spec.md` (only for `technical` mode) — the functional spec to base the technical spec on
-7. Templates: `templates/functional-spec.md` or `templates/technical-spec.md`
+5. `.specs/_system/` — living system spec for all domains (read ALL domain files present; use to avoid contradicting established behavior or duplicating ACs already in the system). Skip if directory does not exist yet.
+6. `.specs/{slug}/gate-context.md` — prior gate decisions to keep continuity
+7. `.specs/{slug}/functional-spec.md` (only for `technical` mode) — the functional spec to base the technical spec on
+8. Templates: `templates/functional-spec.md` or `templates/technical-spec.md`
 
 ## Gate Check
 
@@ -34,6 +35,12 @@ If missing or stale: "Gate [FUNCTIONAL SPEC] not approved. Run /j-flow-spec firs
 Generate the functional spec through a dialogue. Ask questions ONE AT A TIME — wait for each answer before asking the next.
 
 ### Questions
+
+Before asking question 1, check if `.specs/_system/` exists and has any domain files.
+If yes: read all domain files and keep them in context as the current behavioral baseline.
+If during the dialogue a user answer describes behavior already covered by an existing AC in `_system/`, surface it:
+  "⚠ Similar behavior exists in `_system/{domain}.md`: '{existing AC}'. Confirm this is an intentional extension or modification."
+Do not block the spec — just surface the overlap so the user makes an informed choice.
 
 1. **What does this feature do?** (describe from the user's perspective in 1-2 sentences)
 2. **Who uses it?** (which user roles interact with this feature)

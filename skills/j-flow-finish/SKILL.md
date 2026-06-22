@@ -15,7 +15,9 @@ Before finishing, read:
 4. `.specs/{slug}/tasks.json` — files changed list
 5. `CHANGELOG.md` — current [Unreleased] section
 6. `.specs/.agents/*.md` — agent memory files to update with new learnings
-7. Template: `templates/feature-readme.md` — README format
+7. `.specs/_system/` — system behavior files for the domains this feature touches (read to confirm no regression; not required to exist yet)
+8. Template: `templates/feature-readme.md` — README format
+9. Template: `templates/system-domain.md` — system domain file format
 
 ## Gate Check
 
@@ -66,11 +68,36 @@ Example:
 - NestJS: Auth guard at controller level (not globally) — admin routes need a different guard
 ```
 
+### Step 3b: Merge ACs to system spec
+
+Ask the user: "Which domain does this feature belong to? (e.g. `auth`, `users`, `notifications`, `billing`). Press Enter to skip system-spec update."
+
+If the user provides a domain name `{domain}`:
+
+1. Check if `.specs/_system/{domain}.md` exists.
+   - If not: read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/system-domain.md`. Initialize it substituting `{domain}` as the domain name. Write to `.specs/_system/{domain}.md`.
+2. Read `.specs/{slug}/functional-spec.md`. Extract all Acceptance Criteria (sections matching `### AC-N`).
+3. Read `.specs/_system/{domain}.md`. Locate the `<!-- next feature entries are appended above this line -->` marker.
+4. Insert the following block *above* the marker:
+
+```markdown
+### {slug} — {one-line description from functional-spec Purpose section} ({today's date})
+
+{all AC sections verbatim, preserving Given/When/Then formatting}
+
+```
+
+5. Update the `Last updated:` line at the top of the file.
+6. Show the diff to the user before writing.
+7. Write the updated `.specs/_system/{domain}.md`.
+
+If the user skips: print `System spec update skipped.` and continue.
+
 ### Step 4: Commit finish artifacts
 
 ```bash
-git add .specs/{slug}/README.md CHANGELOG.md .specs/.agents/
-git commit -m "docs({slug}): feature README, changelog entry, and agent memory update"
+git add .specs/{slug}/README.md CHANGELOG.md .specs/.agents/ .specs/_system/
+git commit -m "docs({slug}): feature README, changelog entry, agent memory, and system spec update"
 ```
 
 ### Step 5: Create PR to develop

@@ -64,6 +64,20 @@ git -C ~/j-flow pull && claude plugin update j-flow
 | `/j-flow-doctor [--verbose]` | Read-only health check — drift, missing artifacts, backlog vs gates inconsistency |
 | `/j-flow-eject [path]` | Copy a template / reference / agent into `.specs/.overrides/` for customization |
 
+## Project file structure
+
+Key files generated in your target repo by j-flow:
+
+| Path | Purpose |
+|------|---------|
+| `PRODUCT.md` | Product vision and tech stack (descriptive context) |
+| `DESIGN.md` | Design system tokens and patterns (descriptive context) |
+| `CHANGELOG.md` | Keep-a-Changelog format; updated by `/j-flow-finish` and `/j-flow-release` |
+| `.specs/README.md` | Feature backlog with status symbols |
+| `.specs/.agents/` | Per-agent memory files — accumulated learned patterns |
+| `.specs/{slug}/` | Per-feature folder: `meta.md`, `gate-context.md`, specs, tasks, README |
+| `.specs/_system/` | **Living system spec** — one file per domain (e.g. `auth.md`, `users.md`). Accumulates Acceptance Criteria from every finished feature. Auto-updated by `/j-flow-finish`. Read by `/j-flow-spec` as the behavioral baseline to avoid contradictions. |
+
 ## Stack
 
 | Layer | Technology |
