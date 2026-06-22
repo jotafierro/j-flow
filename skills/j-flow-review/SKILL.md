@@ -1,6 +1,7 @@
 ---
 name: j-flow-review
 description: Audit code quality against approved technical specs. Only reachable if QA gate is green. Produces review-findings.md. Usage: /j-flow-review
+allowed-tools: Read Write
 ---
 
 # j-flow-review
@@ -9,10 +10,10 @@ description: Audit code quality against approved technical specs. Only reachable
 
 Before auditing, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer boundaries to check
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — agent ownership (to detect cross-boundary code)
-4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation rules to enforce
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate format
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` — layer boundaries to check
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` — agent ownership (to detect cross-boundary code)
+4. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` — implementation rules to enforce
 5. `DESIGN.md` — required if review touches UI/mobile (token usage)
 6. `.specs/{slug}/functional-spec.md` — to verify ACs are met
 7. `.specs/{slug}/technical-spec.md` — to verify architecture is respected
@@ -65,8 +66,8 @@ Provide the agent with:
 - Full contents of `.specs/{slug}/tasks.json`
 - Full contents of `.specs/{slug}/review-guide.md`
 - Full contents of `.specs/.agents/j-flow-reviewer.md` (agent memory)
-- Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-findings.md` for the output structure
-- Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for style constraints
+- Template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/review-findings.md` for the output structure
+- Reference `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` for style constraints
 - Instruction: "Audit the implementation against the technical spec. Check for spec conformance, stack pattern violations, security gaps, performance issues, and speculative code. Produce review-findings.md following the template: populate Critical/Major/Minor sections with findings."
 
 ### Show Findings

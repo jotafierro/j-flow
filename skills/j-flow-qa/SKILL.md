@@ -1,6 +1,7 @@
 ---
 name: j-flow-qa
 description: Run full QA gate across 6 stages: unit tests, NestJS E2E, Flutter integration, Playwright E2E, visual smoke check, manual checklist. Blocks /j-flow-review if red. Usage: /j-flow-qa
+allowed-tools: Read Write Bash(bash *) Bash(pnpm *) Bash(flutter *)
 ---
 
 # j-flow-qa
@@ -9,8 +10,8 @@ description: Run full QA gate across 6 stages: unit tests, NestJS E2E, Flutter i
 
 Before running QA, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and red/green semantics
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — j-flow-quality scope and what to test
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate format and red/green semantics
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` — j-flow-quality scope and what to test
 3. `.specs/{slug}/review-guide.md` — manual checklist + environment setup
 4. `.specs/{slug}/tasks.json` — to understand the feature scope
 5. `.specs/{slug}/gate-context.md` — accumulated decisions
@@ -26,7 +27,7 @@ If missing: "Gate [BUILD] not completed. Run /j-flow-build first."
 
 Dispatch the **j-flow-quality** agent with:
 - Full contents of `.specs/{slug}/review-guide.md`
-- Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/qa-report.md` for the output structure
+- Template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/qa-report.md` for the output structure
 - Instruction: "Run all 6 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, include exact failure output for any red stage. For the manual checklist (stage 6), present each item from review-guide.md to the user and record their pass/fail response."
 
 ### Stages the agent runs:

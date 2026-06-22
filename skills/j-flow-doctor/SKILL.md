@@ -1,6 +1,7 @@
 ---
 name: j-flow-doctor
 description: Read-only diagnostic that checks a target j-flow repo for drift, missing artifacts, and inconsistency. Reports findings; never writes or auto-fixes. Use when returning to a stale repo or cloning a project that uses j-flow. Usage: /j-flow-doctor [--verbose]
+allowed-tools: Read Bash(bash *)
 ---
 
 # j-flow-doctor
@@ -11,8 +12,8 @@ Read-only health check for a target j-flow repo. Surfaces drift between PRODUCT.
 
 Before running diagnostics, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format, status values
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md` — expected meta.md fields
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate format, status values
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/meta.md` — expected meta.md fields
 3. `PRODUCT.md` — the declared product and stack
 4. `DESIGN.md` — declared design system
 5. `.specs/README.md` — the backlog
@@ -61,7 +62,7 @@ Report:
 
 For each feature folder under `.specs/`:
 - Verify `meta.md` exists. If not, report and skip the rest of this check for that folder.
-- Verify `meta.md` contains all expected fields from `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Report missing fields.
+- Verify `meta.md` contains all expected fields from `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/meta.md`. Report missing fields.
 - Verify `gate-context.md` exists (may be empty header for new features).
 
 ### 6. Backlog symbol vs gate state

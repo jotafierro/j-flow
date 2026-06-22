@@ -1,6 +1,8 @@
 ---
 name: j-flow-shared
-description: Bundle of shared templates and references for j-flow skills. This skill is not user-invocable — it exposes assets at known paths. Skills and agents read files in `templates/` and `references/` directly via `${CLAUDE_PLUGIN_ROOT}`.
+description: Bundle of shared templates and references for j-flow skills. This skill is not user-invocable — it exposes assets at known paths. Skills and agents read files in `templates/` and `references/` directly via `${CLAUDE_SKILL_DIR}`.
+allowed-tools: Read
+user-invocable: false
 ---
 
 # j-flow-shared
@@ -27,4 +29,4 @@ This skill does not execute. It bundles shared assets that other j-flow skills r
 
 ## How to reference
 
-Skills resolve paths as `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/<file>` or `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/<file>`. Never duplicate the content here — edit the canonical file.
+Skills resolve paths as `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/<file>` or `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/<file>`. Never duplicate the content here — edit the canonical file.

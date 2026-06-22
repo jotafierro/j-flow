@@ -1,6 +1,7 @@
 ---
 name: j-flow-start
 description: Initialize a new feature. Creates git branch, .specs/{slug}/ directory, meta.md, and empty gate-context.md. Loads agent memory context. Usage: /j-flow-start {slug}
+allowed-tools: Read Write Bash(git *) Bash(mkdir *)
 ---
 
 # j-flow-start
@@ -11,9 +12,9 @@ Initialize a new feature branch and spec folder.
 
 Before initializing a feature, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — for the initial `gate-context.md` format and meta.md field names
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md` — the meta.md template (already used in the existing flow)
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/gate-context.md` — the gate-context.md seed
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — for the initial `gate-context.md` format and meta.md field names
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/meta.md` — the meta.md template (already used in the existing flow)
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/gate-context.md` — the gate-context.md seed
 4. `.specs/README.md` — the backlog, to verify the slug exists and isn't already started
 
 ## Usage
@@ -56,10 +57,10 @@ If branch already exists: "Branch feature/{slug} already exists. Delete it first
 Create `.specs/{slug}/` with two files:
 
 **meta.md:**
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute placeholders: `{slug}` with the feature slug, `{today's date}` with today's date in ISO 8601. Write to `.specs/{slug}/meta.md`.
+Read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/meta.md`. Substitute placeholders: `{slug}` with the feature slug, `{today's date}` with today's date in ISO 8601. Write to `.specs/{slug}/meta.md`.
 
 **gate-context.md:**
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/gate-context.md`. Substitute `{slug}` with the feature slug. Write to `.specs/{slug}/gate-context.md`.
+Read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/gate-context.md`. Substitute `{slug}` with the feature slug. Write to `.specs/{slug}/gate-context.md`.
 
 ### Step 5: Load and summarize agent memory
 

@@ -1,6 +1,7 @@
 ---
 name: j-flow-finish
 description: Generate feature README, update CHANGELOG [Unreleased], consolidate agent memory patterns, and create PR to develop. Usage: /j-flow-finish
+allowed-tools: Read Write Bash(git *) Bash(gh *)
 ---
 
 # j-flow-finish
@@ -9,7 +10,7 @@ description: Generate feature README, update CHANGELOG [Unreleased], consolidate
 
 Before finishing, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate cascade rules
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate cascade rules
 2. `.specs/{slug}/gate-context.md` — all accumulated decisions to summarize in README
 3. `.specs/{slug}/functional-spec.md` — AC table for the README
 4. `.specs/{slug}/tasks.json` — files changed list
@@ -22,14 +23,14 @@ Before finishing, read:
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.
-Require `[REVIEW] approved` (see `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format).
+Require `[REVIEW] approved` (see `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` for gate format).
 If missing or stale: "Gate [REVIEW] not approved. Run /j-flow-review first."
 
 ## Process
 
 ### Step 1: Generate feature README
 
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/feature-readme.md`. Substitute placeholders: slug, today's date, branch name, AC table (from functional-spec.md), key files list (grouped by layer from tasks.json), and patterns introduced. Write to `.specs/{slug}/README.md`.
+Read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/feature-readme.md`. Substitute placeholders: slug, today's date, branch name, AC table (from functional-spec.md), key files list (grouped by layer from tasks.json), and patterns introduced. Write to `.specs/{slug}/README.md`.
 
 ### Step 2: Update CHANGELOG.md
 
@@ -75,7 +76,7 @@ Ask the user: "Which domain does this feature belong to? (e.g. `auth`, `users`, 
 If the user provides a domain name `{domain}`:
 
 1. Check if `.specs/_system/{domain}.md` exists.
-   - If not: read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/system-domain.md`. Initialize it substituting `{domain}` as the domain name. Write to `.specs/_system/{domain}.md`.
+   - If not: read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/system-domain.md`. Initialize it substituting `{domain}` as the domain name. Write to `.specs/_system/{domain}.md`.
 2. Read `.specs/{slug}/functional-spec.md`. Extract all Acceptance Criteria (sections matching `### AC-N`).
 3. Read `.specs/_system/{domain}.md`. Locate the `<!-- next feature entries are appended above this line -->` marker.
 4. Insert the following block *above* the marker:

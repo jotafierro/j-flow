@@ -50,7 +50,7 @@ If `PRODUCT.md` already exists in the current directory, stop:
 
 ### Step 3: Build PRODUCT.md
 
-Read the template from `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/product.md`.
+Read the template from `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/product.md`.
 
 Substitute all `{placeholders}` with the answers collected in Step 2. Keep the Tech Stack section exactly as in the template (MongoDB + NestJS + React + Flutter stack).
 
@@ -74,7 +74,7 @@ Ask these questions ONE AT A TIME:
 
 Then:
 - Generate a full color palette for both light mode and dark mode from the primary color (complementary shades for background, surface, on-surface, secondary, error, outline, etc.)
-- Read the template from `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/design.md`
+- Read the template from `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/design.md`
 - Fill in all `{placeholders}` with the brand decisions and derived tokens
 - Show the full draft to the user. Ask: "Does this design system look right?"
 - Iterate until approved, then write to `DESIGN.md` at the project root.
@@ -114,7 +114,7 @@ Iterate until the user approves.
 
 Create `.specs/` directory if it does not exist.
 
-Read the template from `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/specs-index.md`.
+Read the template from `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/specs-index.md`.
 
 Fill in:
 - `{Project Name}` — from `PRODUCT.md` **Name** field
@@ -129,7 +129,7 @@ Write to `.specs/README.md`.
 
 ### Step 7: Initialize CHANGELOG.md
 
-If `CHANGELOG.md` does not exist, read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/changelog.md` and write to `CHANGELOG.md` at the project root.
+If `CHANGELOG.md` does not exist, read `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/changelog.md` and write to `CHANGELOG.md` at the project root.
 
 If it already exists, leave it untouched and print "CHANGELOG.md already exists — skipped."
 
@@ -137,7 +137,7 @@ If it already exists, leave it untouched and print "CHANGELOG.md already exists 
 
 Create `.specs/.agents/` directory if it does not exist.
 
-For each of the 7 agent templates in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/`:
+For each of the 7 agent templates in `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/agents/`:
 - `j-flow-architect.md`
 - `j-flow-backend.md`
 - `j-flow-frontend.md`
@@ -152,7 +152,7 @@ If a file already exists, skip it and print `{agent}.md already exists — skipp
 
 ### Step 8b: Generate CONSTITUTION.md
 
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/constitution.md`.
+Read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/constitution.md`.
 
 Ask the user: "Do you want to define project principles now? These will be enforced as a blocking gate in `/j-flow-review`. You can always add them later by editing `CONSTITUTION.md`. (yes / skip)"
 

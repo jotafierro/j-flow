@@ -1,6 +1,7 @@
 ---
 name: j-flow-release
 description: Cut a release — semver bump, move CHANGELOG [Unreleased] to versioned section, create git tag, PR to main. Usage: /j-flow-release [major|minor|patch]
+allowed-tools: Read Write Bash(git *) Bash(gh *)
 ---
 
 # j-flow-release

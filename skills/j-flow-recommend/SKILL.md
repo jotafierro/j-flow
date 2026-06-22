@@ -1,6 +1,7 @@
 ---
 name: j-flow-recommend
 description: Recommends plugins, skills, and tools that enhance the j-flow workflow. Invoked automatically at the end of /j-flow-scaffold. Can also be run standalone any time. Usage: /j-flow-recommend
+allowed-tools: Read
 ---
 
 # /j-flow-recommend

@@ -1,6 +1,7 @@
 ---
 name: j-flow-spec
 description: Generate functional spec (default) via dialogue, or technical spec (technical argument) via j-flow-architect agent, or explore scope without committing (--explore). Both spec modes produce approval gates. Usage: /j-flow-spec [technical|--explore]
+allowed-tools: Read Write
 ---
 
 # j-flow-spec
@@ -9,8 +10,8 @@ description: Generate functional spec (default) via dialogue, or technical spec 
 
 Before drafting any spec, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and approval rules
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — design constraints for specs (used by /j-flow-spec technical)
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate format and approval rules
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` — design constraints for specs (used by /j-flow-spec technical)
 3. `PRODUCT.md` — product vision and tech stack to anchor decisions
 4. `DESIGN.md` — design system tokens (REQUIRED when the spec includes any UI or mobile work)
 5. `.specs/_system/` — living system spec for all domains (read ALL domain files present; use to avoid contradicting established behavior or duplicating ACs already in the system). Skip if directory does not exist yet.
@@ -134,9 +135,9 @@ The spec can still be approved with markers present — this allows saving progr
 
 ### Draft and Confirm
 
-After collecting all answers, read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/functional-spec.md`. Substitute placeholders with the answers from the dialogue above. When substituting ACs: format each as `### AC-N — {short name}` with `Given / When / Then:` structure following the template exactly. If the user provided free-form ACs during the dialogue, convert them to GWT format before writing the draft — show the conversion alongside the original text if the interpretation may not be obvious. Show the full draft to the user.
+After collecting all answers, read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/functional-spec.md`. Substitute placeholders with the answers from the dialogue above. When substituting ACs: format each as `### AC-N — {short name}` with `Given / When / Then:` structure following the template exactly. If the user provided free-form ACs during the dialogue, convert them to GWT format before writing the draft — show the conversion alongside the original text if the interpretation may not be obvious. Show the full draft to the user.
 
-Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format requirements.
+Reference `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` for gate format requirements.
 
 Ask: "Does this spec look right? Reply 'approved' to proceed, or tell me what to change."
 
@@ -174,8 +175,8 @@ Edit .specs/{slug}/functional-spec.md to replace each marker with the resolved c
 Provide the agent with:
 - Full contents of `.specs/{slug}/functional-spec.md`
 - Full contents of `.specs/.agents/j-flow-architect.md` (agent memory)
-- Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/technical-spec.md` for the output structure
-- Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for style constraints
+- Template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/technical-spec.md` for the output structure
+- Reference `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` for style constraints
 - Instruction: "Generate a complete technical spec following the template structure. Every decision must reference an AC. No speculative features."
 
 ### Draft and Confirm

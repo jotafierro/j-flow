@@ -1,6 +1,7 @@
 ---
 name: j-flow-eject
 description: Copy a j-flow template, reference, agent definition, or agent memory file from the plugin into the target repo under `.specs/.overrides/` so it can be customized without forking. Usage: /j-flow-eject [asset-path]
+allowed-tools: Read Write Bash(cp *) Bash(mkdir *)
 ---
 
 # j-flow-eject
@@ -11,9 +12,9 @@ Copy a single j-flow asset into the target repo's `.specs/.overrides/` tree so y
 
 | Asset kind | Source path (plugin) | Destination (target repo) |
 |------------|----------------------|---------------------------|
-| Template | `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/<file>` | `.specs/.overrides/templates/<file>` |
-| Agent memory template | `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/<file>` | `.specs/.overrides/templates/agents/<file>` |
-| Reference | `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/<file>` | `.specs/.overrides/references/<file>` |
+| Template | `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/<file>` | `.specs/.overrides/templates/<file>` |
+| Agent memory template | `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/agents/<file>` | `.specs/.overrides/templates/agents/<file>` |
+| Reference | `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/<file>` | `.specs/.overrides/references/<file>` |
 | Agent definition | `${CLAUDE_SKILL_DIR}/../j-flow-shared/agents/<file>` | `.specs/.overrides/agents/<file>` |
 
 ## Usage
@@ -35,10 +36,10 @@ If argument provided: validate the path matches one of the four allowed prefixes
 
 ### Step 2: Verify source exists
 
-Resolve the source path under `${CLAUDE_PLUGIN_ROOT}`:
-- `templates/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/<file>`
-- `templates/agents/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/<file>`
-- `references/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/<file>`
+Resolve the source path under `${CLAUDE_SKILL_DIR}/../`:
+- `templates/<file>` → `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/<file>`
+- `templates/agents/<file>` → `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/agents/<file>`
+- `references/<file>` → `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/<file>`
 - `agents/<file>` → `${CLAUDE_SKILL_DIR}/../j-flow-shared/agents/<file>`
 
 If the source file does not exist, stop with: `Source not found: <path>. Run /j-flow-eject without arguments to list available assets.`
@@ -63,7 +64,7 @@ Create the destination directory if needed. Copy the source file verbatim to the
 
 ```
 ✓ Ejected <argument>
-  source: ${CLAUDE_PLUGIN_ROOT}/.../<file>
+  source: ${CLAUDE_SKILL_DIR}/../j-flow-shared/...<file>
   dest:   .specs/.overrides/<argument>
 
 Edit the destination file. Skills will prefer it over the plugin default once the override-resolution pattern is enabled (tracked in plans/008 — not yet active).

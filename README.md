@@ -6,22 +6,33 @@ Enforce a consistent workflow across all your projects: spec → plan → build 
 
 ## Install
 
+### GitHub Copilot CLI / Cursor / Codex
+
 ```bash
-# Clone the private repo once
 git clone git@github.com:jotafierro/j-flow.git ~/j-flow
+bash ~/j-flow/install.sh --copilot
+```
 
-# Register as a local marketplace (once per machine)
-claude plugin marketplace add ~/j-flow --scope user
+Skills are symlinked into `~/.agents/skills/`. Available in your next session.
 
-# Install globally (available in all projects)
-claude plugin install j-flow
+### Claude Code
 
-# Or install per-project (no conflicts with other plugins)
-claude plugin marketplace add ~/j-flow --scope project
-claude plugin install j-flow --scope project
+```bash
+git clone git@github.com:jotafierro/j-flow.git ~/j-flow
+bash ~/j-flow/install.sh --claude
+```
 
-# Update later
-git -C ~/j-flow pull && claude plugin update j-flow
+### Both
+
+```bash
+git clone git@github.com:jotafierro/j-flow.git ~/j-flow
+bash ~/j-flow/install.sh --all
+```
+
+### Update
+
+```bash
+git -C ~/j-flow pull && bash ~/j-flow/install.sh --all
 ```
 
 > **Requirement:** `/j-flow-project` requires an existing git repository. Run `git init` first if needed.

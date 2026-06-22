@@ -1,6 +1,7 @@
 ---
 name: j-flow-build
 description: Implement tasks from the approved plan. Dispatches domain agents by layer in sequence. --fix mode resolves QA or review findings. Usage: /j-flow-build [--fix]
+allowed-tools: Read Write Bash(bash *) Bash(git *)
 ---
 
 # j-flow-build
@@ -9,10 +10,10 @@ description: Implement tasks from the approved plan. Dispatches domain agents by
 
 Before dispatching any agent, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer order to respect
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — to pick the right agent per layer
-4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints for agents to follow
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate format
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` — layer order to respect
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` — to pick the right agent per layer
+4. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` — implementation constraints for agents to follow
 5. `PRODUCT.md` — tech stack reference
 6. `DESIGN.md` — REQUIRED to forward to j-flow-frontend and j-flow-mobile dispatches
 7. `.specs/{slug}/tasks.json` — the tasks per layer
@@ -37,7 +38,7 @@ If neither: "Nothing to fix — QA gate is green and review has no open findings
 
 ### Layer Sequence
 
-Execute layers in the fixed order defined in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md`. Skip empty layers (no tasks).
+Execute layers in the fixed order defined in `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md`. Skip empty layers (no tasks).
 
 1. `data` → **j-flow-backend**
 2. `service` → **j-flow-backend**
@@ -46,7 +47,7 @@ Execute layers in the fixed order defined in `${CLAUDE_PLUGIN_ROOT}/skills/j-flo
 5. `mobile` → **j-flow-mobile** (also writes Widgetbook entries + integration_test)
 6. `infra` → **j-flow-devops**
 
-See `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` for the full layer→agent mapping and each agent's responsibilities.
+See `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` for the full layer→agent mapping and each agent's responsibilities.
 
 ### Per-Layer Dispatch
 
@@ -60,7 +61,7 @@ For each layer with tasks:
    - The ACs being implemented (from functional-spec.md)
    - The technical patterns for this layer (from technical-spec.md)
    - Agent memory (from .specs/.agents/{agent}.md)
-   - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for coding conventions
+   - Reference `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` for coding conventions
    - Instruction: "Implement exactly what the tasks require. No extra features or abstractions. Write unit tests in the same pass. Follow the technical spec patterns."
 5. After agent completes, commit the layer:
 

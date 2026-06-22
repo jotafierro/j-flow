@@ -1,6 +1,7 @@
 ---
 name: j-flow-plan
 description: Generate task plan (tasks.json) and review guide (review-guide.md) from approved specs. Validates AC coverage before saving. Usage: /j-flow-plan
+allowed-tools: Read Write
 ---
 
 # j-flow-plan
@@ -9,9 +10,9 @@ description: Generate task plan (tasks.json) and review guide (review-guide.md) 
 
 Before generating the task plan, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer definitions and execution order
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — to know which agent owns which layer
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate format
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` — layer definitions and execution order
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` — to know which agent owns which layer
 4. `PRODUCT.md` — tech stack reference
 5. `DESIGN.md` — required when planning ui or mobile tasks
 6. `.specs/{slug}/functional-spec.md` — extract every AC
@@ -72,18 +73,18 @@ One AC can map to multiple layers (e.g. a create-user feature touches data + ser
 
 ### Step 3: Generate tasks.json
 
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/tasks.json`. Use it as the structural baseline. Populate `layers`, `ac_coverage`, and `uncovered_acs` from the actual feature (slug, today's date, tasks per layer, AC mapping).
+Read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/tasks.json`. Use it as the structural baseline. Populate `layers`, `ac_coverage`, and `uncovered_acs` from the actual feature (slug, today's date, tasks per layer, AC mapping).
 
-Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` for the correct layer sequence and which agent handles each layer.
+Reference `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` for the correct layer sequence and which agent handles each layer.
 
 **Coverage validation:** If `uncovered_acs` is not empty, stop:
 "Warning: the following ACs have no tasks assigned: {list}. Add tasks before proceeding."
 
 ### Step 4: Generate review-guide.md
 
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md`. Substitute placeholders with feature-specific content: slug, today's date, AC list, environment setup details, and manual test steps derived from the ACs.
+Read template `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/review-guide.md`. Substitute placeholders with feature-specific content: slug, today's date, AC list, environment setup details, and manual test steps derived from the ACs.
 
-Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format.
+Reference `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` for gate format.
 
 ### Step 5: Show and confirm
 

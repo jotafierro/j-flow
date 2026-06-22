@@ -1,6 +1,7 @@
 ---
 name: j-flow-analyze
 description: Read-only cross-consistency check for the active feature. Verifies every AC has a task, every task maps to an AC, every AC has a test, and no AC contradicts established system behavior. Usage: /j-flow-analyze [--verbose]
+allowed-tools: Read
 ---
 
 # j-flow-analyze
@@ -11,7 +12,7 @@ Read-only consistency check across functional-spec ↔ tasks ↔ tests ↔ syste
 
 Before running, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md`
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md`
 2. `.specs/{slug}/functional-spec.md` — ACs source of truth
 3. `.specs/{slug}/technical-spec.md` — architecture decisions (context for task-to-AC mapping)
 4. `.specs/{slug}/tasks.json` — task list and changed files

@@ -1,6 +1,7 @@
 ---
 name: j-flow-reopen
 description: Reopen a feature to a prior gate. Clears gate-context.md from the chosen gate forward. Does NOT revert commits. Usage: /j-flow-reopen [slug]
+allowed-tools: Read Write
 ---
 
 # j-flow-reopen
@@ -12,7 +13,7 @@ Does NOT revert commits — only gate status in `gate-context.md` is cleared.
 
 Before reopening any gate, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — cascade rules: reopening at phase X resets X and all downstream gates
+1. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — cascade rules: reopening at phase X resets X and all downstream gates
 2. `.specs/{slug}/meta.md` — current gate states
 3. `.specs/{slug}/gate-context.md` — accumulated decisions (will be rewritten by this skill)
 

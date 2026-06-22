@@ -1,6 +1,7 @@
 ---
 name: j-flow-scaffold
 description: Scaffolds the monorepo using official CLIs (nest new, pnpm create vite, flutter create, npx storybook init) — always latest framework versions. Generates health endpoint, README, CHANGELOG entry, and review-guide for manual verification. Manual approval gate before marking 01-infra-base as done. Auto-triggered by /j-flow-project. Usage: /j-flow-scaffold [--review]
+allowed-tools: Read Write Bash(bash *) Bash(git *) Bash(pnpm *) Bash(npx *) Bash(flutter *) Bash(mkdir *) Bash(cp *)
 ---
 
 # /j-flow-scaffold
@@ -1550,13 +1551,13 @@ Read `CHANGELOG.md`. Under `## [Unreleased]`, append:
 
 Create `.specs/01-infra-base/`. Use the templates:
 
-**`meta.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute slug=01-infra-base, branch=main (no feature branch — scaffold runs on main), current date. Set ALL status fields to `pending` initially — they update progressively as user verifies.
+**`meta.md`:** Read `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/meta.md`. Substitute slug=01-infra-base, branch=main (no feature branch — scaffold runs on main), current date. Set ALL status fields to `pending` initially — they update progressively as user verifies.
 
 **`functional-spec.md`:** Write a short doc describing what was scaffolded.
 
 **`technical-spec.md`:** Write a short doc with the directory tree generated.
 
-**`review-guide.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md` and customize for 01-infra-base. Manual Test Steps must include:
+**`review-guide.md`:** Read `${CLAUDE_SKILL_DIR}/../j-flow-shared/templates/review-guide.md` and customize for 01-infra-base. Manual Test Steps must include:
 1. `pnpm install` succeeds with no errors
 2. `docker compose up -d` starts MongoDB, Redis, Mailhog
 3. `pnpm --filter @{project}/api dev` starts API

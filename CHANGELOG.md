@@ -75,3 +75,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `README.md` documents `CONSTITUTION.md` in project file structure
 - `/j-flow-analyze` — new read-only skill with 5 cross-consistency checks: unresolved clarification markers, AC→task coverage, task→AC traceability, AC→test coverage, system spec collision detection against `.specs/_system/`
 - `/j-flow-spec --explore` — lightweight scoping mode: 5-question conversational dialogue, no files written, ends with scope summary and offer to transition to formal spec
+
+### Changed
+- `agents/` directory moved to `skills/j-flow-shared/agents/` — agents now co-located with shared skill assets
+- All SKILL.md files: `${CLAUDE_PLUGIN_ROOT}/skills/` replaced with `${CLAUDE_SKILL_DIR}/../` — works in both Claude Code and Copilot CLI / Cursor / Codex
+- `CLAUDE.md` renamed from "Claude Code Plugin" to "SDD Plugin" to reflect multi-runtime support
+- `README.md` install instructions updated to use `install.sh` (replaces `claude plugin install`)
+
+### Added (continued)
+- `install.sh` — symlinks all 18 j-flow skills into `~/.agents/skills/` (Copilot CLI / Cursor / Codex) or `~/.claude/skills/` (Claude Code) via `--copilot`, `--claude`, or `--all` flags
+- `allowed-tools` frontmatter added to all 18 SKILL.md files (required by Copilot CLI skill runner)
+- `user-invocable: false` added to `j-flow-shared/SKILL.md` (library skill, not directly invocable)
