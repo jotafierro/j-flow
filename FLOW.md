@@ -82,6 +82,10 @@
   └─ read-only diagnostics: PRODUCT.md / DESIGN.md / agent memory / backlog drift / per-feature integrity
   └─ never writes; reports a punch list and suggests which fix skills to run
 
+/j-flow-analyze [--verbose]
+  └─ cross-consistency: AC→task, task→AC, AC→test, AC vs _system/ collisions
+  └─ read-only; run any time after /j-flow-spec to catch gaps early
+
 /j-flow-eject [path]
   └─ copy templates/references/agent files into .specs/.overrides/ so you can customize without forking
   └─ stages the file; does not commit
