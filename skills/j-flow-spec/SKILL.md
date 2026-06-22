@@ -1,6 +1,6 @@
 ---
 name: j-flow-spec
-description: Generate functional spec (default) via dialogue, or technical spec (technical argument) via j-flow-architect agent. Both produce approval gates. Usage: /j-flow-spec [technical]
+description: Generate functional spec (default) via dialogue, or technical spec (technical argument) via j-flow-architect agent, or explore scope without committing (--explore). Both spec modes produce approval gates. Usage: /j-flow-spec [technical|--explore]
 ---
 
 # j-flow-spec
@@ -27,6 +27,70 @@ Read `.specs/{slug}/gate-context.md`.
 If missing or stale: "Gate [FUNCTIONAL SPEC] not approved. Run /j-flow-spec first."
 
 **For default mode:** No prior gate required (it's the first gate).
+
+**For `--explore` mode:** No prior gate required. No files will be written.
+
+---
+
+## Mode: Explore (`/j-flow-spec --explore`)
+
+Lightweight scoping conversation. No files are written. No gate is created. Ends with a summary and an offer to start the real spec.
+
+### When to use
+
+Use `--explore` when the feature idea is still vague:
+- "I want to add notifications but I'm not sure of the scope."
+- "Should this be one feature or two?"
+- "Which existing features does this touch?"
+
+If the feature already has `[FUNCTIONAL SPEC] approved` in `gate-context.md`, print:
+`⚠ This feature already has an approved functional spec. Use /j-flow-reopen to revisit it, or /j-flow-spec (no flag) to re-run.` Stop.
+
+### Dialogue
+
+Ask the following questions conversationally — keep it casual, no formal numbered list. Wait for each answer before asking the next.
+
+1. What's the rough idea? (1–3 sentences, user's words, no structure needed)
+2. Who benefits from this? (user roles or system actors)
+3. What's the trigger? (user action, event, or schedule — even a vague answer is fine)
+4. Any obvious constraints or things it definitely should NOT do?
+5. Does this feel like one feature, or could it be split? (if split: ask what the natural boundaries are)
+
+### Scope summary
+
+After the 5 questions, produce a short unstructured summary:
+
+```
+Explore summary — {rough feature name}
+
+What it does: {1–2 sentences}
+Who: {roles}
+Trigger: {trigger}
+Constraints: {constraints or "none identified"}
+Domains likely affected: {list domains from .specs/_system/ if it exists, otherwise from PRODUCT.md context}
+Suggested split: {1 feature / split into: {A}, {B}} — {reason if split}
+
+Open questions:
+  - {any questions that came up during dialogue needing answers before speccing}
+
+Spec-ready? {yes / not yet — and why if not}
+```
+
+If `.specs/_system/` exists: note any existing behaviors this idea might extend or conflict with (1 line each).
+
+### Commit or continue
+
+Ask:
+> "Ready to start the real spec? Reply 'yes' to move to `/j-flow-spec`, 'split' to discuss splitting further, or 'not yet' to end here."
+
+- **`yes`**: transition immediately to Mode: Functional Spec (run the full dialogue as if `/j-flow-spec` was invoked fresh). Use the explore summary as pre-filled context — skip questions clearly answered already.
+- **`split`**: ask the user to name the sub-features. Produce a summary for each. Then ask again.
+- **`not yet`**: print `Explore session ended. No files written. Run /j-flow-spec --explore again when ready, or /j-flow-spec to start the formal spec.`
+
+### Rules for --explore
+
+- Never write any file. No `.specs/` changes, no `gate-context.md` entries.
+- Never output a gate status line.
 
 ---
 

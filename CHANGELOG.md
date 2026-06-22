@@ -8,31 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `[NEEDS CLARIFICATION: {question}]` marker convention in `functional-spec.md` template — lets users flag unresolved questions during spec dialogue without blocking approval
-- `/j-flow-plan` clarification check: blocks task generation if any `[NEEDS CLARIFICATION]` markers remain in `functional-spec.md`, listing each unresolved item
-- `/j-flow-spec` partial-answer guidance: dialogue now instructs users to use the marker for incomplete answers; warns after approval if markers are present
-- `gate-rules.md` documents the clarification marker convention and its behavior across gates
-- Given/When/Then format for Acceptance Criteria in `functional-spec.md` template — `### AC-N — {name}` heading with `Given / When / Then:` structure replaces free-form bullets
-- `Functional scenarios` section moved to optional (bottom of template) — for complex multi-step flows only
-- `/j-flow-spec` dialogue question 4 updated to guide GWT format with example; draft step now converts free-form ACs to GWT before showing draft
-- `gate-rules.md` documents GWT AC format and backwards-compatibility with free-form specs
-- `templates/system-domain.md` — new template for per-domain living system spec files
-- `/j-flow-finish` new Step 3b: asks domain, merges feature ACs into `.specs/_system/{domain}.md`, shows diff before writing
-- `/j-flow-spec` now reads `.specs/_system/` as behavioral baseline before drafting; surfaces AC overlaps with existing system behavior
-- `README.md` documents `.specs/_system/` convention and purpose
-- `tests/validate.js` tracks `system-domain.md` in `EXPECTED_TEMPLATES`
-- `templates/constitution.md` — new template for inviolable project principles
-- `/j-flow-project` Step 8b: generates `CONSTITUTION.md` during init (with principles dialogue or skip to placeholder)
-- `/j-flow-review` principles check: evaluates each principle in `CONSTITUTION.md` against feature code before dispatching reviewer agent; blocks gate on violation; non-blocking when file absent or placeholder
-- `[REVIEW]` gate context entry now records constitution check result
-- `README.md` documents `CONSTITUTION.md` in project file structure
-- `tests/validate.js` tracks `constitution.md` in `EXPECTED_TEMPLATES`
-- `/j-flow-analyze` — new read-only skill with 5 cross-consistency checks: unresolved clarification markers, AC→task coverage, task→AC traceability, AC→test coverage, system spec collision detection against `.specs/_system/`
-- `README.md` Skills table includes `/j-flow-analyze`
-- `FLOW.md` documents `/j-flow-analyze` under diagnostic commands
-- `tests/validate.js` tracks `j-flow-analyze` in `EXPECTED_SKILLS`
-
-### Added
 - Initial j-flow plugin: gate-based SDD workflow for MongoDB + NestJS + React + Flutter
 - 16 user-facing skills: `/j-flow-project`, `/j-flow-scaffold`, `/j-flow-start`, `/j-flow-spec`, `/j-flow-plan`, `/j-flow-build`, `/j-flow-qa`, `/j-flow-review`, `/j-flow-finish`, `/j-flow-release`, `/j-flow-reopen`, `/j-flow-update`, `/j-flow-check`, `/j-flow-doctor`, `/j-flow-eject`, `/j-flow-recommend`
 - 1 internal skill `/j-flow-shared` exposing templates and references (collapsed to a 30-line pointer doc)
@@ -81,3 +56,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 4 YAML scenario test specs under `tests/scenarios/`
 - `tests/run-scenarios.js` — scenario test runner with `js-yaml` (file-system assertions; LLM-execution matchers deferred)
 - GitHub Actions CI workflow (`.github/workflows/ci.yml`) runs `validate.js` on push and PR
+- `[NEEDS CLARIFICATION: {question}]` marker convention in `functional-spec.md` template — lets users flag unresolved questions during spec dialogue without blocking approval
+- `/j-flow-plan` clarification check: blocks task generation if any `[NEEDS CLARIFICATION]` markers remain in `functional-spec.md`, listing each unresolved item
+- `/j-flow-spec` partial-answer guidance: dialogue now instructs users to use the marker for incomplete answers; warns after approval if markers are present
+- `gate-rules.md` documents the clarification marker convention and its behavior across gates
+- Given/When/Then format for Acceptance Criteria in `functional-spec.md` template — `### AC-N — {name}` heading with `Given / When / Then:` structure replaces free-form bullets
+- `Functional scenarios` section moved to optional (bottom of template) — for complex multi-step flows only
+- `/j-flow-spec` dialogue question 4 updated to guide GWT format with example; draft step now converts free-form ACs to GWT before showing draft
+- `gate-rules.md` documents GWT AC format and backwards-compatibility with free-form specs
+- `templates/system-domain.md` — new template for per-domain living system spec files
+- `/j-flow-finish` new Step 3b: asks domain, merges feature ACs into `.specs/_system/{domain}.md`, shows diff before writing
+- `/j-flow-spec` now reads `.specs/_system/` as behavioral baseline before drafting; surfaces AC overlaps with existing system behavior
+- `README.md` documents `.specs/_system/` convention and purpose
+- `templates/constitution.md` — new template for inviolable project principles
+- `/j-flow-project` Step 8b: generates `CONSTITUTION.md` during init (with principles dialogue or skip to placeholder)
+- `/j-flow-review` principles check: evaluates each principle in `CONSTITUTION.md` against feature code before dispatching reviewer agent; blocks gate on violation; non-blocking when file absent or placeholder
+- `[REVIEW]` gate context entry now records constitution check result
+- `README.md` documents `CONSTITUTION.md` in project file structure
+- `/j-flow-analyze` — new read-only skill with 5 cross-consistency checks: unresolved clarification markers, AC→task coverage, task→AC traceability, AC→test coverage, system spec collision detection against `.specs/_system/`
+- `/j-flow-spec --explore` — lightweight scoping mode: 5-question conversational dialogue, no files written, ends with scope summary and offer to transition to formal spec
