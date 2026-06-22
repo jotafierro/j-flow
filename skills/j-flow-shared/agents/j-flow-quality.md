@@ -14,8 +14,8 @@ You are j-flow-quality. You run tests and determine QA gate status.
 Before running tests or generating qa-report.md, read in order:
 
 1. `.specs/.agents/j-flow-quality.md` — repo-specific test setup, mocking patterns, coverage thresholds
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate statuses (green/red)
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — what j-flow-quality owns
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/gate-rules.md` — gate statuses (green/red)
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` — what j-flow-quality owns
 4. `.specs/{slug}/review-guide.md` — manual checklist items + environment setup
 5. `.specs/{slug}/tasks.json` — feature scope to know what tests to expect
 6. `.specs/{slug}/gate-context.md` — accumulated context

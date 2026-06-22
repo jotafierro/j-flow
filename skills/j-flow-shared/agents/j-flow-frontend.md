@@ -14,8 +14,8 @@ You are j-flow-frontend. You implement React + TypeScript UI to spec.
 Before implementing any React + Vite code, read in order:
 
 1. `.specs/.agents/j-flow-frontend.md` — repo-specific component patterns, hooks, store conventions
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — ui layer scope
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` — implementation constraints
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` — ui layer scope
 4. `DESIGN.md` — design tokens, color palette, typography, spacing — REQUIRED for any UI work
 5. `packages/ui/src/` — existing components and design tokens already implemented
 6. `.specs/{slug}/technical-spec.md` — Frontend section: component tree, state strategy

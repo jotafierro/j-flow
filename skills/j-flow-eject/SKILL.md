@@ -14,7 +14,7 @@ Copy a single j-flow asset into the target repo's `.specs/.overrides/` tree so y
 | Template | `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/<file>` | `.specs/.overrides/templates/<file>` |
 | Agent memory template | `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/<file>` | `.specs/.overrides/templates/agents/<file>` |
 | Reference | `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/<file>` | `.specs/.overrides/references/<file>` |
-| Agent definition | `${CLAUDE_PLUGIN_ROOT}/agents/<file>` | `.specs/.overrides/agents/<file>` |
+| Agent definition | `${CLAUDE_SKILL_DIR}/../j-flow-shared/agents/<file>` | `.specs/.overrides/agents/<file>` |
 
 ## Usage
 
@@ -39,7 +39,7 @@ Resolve the source path under `${CLAUDE_PLUGIN_ROOT}`:
 - `templates/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/<file>`
 - `templates/agents/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/<file>`
 - `references/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/<file>`
-- `agents/<file>` → `${CLAUDE_PLUGIN_ROOT}/agents/<file>`
+- `agents/<file>` → `${CLAUDE_SKILL_DIR}/../j-flow-shared/agents/<file>`
 
 If the source file does not exist, stop with: `Source not found: <path>. Run /j-flow-eject without arguments to list available assets.`
 

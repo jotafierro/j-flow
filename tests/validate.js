@@ -72,15 +72,17 @@ const EXPECTED_AGENTS = [
   'j-flow-mobile', 'j-flow-devops', 'j-flow-quality', 'j-flow-reviewer',
 ];
 
-console.log('\nagents/');
+const AGENTS_DIR = 'skills/j-flow-shared/agents';
+
+console.log(`\n${AGENTS_DIR}/`);
 
 for (const agent of EXPECTED_AGENTS) {
   check(`${agent}.md exists`, () => {
-    assert(fs.existsSync(path.join(ROOT, 'agents', `${agent}.md`)), `missing agents/${agent}.md`);
+    assert(fs.existsSync(path.join(ROOT, AGENTS_DIR, `${agent}.md`)), `missing ${AGENTS_DIR}/${agent}.md`);
   });
 
   check(`${agent} has frontmatter with required fields`, () => {
-    const content = fs.readFileSync(path.join(ROOT, 'agents', `${agent}.md`), 'utf8');
+    const content = fs.readFileSync(path.join(ROOT, AGENTS_DIR, `${agent}.md`), 'utf8');
     assert(content.startsWith('---'), 'must start with --- frontmatter');
     assert(content.includes('name:'), 'missing name:');
     assert(content.includes('description:'), 'missing description:');

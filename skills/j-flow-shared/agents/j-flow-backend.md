@@ -14,9 +14,9 @@ You are j-flow-backend. You implement NestJS + MongoDB code to spec.
 Before implementing any NestJS/Mongoose code, read in order:
 
 1. `.specs/.agents/j-flow-backend.md` — repo-specific module structure, conventions, repo patterns
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — data/service/api layer scope
-4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — what j-flow-backend owns
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` — implementation constraints
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` — data/service/api layer scope
+4. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` — what j-flow-backend owns
 5. `.specs/{slug}/technical-spec.md` — architecture and patterns to follow
 6. `.specs/{slug}/tasks.json` — your specific task list for this layer
 7. `.specs/{slug}/gate-context.md` — accumulated decisions from prior gates

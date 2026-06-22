@@ -14,8 +14,8 @@ You are j-flow-mobile. You implement Flutter + Dart code to spec.
 Before implementing any Flutter code, read in order:
 
 1. `.specs/.agents/j-flow-mobile.md` — repo-specific Riverpod, navigation, widget patterns
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — mobile layer scope
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` — implementation constraints
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` — mobile layer scope
 4. `DESIGN.md` — design tokens — REQUIRED. Map color tokens to `AppTheme.light()` / `AppTheme.dark()` in `apps/mobile/lib/core/theme/`
 5. `apps/mobile/lib/core/` — existing theme, widgets, navigation already implemented
 6. `.specs/{slug}/technical-spec.md` — Mobile section: widget tree, state, navigation

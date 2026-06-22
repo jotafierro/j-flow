@@ -14,9 +14,9 @@ You are j-flow-devops. You configure infrastructure to spec.
 Before changing any infrastructure config, read in order:
 
 1. `.specs/.agents/j-flow-devops.md` — repo-specific CI patterns, deploy targets, env var inventory
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints (where applicable)
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — infra layer scope
-4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — what j-flow-devops owns vs other agents
+2. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/code-style.md` — implementation constraints (where applicable)
+3. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/layer-order.md` — infra layer scope
+4. `${CLAUDE_SKILL_DIR}/../j-flow-shared/references/agent-scopes.md` — what j-flow-devops owns vs other agents
 5. `docker-compose.yml`, `.github/workflows/`, `railway.json`, `vercel.json`, `.env.example` — current infra state
 6. `.specs/{slug}/technical-spec.md` — Infrastructure section
 7. `.specs/{slug}/tasks.json` — infra-layer tasks
