@@ -18,7 +18,8 @@ Before auditing, read:
 7. `.specs/{slug}/technical-spec.md` — to verify architecture is respected
 8. `.specs/{slug}/tasks.json` — to detect speculative code
 9. `.specs/{slug}/gate-context.md` — accumulated decisions
-10. Template: `templates/review-findings.md` — output format
+10. `CONSTITUTION.md` — project principles to enforce (if absent: warn and skip check)
+11. Template: `templates/review-findings.md` — output format
 
 ## Gate Check
 
@@ -28,6 +29,34 @@ If QA gate is absent, red, or stale:
 "Gate [QA] not green. Run /j-flow-qa first (and resolve any failures with /j-flow-build --fix)."
 
 ## Process
+
+### Principles check (blocking)
+
+Before dispatching the reviewer agent, check `CONSTITUTION.md`:
+
+1. **If file does not exist:** print `⚠ CONSTITUTION.md not found — principles check skipped. Run /j-flow-project to generate it.` Continue (non-blocking).
+
+2. **If file exists but contains the placeholder** (line matching `*(none defined`): print `⚠ No principles defined in CONSTITUTION.md — skipping check.` Continue (non-blocking).
+
+3. **If principles are defined:** for each principle (P1, P2, ...):
+   - Read the principle name and text.
+   - Evaluate the feature's changed files (from `tasks.json` file list) against the principle.
+   - Report:
+     - `✓ P{N} — {name}` if no violation detected.
+     - `✗ P{N} — {name}: {specific violation, with file and location if possible}` if violated.
+
+4. **If any principle is violated (`✗`):**
+   ```
+   [REVIEW] BLOCKED — constitution violation(s) found:
+
+     ✗ P{N} — {name}: {violation detail}
+
+   Fix the violation(s) above before re-running /j-flow-review.
+   CONSTITUTION.md principles are inviolable — they cannot be overridden per-feature.
+   ```
+   Do NOT write any gate entry. Stop here.
+
+5. **If all principles pass:** print `✓ Constitution: {N} principles checked.` Continue to reviewer agent dispatch.
 
 ### Dispatch j-flow-reviewer
 
@@ -58,6 +87,7 @@ Always write `.specs/{slug}/review-findings.md` regardless of verdict.
 Append to `.specs/{slug}/gate-context.md`:
 ```
 [REVIEW] approved {today's date}
+  → constitution: ✓ {N} principles checked
   → {N} findings resolved
 ```
 

@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/j-flow-spec` now reads `.specs/_system/` as behavioral baseline before drafting; surfaces AC overlaps with existing system behavior
 - `README.md` documents `.specs/_system/` convention and purpose
 - `tests/validate.js` tracks `system-domain.md` in `EXPECTED_TEMPLATES`
+- `templates/constitution.md` — new template for inviolable project principles
+- `/j-flow-project` Step 8b: generates `CONSTITUTION.md` during init (with principles dialogue or skip to placeholder)
+- `/j-flow-review` principles check: evaluates each principle in `CONSTITUTION.md` against feature code before dispatching reviewer agent; blocks gate on violation; non-blocking when file absent or placeholder
+- `[REVIEW]` gate context entry now records constitution check result
+- `README.md` documents `CONSTITUTION.md` in project file structure
+- `tests/validate.js` tracks `constitution.md` in `EXPECTED_TEMPLATES`
 
 ### Added
 - Initial j-flow plugin: gate-based SDD workflow for MongoDB + NestJS + React + Flutter

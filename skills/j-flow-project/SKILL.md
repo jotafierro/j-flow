@@ -16,7 +16,7 @@ Flags can be combined: `--from PRODUCT.md --from-design DESIGN.md --update`
 
 ## Mode: Init (no `--update`)
 
-Run once when starting a new project. Creates `PRODUCT.md`, `DESIGN.md`, `CHANGELOG.md`, `.specs/README.md`, and agent memory.
+Run once when starting a new project. Creates `PRODUCT.md`, `DESIGN.md`, `CHANGELOG.md`, `.specs/README.md`, `CONSTITUTION.md`, and agent memory.
 
 ### Step 1: Verify git repo
 
@@ -150,12 +150,44 @@ Read each template, substitute `{project name}` with the name from `PRODUCT.md` 
 
 If a file already exists, skip it and print `{agent}.md already exists — skipped.`
 
+### Step 8b: Generate CONSTITUTION.md
+
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/constitution.md`.
+
+Ask the user: "Do you want to define project principles now? These will be enforced as a blocking gate in `/j-flow-review`. You can always add them later by editing `CONSTITUTION.md`. (yes / skip)"
+
+**If yes:** Ask the user to provide 1–5 initial principles (free-form). For each principle, ask:
+  1. Short name (e.g. "no-business-logic-in-controllers")
+  2. Principle text (one or two sentences — be specific enough to evaluate against code)
+  3. Rationale (why this principle exists)
+
+Generate `CONSTITUTION.md` substituting each principle into the template (P1, P2, ...). Show the draft before writing. Iterate until approved. Write to `CONSTITUTION.md` at the project root.
+
+**If skip:** Write `CONSTITUTION.md` with the following placeholder content so the file exists and `/j-flow-review` can read it without blocking:
+
+```markdown
+# Constitution — {Project Name}
+
+<!-- No principles defined yet. Add principles here before running /j-flow-review.
+     /j-flow-review will warn but not block while this placeholder comment is present. -->
+
+## Principles
+
+*(none defined — edit this file to add principles)*
+
+## Change log
+
+| Date | Change | Author |
+|------|--------|--------|
+| {today} | Initial constitution (no principles defined) | — |
+```
+
 ### Step 9: Commit
 
 Stage and commit all created files:
 
 ```bash
-git add PRODUCT.md DESIGN.md CHANGELOG.md .specs/
+git add PRODUCT.md DESIGN.md CHANGELOG.md CONSTITUTION.md .specs/
 git commit -m "chore: j-flow-project — product definition + backlog"
 ```
 
@@ -167,6 +199,7 @@ Project initialized ✓
   PRODUCT.md created
   DESIGN.md created
   CHANGELOG.md ready
+  CONSTITUTION.md created
   .specs/README.md created ({N} features across {P} phases)
   Agent memory initialized at .specs/.agents/
 
