@@ -73,7 +73,9 @@ packages/api-client                     ✓ present
 packages/config                         ✓ present
 
 README.md                               ✓ present / ⚠ outdated
+CONSTITUTION.md                         ✓ present / ✗ missing
 .specs/01-infra-base/                   ✓ present / ⚠ outdated
+.specs/_system/                         ✓ present / ✗ missing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -82,7 +84,9 @@ README.md                               ✓ present / ⚠ outdated
 - `apps/api/src/health/health.controller.ts` missing → ⚠ outdated
 - `apps/web/package.json` exists but no `vite-env.d.ts` with CSS declaration → ⚠ outdated
 - `README.md` missing → ⚠ outdated
+- `CONSTITUTION.md` missing → ✗ missing (run `/j-flow-project` or create manually)
 - `.specs/01-infra-base/` missing → ⚠ outdated
+- `.specs/_system/` missing → ✗ missing
 
 After the table, print:
 ```
@@ -1506,7 +1510,9 @@ curl http://localhost:3000/api/v1/health  # Verify API
 |------|---------|
 | `PRODUCT.md` | Product definition and feature backlog source |
 | `DESIGN.md` | Design tokens, component specs, color system |
+| `CONSTITUTION.md` | Inviolable project principles — enforced by `/j-flow-review` |
 | `.specs/` | SDD feature specs (j-flow workflow) |
+| `.specs/_system/` | Living system spec — domain behaviors accumulated across features |
 | `docker-compose.yml` | Local infrastructure (MongoDB, Redis, Mailhog) |
 | `apps/api/.env` | API env vars (not committed — copy from `.env.example`) |
 | `apps/web/.env` | Web env vars (not committed) |
@@ -1552,7 +1558,89 @@ Create `.specs/01-infra-base/`. Use the templates:
 
 **`meta.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute slug=01-infra-base, branch=main (no feature branch — scaffold runs on main), current date. Set ALL status fields to `pending` initially — they update progressively as user verifies.
 
-**`functional-spec.md`:** Write a short doc describing what was scaffolded.
+**`functional-spec.md`:** Write using the GWT format from the shared template. Required sections: Purpose, Feature users, Trigger, Acceptance criteria (Given/When/Then), Scope. Use these ACs:
+
+```markdown
+# Functional Spec — 01-infra-base
+Date: {today}
+
+## Purpose
+
+Establish the monorepo scaffold so all subsequent features have a working, runnable base.
+
+## Feature users
+
+Engineering team — every developer who runs, tests, or builds this project.
+
+## Trigger
+
+/j-flow-scaffold run by the project lead at project initialization.
+
+## Acceptance criteria
+
+### AC-1 — API health endpoint responds
+
+**Given** MongoDB is running via `docker compose up -d`
+**When** `curl http://localhost:3000/api/v1/health` is called
+**Then:**
+- Returns `{"status":"ok","timestamp":"<ISO string>"}` with HTTP 200
+
+### AC-2 — Web app renders
+
+**Given** `pnpm install` has completed
+**When** `pnpm --filter @{project}/web dev` is run
+**Then:**
+- App is reachable at http://localhost:3001
+- Page body contains the project title
+
+### AC-3 — Quality gates pass
+
+**Given** the scaffolded monorepo with no user changes
+**When** `pnpm lint && pnpm type-check && pnpm test` are run
+**Then:**
+- All commands exit with code 0
+- Zero TypeScript errors across all packages
+
+### AC-4 — Mobile app boots
+
+**Given** Flutter SDK is installed and `flutter pub get` has run
+**When** `flutter run` is executed in `apps/mobile`
+**Then:**
+- App boots on emulator or device
+- Home screen displays the project title
+
+### AC-5 — UI catalogs are reachable
+
+**Given** all dependencies are installed
+**When** Storybook and Widgetbook are started
+**Then:**
+- Storybook shows the Welcome story at http://localhost:6006
+- Widgetbook catalog renders in Chrome with theme toggle working
+
+## Scope
+
+**In scope:**
+- Root monorepo config (turbo, pnpm workspaces, CI, Docker Compose)
+- apps/{api, web, e2e, mobile, mobile/widgetbook} and packages/{ui, domain, api-client, config}
+- Health endpoint, smoke tests, welcome screens
+
+**Out of scope:**
+- Any product feature (auth, users, etc.)
+- Production deployment config
+
+## Dependencies
+
+None — this is the foundation feature.
+
+## Edge cases
+
+- apps/admin only scaffolded if user explicitly confirms
+- Default theme falls back to asking user if DESIGN.md has no default specified
+
+## Risks
+
+- CLI version drift: always use `@latest` flags; pin flutter-version in CI to match pubspec
+```
 
 **`technical-spec.md`:** Write a short doc with the directory tree generated.
 
@@ -1571,6 +1659,8 @@ Create `.specs/01-infra-base/`. Use the templates:
 12. VS Code shows no TypeScript errors when opening the project
 
 **`gate-context.md`:** empty header only — will be written on approval.
+
+Create `.specs/_system/.gitkeep` so the system spec directory exists from the start. The full `_system/infra.md` entry is written on approval (Step 9).
 
 ### Step 8: MANUAL APPROVAL GATE
 
@@ -1637,15 +1727,17 @@ When user replies 'approved':
   → no findings (CLI-generated code)
 ```
 
-3. Update `.specs/README.md` symbol for `01-infra-base` from `[ ]` to `[✓]`.
+3. Write `.specs/_system/infra.md` using the system-domain template. Initialize with the 01-infra-base ACs verbatim (Given/When/Then format) under a `### 01-infra-base` entry. This seeds the living system spec that `/j-flow-finish` will append to on future feature completions.
 
-4. Commit:
+4. Update `.specs/README.md` symbol for `01-infra-base` from `[ ]` to `[✓]`.
+
+5. Commit:
 ```bash
 git add -A
 git commit -m "chore: j-flow-scaffold — 01-infra-base scaffolded and verified"
 ```
 
-5. Print success and invoke `/j-flow-recommend`:
+6. Print success and invoke `/j-flow-recommend`:
 ```
 ✓ 01-infra-base marked as done.
 
