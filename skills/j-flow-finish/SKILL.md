@@ -112,6 +112,8 @@ gh pr create \
 
 If `gh` CLI is not available: print the URL for manual PR creation with recommended title and body.
 
+Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[✓]`.
+
 ### Step 6: Output
 
 Print:

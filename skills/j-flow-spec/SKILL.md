@@ -151,7 +151,8 @@ When the user replies 'approved' (or equivalent confirmation):
    [FUNCTIONAL SPEC] approved {today's date}
      → key decisions: {1-line summary of main scope decisions}
    ```
-3. Print:
+3. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[SF]`.
+4. Print:
    ```
    Functional spec approved and saved ✓
    Next step: /j-flow-spec technical
@@ -195,7 +196,8 @@ When approved:
      → architecture: {1-line summary of main architecture decisions}
      → patterns: {key patterns chosen, e.g. "repository pattern, JWT guards, Riverpod"}
    ```
-3. Print:
+3. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[TF]`.
+4. Print:
    ```
    Technical spec approved and saved ✓
    Next step: /j-flow-plan

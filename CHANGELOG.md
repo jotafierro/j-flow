@@ -75,3 +75,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `README.md` documents `CONSTITUTION.md` in project file structure
 - `/j-flow-analyze` — new read-only skill with 5 cross-consistency checks: unresolved clarification markers, AC→task coverage, task→AC traceability, AC→test coverage, system spec collision detection against `.specs/_system/`
 - `/j-flow-spec --explore` — lightweight scoping mode: 5-question conversational dialogue, no files written, ends with scope summary and offer to transition to formal spec
+- All gate skills now update `.specs/README.md` status symbol on approval — `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]` were never written before
