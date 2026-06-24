@@ -81,6 +81,8 @@ Append to `.specs/{slug}/gate-context.md`:
 ```
 (Only include layers that had tasks.)
 
+Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[B]`.
+
 Print:
 ```
 Build complete ✓

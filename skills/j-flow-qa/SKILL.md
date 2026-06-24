@@ -71,7 +71,8 @@ Present each item from `review-guide.md` → Manual Test Steps to the user. Reco
    [QA] green {today's date}
      → {N} tests passing, checklist {N}/{N}
    ```
-3. Print:
+3. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[Q]`.
+4. Print:
    ```
    QA gate green ✓
    All 6 stages passed.

@@ -100,7 +100,8 @@ When approved:
    [TASK PLAN] approved {today's date}
      → {N} tasks across {N} layers, {N} ACs covered
    ```
-4. Print:
+4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[P]`.
+5. Print:
    ```
    Task plan approved and saved ✓
    Next step: /j-flow-build

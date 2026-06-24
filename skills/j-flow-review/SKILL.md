@@ -91,6 +91,8 @@ Append to `.specs/{slug}/gate-context.md`:
   → {N} findings resolved
 ```
 
+Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[R]`.
+
 Print:
 ```
 Review approved ✓
