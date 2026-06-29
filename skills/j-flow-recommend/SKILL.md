@@ -34,6 +34,15 @@ Lists complementary plugins, skills, and tools for the j-flow workflow.
     · Agent dispatch outputs stay short
   Hub: https://www.claudepluginhub.com/plugins/juliusbrussee-caveman
 
+▸ ponytail (DietrichGebert) — lazy senior developer enforcement (never write code you don't need)
+  Install:
+    /plugin marketplace add DietrichGebert/ponytail
+    /plugin install ponytail
+  Used by j-flow:
+    · /j-flow-build → decision ladder runs before each layer dispatch
+    · /j-flow-review → over-engineering scan before reviewer agent dispatch
+  GitHub: https://github.com/DietrichGebert/ponytail
+
 ▸ RTK (rtk-ai) — CLI output compression
   Install: brew install rtk
   Savings in j-flow sessions:

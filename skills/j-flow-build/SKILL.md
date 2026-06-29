@@ -61,7 +61,7 @@ For each layer with tasks:
    - The technical patterns for this layer (from technical-spec.md)
    - Agent memory (from .specs/.agents/{agent}.md)
    - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for coding conventions
-   - Instruction: "Implement exactly what the tasks require. No extra features or abstractions. Write unit tests in the same pass. Follow the technical spec patterns."
+   - Instruction: "Before writing any code, walk the decision ladder for each piece: (1) does this need to exist at all? (2) does the codebase already have this pattern? (3) can stdlib handle it? (4) is there a native platform feature? (5) does an installed dependency already cover it? (6) can it be one line? Only then write the minimum working code. Implement exactly what the tasks require — no extra features or abstractions. Write unit tests in the same pass. Follow the technical spec patterns."
 5. After agent completes, commit the layer:
 
 ```bash
