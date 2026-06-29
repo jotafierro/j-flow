@@ -58,6 +58,21 @@ Before dispatching the reviewer agent, check `CONSTITUTION.md`:
 
 5. **If all principles pass:** print `✓ Constitution: {N} principles checked.` Continue to reviewer agent dispatch.
 
+### Over-engineering check (optional)
+
+Before dispatching the reviewer agent, run a ponytail scan:
+
+1. **If ponytail plugin is not installed:** print `ℹ ponytail not installed — over-engineering check skipped.` Continue (non-blocking).
+
+2. **If ponytail is installed:** invoke `/ponytail-review` on the current diff.
+   - Collect findings. Each finding has format `L{line}: {tag} {what}. {replacement}.`
+   - Print findings to the user.
+   - Count findings by tag: `delete:`, `stdlib:`, `native:`, `yagni:`, `shrink:`.
+   - These findings are **advisory** — they do not block approval.
+   - Forward findings to the reviewer agent (Step "Dispatch j-flow-reviewer") so it can include them in `review-findings.md` under an `## Over-engineering` section.
+
+3. Whether skipped or run, record the outcome for the gate entry (see "If approved" section below).
+
 ### Dispatch j-flow-reviewer
 
 Provide the agent with:
@@ -88,6 +103,7 @@ Append to `.specs/{slug}/gate-context.md`:
 ```
 [REVIEW] approved {today's date}
   → constitution: ✓ {N} principles checked
+  → ponytail: {✓ N findings | skipped — not installed}
   → {N} findings resolved
 ```
 

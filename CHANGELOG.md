@@ -76,3 +76,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/j-flow-analyze` — new read-only skill with 5 cross-consistency checks: unresolved clarification markers, AC→task coverage, task→AC traceability, AC→test coverage, system spec collision detection against `.specs/_system/`
 - `/j-flow-spec --explore` — lightweight scoping mode: 5-question conversational dialogue, no files written, ends with scope summary and offer to transition to formal spec
 - All gate skills now update `.specs/README.md` status symbol on approval — `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]` were never written before
+- `ponytail` (DietrichGebert) added to `/j-flow-recommend` as a complementary plugin — lazy senior developer enforcement that walks a 6-question decision ladder before generating code
+- `/j-flow-review` optional over-engineering check: invokes `/ponytail-review` after constitution check and before reviewer agent dispatch; advisory (non-blocking), findings forwarded to `review-findings.md` under `## Over-engineering`; gate entry records ponytail outcome or `skipped — not installed`
+- `/j-flow-build` per-layer agent instruction extended with ponytail decision ladder: 6 questions (exist? pattern? stdlib? native? dep? one-liner?) required before writing any code
