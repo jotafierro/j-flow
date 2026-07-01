@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-07-01
+
 ### Added
 - All gate skills (`spec`, `plan`, `build`, `qa`, `review`, `finish`) now update `meta.md` with status, date, and `current_phase` on gate approval — previously only `scaffold` did this
 - Phase 0 backlog expanded to 4 features: `01-infra-base`, `02-observability`, `03-design-system`, `04-design-polish`; `02-observability` and `04-design-polish` are optional/recommended; Phase 1 slugs start at `05`
