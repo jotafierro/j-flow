@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-07-01
+
+### Changed
+- `/j-flow-release` skill rewritten with Mode B (retroactive) — inserts version bumps into git history via `git rebase -i`; adds multi-file bump (all workspace `package.json` + `pubspec.yaml`), CHANGELOG label-split Python script, and `gh release create` step to both modes
+
 ## [1.0.0] - 2026-07-01
 
 ### Added
