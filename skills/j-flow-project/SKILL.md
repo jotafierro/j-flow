@@ -84,27 +84,49 @@ Then:
 Based on `PRODUCT.md`, propose a phased backlog.
 
 **Rules:**
-- Phase 0 always contains `01-infra-base` (Monorepo + Docker + CI/CD) and `02-design-system` (Tokens + Storybook + Widgetbook)
-- Phase 1 = Core / MVP features
+- Phase 0 always contains these 4 features in order:
+  - `01-infra-base` (Monorepo + Docker + CI/CD)
+  - `02-observability` (Error tracking + request tracing + NestJS exception filter + Flutter SDK) — recommended; ask user before including
+  - `03-design-system` (Tokens + Storybook + Widgetbook)
+  - `04-design-polish` (Visual fidelity pass + form UX — submit buttons disabled until required fields filled) — recommended; ask user before including
+- Phase 1 = Core / MVP features — slugs start at `05`
 - Phase 2+ = value-add and advanced features
-- Slug format: `{2-digit number}-{kebab-case-name}` (e.g. `03-auth`, `04-tenants`)
+- Slug format: `{2-digit number}-{kebab-case-name}` (e.g. `05-auth`, `06-tenants`)
 - Each feature has a 1-line description and dependency list (which slugs it needs)
+
+After proposing Phase 0, ask explicitly:
+
+```
+Phase 0 includes 2 optional foundation features:
+  02-observability  — error tracking (Sentry/GlitchTip), request tracing, NestJS exception filter, Flutter SDK
+  04-design-polish  — visual fidelity pass once designs are approved; form UX (disable submit until valid)
+
+Include them?
+  1. Both (recommended)
+  2. Only 02-observability
+  3. Only 04-design-polish
+  4. Neither — skip both
+```
 
 Display the proposed backlog as a readable outline:
 
 ```
 Phase 0 — Foundation
-  01-infra-base     Turborepo + Docker + CI/CD
-  02-design-system  Tokens + Storybook + Widgetbook
+  01-infra-base      Turborepo + Docker + CI/CD
+  02-observability   Error tracking + request tracing     (needs: 01)   ← if included
+  03-design-system   Tokens + Storybook + Widgetbook
+  04-design-polish   Visual fidelity + form UX            (needs: 03)   ← if included
 
 Phase 1 — Core
-  03-auth           JWT + refresh + biometrics          (needs: 01)
-  04-tenants        Multi-tenant CRUD                   (needs: 03)
+  05-auth            JWT + refresh + biometrics           (needs: 01, 03)
+  06-tenants         Multi-tenant CRUD                    (needs: 05)
   ...
 
 Phase 2 — {Name}
   ...
 ```
+
+If user skips 02-observability or 04-design-polish, renumber accordingly (e.g. if both skipped, design-system stays 03 and Phase 1 starts at 04).
 
 Ask: "Does this look right? Anything to add, remove, or move?"
 
@@ -301,6 +323,6 @@ Then immediately invoke `/j-flow-scaffold --review`.
 - Exception: `.specs/01-infra-base/` is owned by `/j-flow-scaffold` — do not create or modify it here
 - If `PRODUCT.md` already exists in init mode (no `--update`), warn and stop immediately
 - Slug numbering always continues from the highest existing number + 1 (never reuse numbers)
-- Phase 0 always contains `01-infra-base` and `02-design-system` — do not remove them
+- Phase 0 always contains `01-infra-base` and `03-design-system` — do not remove them; `02-observability` and `04-design-polish` are optional but recommended
 - The `--from` and `--from-design` flags are only used in init mode — they are ignored in update mode
 - Agent memory files in `.specs/.agents/` are never overwritten — skip existing files silently

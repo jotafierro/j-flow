@@ -100,6 +100,15 @@ git add .specs/{slug}/README.md CHANGELOG.md .specs/.agents/ .specs/_system/
 git commit -m "docs({slug}): feature README, changelog entry, agent memory, and system spec update"
 ```
 
+### Step 4b: Update meta.md
+
+Update `.specs/{slug}/meta.md`: set `finish_status: completed`, `finish_completed_at: {today's date}`, `current_phase: done`.
+
+```bash
+git add .specs/{slug}/meta.md
+git commit -m "chore({slug}): mark feature done in meta"
+```
+
 ### Step 5: Create PR to develop
 
 ```bash

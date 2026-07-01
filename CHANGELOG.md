@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- All gate skills (`spec`, `plan`, `build`, `qa`, `review`, `finish`) now update `meta.md` with status, date, and `current_phase` on gate approval — previously only `scaffold` did this
+- Phase 0 backlog expanded to 4 features: `01-infra-base`, `02-observability`, `03-design-system`, `04-design-polish`; `02-observability` and `04-design-polish` are optional/recommended; Phase 1 slugs start at `05`
+- `packages/domain` scaffold template stripped to `ID` + `ISODate` only; financial types removed — add when billing is scoped
 - Initial j-flow plugin: gate-based SDD workflow for MongoDB + NestJS + React + Flutter
 - 16 user-facing skills: `/j-flow-project`, `/j-flow-scaffold`, `/j-flow-start`, `/j-flow-spec`, `/j-flow-plan`, `/j-flow-build`, `/j-flow-qa`, `/j-flow-review`, `/j-flow-finish`, `/j-flow-release`, `/j-flow-reopen`, `/j-flow-update`, `/j-flow-check`, `/j-flow-doctor`, `/j-flow-eject`, `/j-flow-recommend`
 - 1 internal skill `/j-flow-shared` exposing templates and references (collapsed to a 30-line pointer doc)

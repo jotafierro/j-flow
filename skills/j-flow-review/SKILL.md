@@ -107,6 +107,8 @@ Append to `.specs/{slug}/gate-context.md`:
   → {N} findings resolved
 ```
 
+Update `.specs/{slug}/meta.md`: set `review_status: approved`, `review_approved_at: {today's date}`, `current_phase: finish`.
+
 Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[R]`.
 
 Print:

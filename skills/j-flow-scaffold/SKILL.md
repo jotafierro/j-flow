@@ -75,6 +75,8 @@ packages/config                         ✓ present
 README.md                               ✓ present / ⚠ outdated
 CONSTITUTION.md                         ✓ present / ✗ missing
 .specs/01-infra-base/                   ✓ present / ⚠ outdated
+.specs/02-observability/                ✓ present / [ ] not in backlog (optional Phase 0)
+.specs/04-design-polish/                ✓ present / [ ] not in backlog (optional Phase 0)
 .specs/_system/                         ✓ present / ✗ missing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -86,6 +88,8 @@ CONSTITUTION.md                         ✓ present / ✗ missing
 - `README.md` missing → ⚠ outdated
 - `CONSTITUTION.md` missing → ✗ missing (run `/j-flow-project` or create manually)
 - `.specs/01-infra-base/` missing → ⚠ outdated
+- `.specs/02-observability/` present but not in `.specs/README.md` → warn (optional — can be added via `/j-flow-project --update`)
+- `.specs/04-design-polish/` present but not in `.specs/README.md` → warn (optional — can be added via `/j-flow-project --update`)
 - `.specs/_system/` missing → ✗ missing
 
 After the table, print:
@@ -1187,12 +1191,11 @@ export * from './components/Welcome';
 
 **`packages/domain/src/index.ts`**
 ```typescript
-export type Cents = number & { readonly __brand: 'Cents' };
-export const toCents = (amount: number): Cents => Math.round(amount) as Cents;
 export type ID = string;
 export type ISODate = string;
-export type ISOCurrency = string;
 ```
+
+Note: Only base primitives live here at scaffold time. Domain types (KarmaScore, Level, Streak, etc.) are added as product features are built. Financial types (Cents, ISOCurrency) are added only when billing features are scoped.
 
 **packages/api-client:**
 
