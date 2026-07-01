@@ -111,7 +111,7 @@ For each failure or finding:
    - The affected file(s)
    - The relevant technical-spec.md section
    - Agent memory
-   - Instruction: "Fix only this specific issue. Do not change anything else."
+   - Instruction: "Fix only this specific issue. Do not change anything else. If the fix changes a value, error code, status code, redirect target, or any other behavior that tests could assert, grep the entire repo for test files (`*.spec.ts`, `*.e2e-spec.ts`, `*.test.tsx`, `*_test.dart`, `*.spec.ts` under apps/e2e) that reference the old value and update those assertions too."
 3. After fixing, verify the specific change looks correct
 
 ### Commit Fixes

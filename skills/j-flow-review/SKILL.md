@@ -90,14 +90,20 @@ Display the agent's `review-findings.md` output to the user.
 
 Ask:
 "Review complete. Are there any critical or major findings that need fixing?
-- Reply 'approved' if no blockers (or after /j-flow-build --fix has resolved them)
-- Or run /j-flow-build --fix to resolve findings first"
+- Run /j-flow-build --fix to resolve findings, then re-run /j-flow-qa to validate — QA gate must be green again before approving
+- Reply 'approved' only after all critical/major findings are resolved AND /j-flow-qa is green"
 
 ### Write findings file
 
 Always write `.specs/{slug}/review-findings.md` regardless of verdict.
 
 ### If approved (no critical findings or all resolved):
+
+Before accepting approval, verify the most recent gate-context.md `[QA]` entry is `green` and dated **after** the last `[REVIEW] changes-requested` entry. If QA is stale or absent:
+```
+Cannot approve — QA gate must be re-run after review fixes.
+Run /j-flow-qa first, then reply 'approved'.
+```
 
 Append to `.specs/{slug}/gate-context.md`:
 ```
