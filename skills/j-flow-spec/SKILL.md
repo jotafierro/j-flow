@@ -151,8 +151,9 @@ When the user replies 'approved' (or equivalent confirmation):
    [FUNCTIONAL SPEC] approved {today's date}
      → key decisions: {1-line summary of main scope decisions}
    ```
-3. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[SF]`.
-4. Print:
+3. Update `.specs/{slug}/meta.md`: set `functional_status: approved`, `functional_approved_at: {today's date}`, `current_phase: technical`.
+4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[SF]`.
+5. Print:
    ```
    Functional spec approved and saved ✓
    Next step: /j-flow-spec technical
@@ -196,8 +197,9 @@ When approved:
      → architecture: {1-line summary of main architecture decisions}
      → patterns: {key patterns chosen, e.g. "repository pattern, JWT guards, Riverpod"}
    ```
-3. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[TF]`.
-4. Print:
+3. Update `.specs/{slug}/meta.md`: set `technical_status: approved`, `technical_approved_at: {today's date}`, `current_phase: planning`.
+4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[TF]`.
+5. Print:
    ```
    Technical spec approved and saved ✓
    Next step: /j-flow-plan
