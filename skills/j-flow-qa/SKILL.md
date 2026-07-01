@@ -27,43 +27,50 @@ If missing: "Gate [BUILD] not completed. Run /j-flow-build first."
 Dispatch the **j-flow-quality** agent with:
 - Full contents of `.specs/{slug}/review-guide.md`
 - Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/qa-report.md` for the output structure
-- Instruction: "Run all 6 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, include exact failure output for any red stage. For the manual checklist (stage 6), present each item from review-guide.md to the user and record their pass/fail response."
+- Instruction: "Run all 7 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, include exact failure output for any red stage. For the manual checklist (stage 7), present each item from review-guide.md to the user and record their pass/fail response."
 
 ### Stages the agent runs:
 
-**Stage 1 — Unit tests:**
+**Stage 1 — Lint:**
+```bash
+pnpm lint          # ESLint across all JS/TS packages
+flutter analyze    # Dart analyzer for mobile
+```
+Any `error`-level ESLint finding or Dart analyzer error is a stage failure. Warnings are logged but do not block.
+
+**Stage 2 — Unit tests:**
 ```bash
 pnpm test --passWithNoTests   # or jest / vitest depending on project
 flutter test
 ```
 
-**Stage 2 — NestJS E2E:**
+**Stage 3 — NestJS E2E:**
 ```bash
 pnpm test:e2e   # runs *.e2e-spec.ts via @nestjs/testing + supertest
 ```
 Requires MongoDB container. Agent checks `docker compose ps` first.
 
-**Stage 3 — Flutter integration:**
+**Stage 4 — Flutter integration:**
 ```bash
 flutter drive --target=integration_test/app_test.dart
 ```
 
-**Stage 4 — Playwright E2E:**
+**Stage 5 — Playwright E2E:**
 ```bash
 npx playwright test
 ```
 Requires full stack running (docker compose + backend + frontend).
 
-**Stage 5 — Visual smoke:**
+**Stage 6 — Visual smoke:**
 Storybook: `pnpm storybook --ci` (or equivalent) — verify it builds without errors.
 Widgetbook: `flutter run -d chrome --headless` from widgetbook directory — verify it launches.
 
-**Stage 6 — Manual checklist:**
+**Stage 7 — Manual checklist:**
 Present each item from `review-guide.md` → Manual Test Steps to the user. Record PASS or FAIL for each.
 
 ## Gate Decision
 
-### If all 6 stages pass (green):
+### If all 7 stages pass (green):
 
 1. Write `.specs/{slug}/qa-report.md` with green status
 2. Append to `.specs/{slug}/gate-context.md`:
@@ -76,7 +83,7 @@ Present each item from `review-guide.md` → Manual Test Steps to the user. Reco
 5. Print:
    ```
    QA gate green ✓
-   All 6 stages passed.
+   All 7 stages passed.
    
    Next step: /j-flow-review
    ```
