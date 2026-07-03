@@ -62,7 +62,49 @@ For each layer with tasks:
    - Agent memory (from .specs/.agents/{agent}.md)
    - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for coding conventions
    - Instruction: "Before writing any code, walk the decision ladder for each piece: (1) does this need to exist at all? (2) does the codebase already have this pattern? (3) can stdlib handle it? (4) is there a native platform feature? (5) does an installed dependency already cover it? (6) can it be one line? Only then write the minimum working code. Implement exactly what the tasks require — no extra features or abstractions. Write unit tests in the same pass. Follow the technical spec patterns."
-5. After agent completes, commit the layer:
+5. After agent completes — **smoke check gate before committing**:
+
+   a. Collect the ACs covered by this layer's tasks (from `tasks.json` `spec_refs`)
+   b. From `.specs/{slug}/review-guide.md`, extract the manual test steps for those ACs
+   c. Print:
+
+   ```
+   ── Layer: {layer} complete ──────────────────────────────────────────
+   Automated tests: {pass/fail summary from agent output}
+
+   Before committing, verify these ACs manually:
+
+   {For each AC covered by this layer, paste the AC title and its
+    manual test steps from review-guide.md verbatim}
+
+   Services needed:
+     docker compose up -d
+     {only list apps relevant to this layer — e.g. api for service/api layers,
+      web/admin for ui layer, mobile for mobile layer}
+
+   Reply:
+     ok          → commit and continue to next layer
+     fix: <desc> → fix the issue first, then re-show this checklist
+     skip        → commit without testing (not recommended — logged in gate-context)
+   ──────────────────────────────────────────────────────────────────────
+   ```
+
+   d. Wait for user response before proceeding
+   e. If `ok`: append to `.specs/{slug}/gate-context.md` before committing:
+      ```
+        ✓ smoke check {layer} {today's date} — ACs confirmed: {ac-id-1}, {ac-id-2}
+      ```
+      Then proceed to commit.
+   f. If `fix: <desc>`:
+      - Identify which file(s) the issue affects
+      - Dispatch the appropriate domain agent with: the specific issue description, affected files, relevant technical-spec.md section, agent memory
+      - After fix, re-show the smoke check for this layer (return to step 5a)
+   g. If `skip`: proceed to commit; append to `.specs/{slug}/gate-context.md`:
+      ```
+        ⚠ smoke check {layer} {today's date} — skipped by user
+      ```
+
+6. Commit the layer:
 
 ```bash
 git add .
