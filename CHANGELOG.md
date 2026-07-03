@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-07-03
+
+### Changed
+- `/j-flow-build` smoke check now appends result to `gate-context.md` before each layer commit — `ok` logs confirmed ACs with date (`✓ smoke check {layer} {date} — ACs confirmed: …`), `skip` logs a warning (`⚠ smoke check {layer} {date} — skipped by user`)
+
 ## [1.1.0] - 2026-07-02
 
 ### Changed
