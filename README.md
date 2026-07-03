@@ -97,3 +97,7 @@ node tests/validate.js
 ```
 
 Checks all 14 skills, 7 agents, shared templates, and references have valid structure and frontmatter. No LLM required.
+
+## Credits
+
+Created by [Jonathan Fierro](https://github.com/jotafierro).
