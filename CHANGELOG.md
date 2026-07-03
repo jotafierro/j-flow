@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-02
+
+### Changed
+- `/j-flow-build` per-layer smoke check gate: after each agent completes a layer and before committing, skill pauses to show relevant ACs and manual test steps from `review-guide.md`; user replies `ok` to commit, `fix: <desc>` to fix inline (re-dispatches domain agent and re-shows checklist), or `skip` to bypass with a warning logged to `gate-context.md`
+
 ## [1.0.1] - 2026-07-01
 
 ### Changed
