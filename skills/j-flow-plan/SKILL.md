@@ -17,7 +17,7 @@ Before generating the task plan, read:
 6. `.specs/{slug}/functional-spec.md` — extract every AC
 7. `.specs/{slug}/technical-spec.md` — implementation patterns to plan against
 8. `.specs/{slug}/gate-context.md` — accumulated decisions
-9. Templates: `templates/tasks.json`, `templates/review-guide.md`, `templates/review-api.md`, `templates/review-web.md`, `templates/review-mobile.md`, `templates/review-e2e.md`
+9. Templates: `templates/tasks.json`, `templates/review-guide.md`, `templates/review-api.md`, `templates/review-api-graphql.md`, `templates/review-web.md`, `templates/review-mobile.md`, `templates/review-e2e.md`
 
 ## Gate Check
 
@@ -88,10 +88,13 @@ Substitute: slug, today's date, env vars needed by this feature, seed data, and 
 **Per-layer review docs:**
 For each layer with tasks in `tasks.json`, generate a file in `.specs/{slug}/review/`:
 
-- `api` or `service` tasks → `review/api.md` (template: `templates/review-api.md`)
-  - Write real curl commands: actual HTTP methods, routes from technical-spec API Layer table, real request body shapes, expected response shapes
+- `api` or `service` tasks → `review/api.md`
+  - Read `PRODUCT.md` `## Tech Stack` for `**API Style:**` field
+  - If `api_style: rest` or field absent → use template `templates/review-api.md` (curl commands with `/api/v1/{route}`)
+  - If `api_style: graphql` → use template `templates/review-api-graphql.md` (POST to `/graphql` with query/mutation bodies)
+  - Write real commands: actual query names, mutation names, routes, input shapes, and response shapes from technical-spec
   - One section per AC covered by this layer
-  - Include DB or header verification steps for each AC
+  - Include DB or side-effect verification steps for each AC
 - `ui` tasks → `review/web.md` (template: `templates/review-web.md`)
   - Use actual page paths, form field names, cookie names, redirect targets from technical-spec
 - `mobile` tasks → `review/mobile.md` (template: `templates/review-mobile.md`)

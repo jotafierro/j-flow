@@ -50,6 +50,7 @@
 ## Tech Stack
 
 **Backend:** NestJS 11 + Mongoose (MongoDB)
+**API Style:** {rest|graphql}
 **Web:** React + Vite + React Query + Zustand + Tailwind CSS
 **Mobile:** Flutter + Riverpod + GoRouter
 **Auth:** JWT (access 15min cookie + refresh 30d cookie/header)
