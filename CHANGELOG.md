@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `j-flow-backend` agent: `## GraphQL Mode` section — resolver pattern (`@Resolver`, `@Query`, `@Mutation`, `@Args`, `@ObjectType`, `@InputType`, `@Field`), GraphQL E2E spec pattern (POST to `/graphql`)
 - `j-flow-backend` agent: Swagger annotation rule — REST mode annotates controllers with `@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiBearerAuth` and DTOs with `@ApiProperty`
 - `j-flow-plan` selects `review/api.md` template based on `api_style` — REST uses curl with `/api/v1/{route}`, GraphQL uses POST to `/graphql`
+- `j-flow-finish` now generates `docs/architecture/{slug}.md` (verbatim Architecture Overview + Design Decisions from technical-spec) and `docs/features/{slug}.md` (user-facing rewrite of functional-spec: no jargon, AC-keyed capability bullets)
+- `docs/features/README.md` capability catalog auto-upserted on each finish — one row per shipped feature, append-only
+- `feature-doc.md` template added to `skills/j-flow-shared/templates/`
+- `j-flow-review` Swagger coverage check: flags `@Get`/`@Post`/`@Patch`/`@Delete` methods without `@ApiOperation` and DTO properties without `@ApiProperty` as low-severity findings (REST mode only; skipped when `@nestjs/graphql` is present)
 
 ## [1.1.1] - 2026-07-03
 
