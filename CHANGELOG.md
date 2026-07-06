@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-06
+
 ### Added
 - Per-layer manual testing docs generated at plan time: `.specs/{slug}/review/api.md`, `review/web.md`, `review/mobile.md`, `review/e2e.md` — real curl commands, actual routes, and AC-keyed checklists from technical-spec (no generic prose)
 - `review-guide.md` becomes an index pointing to per-layer files; per-layer files are passed to QA and review agents
