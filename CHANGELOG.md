@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Per-layer manual testing docs generated at plan time: `.specs/{slug}/review/api.md`, `review/web.md`, `review/mobile.md`, `review/e2e.md` — real curl commands, actual routes, and AC-keyed checklists from technical-spec (no generic prose)
+- `review-guide.md` becomes an index pointing to per-layer files; per-layer files are passed to QA and review agents
+- GraphQL review template `templates/review-api-graphql.md` — POST `/graphql` with query/mutation bodies, Apollo Playground setup, introspection check
+- `/j-flow-scaffold` now asks REST vs GraphQL at scaffold time and reads `PRODUCT.md` `**API Style:**` field; writes choice back to PRODUCT.md
+- REST scaffold: installs `@nestjs/swagger` + `swagger-ui-express`; `main.ts` wires `DocumentBuilder` + `SwaggerModule` at `/api/docs`
+- GraphQL scaffold: installs `@nestjs/graphql` + `@apollo/server` + `@as-integrations/express` + `graphql`; `app.module.ts` wires `GraphQLModule.forRoot<ApolloDriverConfig>` with Apollo Playground enabled in dev
+- `/j-flow-scaffold --review` detects Swagger vs GraphQL presence from `apps/api/package.json` and reports against `PRODUCT.md` `**API Style:**` field
+- `j-flow-backend` agent: `## GraphQL Mode` section — resolver pattern (`@Resolver`, `@Query`, `@Mutation`, `@Args`, `@ObjectType`, `@InputType`, `@Field`), GraphQL E2E spec pattern (POST to `/graphql`)
+- `j-flow-backend` agent: Swagger annotation rule — REST mode annotates controllers with `@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiBearerAuth` and DTOs with `@ApiProperty`
+- `j-flow-plan` selects `review/api.md` template based on `api_style` — REST uses curl with `/api/v1/{route}`, GraphQL uses POST to `/graphql`
+
 ## [1.1.1] - 2026-07-03
 
 ### Changed
