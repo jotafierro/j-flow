@@ -1,44 +1,37 @@
 # Review Guide — {slug}
 Generated: {YYYY-MM-DD}
 
-## Requirements
+## Environment
 
-{Each AC from functional-spec.md as a numbered requirement.}
+```bash
+docker compose up -d                          # MongoDB :27017, Redis :6379, Mailhog :8025
+pnpm --filter @{project}/api dev              # :3000
+pnpm --filter @{project}/web dev              # :3001
+# pnpm --filter @{project}/admin dev          # :3002  (if admin panel in scope)
+# cd apps/mobile && flutter run               # (if mobile in scope)
+```
 
-1. **AC-1** — {full text}
-2. **AC-2** — {full text}
-3. **AC-3** — {full text}
-
-## Environment Setup
-
-**Services running:**
-- `docker compose up -d` → MongoDB :27017, Redis :6379, Mailhog :8025
-
-**Apps to run:**
-- Backend: `pnpm --filter @{project}/api dev` → :3000
-- Web: `pnpm --filter @{project}/web dev` → :3001
-- Admin (if used): `pnpm --filter @{project}/admin dev` → :3002
-- Mobile: `flutter run` from `apps/mobile/`
-
-**Required env vars:**
+**Required env vars for this feature:**
 - `{VAR}` — {description, or "none new for this feature"}
 
 **Seed data:**
 - {fixtures needed, or "none"}
 
-## Manual Test Steps
+## Per-Layer Testing Docs
 
-### AC-1: {brief title}
+Run in this order: api → web → mobile → admin → e2e (last, after all layers pass).
 
-1. {action — be specific}
-2. {observe result}
-3. {verify side effect}
+| Layer | File | ACs covered |
+|-------|------|-------------|
+| API   | [review/api.md](review/api.md) | {ac-ids} |
+| Web   | [review/web.md](review/web.md) | {ac-ids} |
+| Mobile | [review/mobile.md](review/mobile.md) | {ac-ids} |
+| Admin | [review/admin.md](review/admin.md) | {ac-ids} |
+| E2E   | [review/e2e.md](review/e2e.md) | {ac-ids} |
 
-### AC-2: {brief title}
-
-1. ...
+_Only include rows for layers with tasks in this feature._
 
 ## Approval Criteria
 
-- All manual steps pass with no blockers → feature approved for `/j-flow-review`
-- Any blocker found → run `/j-flow-build --fix`, then re-run `/j-flow-qa`
+All per-layer checklists green → feature approved for `/j-flow-review`.
+Any blocker found → run `/j-flow-build --fix`, then re-run `/j-flow-qa`.
