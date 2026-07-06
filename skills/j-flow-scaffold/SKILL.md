@@ -46,6 +46,10 @@ apps/api (NestJS)
   apps/api/src/health/health.controller.ts  ⚠ outdated   (missing health controller)
   apps/api/src/main.ts                  ✓ present
   apps/api/src/app.module.ts            ✓ present
+  apps/api (API docs)
+    REST: @nestjs/swagger in package.json     ✓ present / ✗ missing
+    GraphQL: @nestjs/graphql in package.json  ✓ present / ✗ missing
+    (detected mode from PRODUCT.md `**API Style:**` field)
 
 apps/web (React + Vite)
   apps/web/package.json                 ✓ present
@@ -84,6 +88,8 @@ CONSTITUTION.md                         ✓ present / ✗ missing
 **Outdated detection rules:**
 - `apps/api/package.json` exists but no `@nestjs/mongoose` in deps → ⚠ outdated
 - `apps/api/src/health/health.controller.ts` missing → ⚠ outdated
+- `PRODUCT.md` `**API Style:** rest` but no `@nestjs/swagger` in `apps/api/package.json` → ✗ missing
+- `PRODUCT.md` `**API Style:** graphql` but no `@nestjs/graphql` in `apps/api/package.json` → ✗ missing
 - `apps/web/package.json` exists but no `vite-env.d.ts` with CSS declaration → ⚠ outdated
 - `README.md` missing → ⚠ outdated
 - `CONSTITUTION.md` missing → ✗ missing (run `/j-flow-project` or create manually)
@@ -124,12 +130,39 @@ Generate apps/admin (React admin panel on port 3002)?
 
 Set `wants_admin: true` only if the user answers 1 (yes).
 
+**API style question:**
+
+Scan PRODUCT.md `## Audience` and `## Core Features` for API style signals:
+- GraphQL hints: "multi-tenant", "B2B SaaS", "analytics", "feed", "dashboard with aggregated data", "developer API", "external integration partner"
+- REST hints: "CRUD", "mobile-first", "Flutter", "personal", "team product", "simple API"
+
+Set `api_hint: 'graphql' | 'rest'` based on match (REST is default when no strong signal).
+
+Ask the user:
+
+```
+API style for apps/api?
+  PRODUCT.md hint: {REST / GraphQL} — {one line reason, e.g. "mobile-first Flutter app, simple CRUD"}
+
+1. REST  — controllers, DTOs, Swagger at /api/docs           (recommended: {yes/no})
+2. GraphQL — resolvers, @ObjectType, Apollo Playground at /graphql  (recommended: {yes/no})
+
+Enter 1 or 2 (default: {1 or 2}):
+```
+
+Set `api_style: 'rest' | 'graphql'` from the user's response.
+
+After the user answers, write `api_style` back to `PRODUCT.md`:
+Find the line `**API Style:** {rest|graphql}` and replace with `**API Style:** rest` or `**API Style:** graphql`.
+If `PRODUCT.md` does not have the `**API Style:**` line, insert it under `**Backend:**` in the Tech Stack section.
+
 Then show the scaffold plan and ask for final confirmation:
 
 ```
 Scaffold plan:
   Root config:        package.json, turbo.json, pnpm-workspace.yaml, docker-compose.yml, .github/workflows/ci.yml, .env.example, .gitignore, tsconfig.json
-  apps/api:           NestJS (via @nestjs/cli)
+  apps/api:           NestJS — REST (controllers + Swagger)      ← when api_style: rest
+  apps/api:           NestJS — GraphQL (resolvers + Playground)  ← when api_style: graphql
   apps/web:           React + Vite (via pnpm create vite)
   apps/admin:         React + Vite (port 3002)   ← only shown if wants_admin: true
   apps/e2e:           Playwright (via pnpm create playwright)
@@ -445,6 +478,8 @@ cd ..
 Post-process `apps/api/package.json`:
 - Rename to `@{project}/api`
 - Add deps: `@nestjs/config` (REQUIRED — without it `.env` is never loaded), `@nestjs/mongoose`, `mongoose`, `@nestjs/jwt`, `@nestjs/passport`, `passport`, `passport-jwt`, `@types/passport-jwt`, `class-validator`, `class-transformer`
+- **If `api_style: 'rest'`**: also add `@nestjs/swagger`, `swagger-ui-express`
+- **If `api_style: 'graphql'`**: also add `@nestjs/graphql`, `@apollo/server`, `@as-integrations/express`, `graphql`
 - Add a `dev` script alias (NestJS CLI generates `start:dev` only — alias it as `dev` so commands match the root README):
   ```json
   "scripts": {
@@ -453,8 +488,25 @@ Post-process `apps/api/package.json`:
     ... rest of nest defaults ...
   }
   ```
-- Set port in `apps/api/src/main.ts`: `app.setGlobalPrefix('api/v1')` and `await app.listen(process.env.PORT ?? 3000)`. Call `bootstrap()` as `void bootstrap()` — NestJS CLI generates `bootstrap()` which is a floating promise and triggers `@typescript-eslint/no-floating-promises` in CI lint.
-- Apply `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })`
+- Set port in `apps/api/src/main.ts`:
+  - **Both modes**: `await app.listen(process.env.PORT ?? 3000)`. Call `bootstrap()` as `void bootstrap()` — NestJS CLI generates `bootstrap()` which is a floating promise and triggers `@typescript-eslint/no-floating-promises` in CI lint.
+  - **If `api_style: 'rest'`**: add `app.setGlobalPrefix('api/v1')`. After `app.useGlobalPipes(...)`, add Swagger setup:
+    ```typescript
+    import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+    // inside bootstrap(), after useGlobalPipes:
+    // ponytail: dev-only; move behind auth if API becomes public-facing
+    if (process.env.NODE_ENV !== 'production') {
+      const config = new DocumentBuilder()
+        .setTitle('{Project Name} API')
+        .setVersion('1.0')
+        .addBearerAuth()
+        .build();
+      const document = SwaggerModule.createDocument(app, config);
+      SwaggerModule.setup('api/docs', app, document);
+    }
+    ```
+  - **If `api_style: 'graphql'`**: do NOT add `setGlobalPrefix` — GraphQL operates at `/graphql`; the health endpoint keeps its own path outside the prefix. Add `schema.gql` to `apps/api/.gitignore` (auto-generated at runtime).
+- Apply `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })` in both modes — validates DTOs (REST) and `@InputType()` classes (GraphQL)
 
 Post-process `apps/api/tsconfig.json`: add `"types": ["node", "jest"]` to `compilerOptions`. NestJS CLI does not include it, causing the VS Code TS language server to report ts(2593) (`describe`/`it`/`expect` not found) in spec files under `src/`. The CLI (`tsc`) resolves `@types` automatically, but the editor language server needs explicit declaration:
 ```json
@@ -514,8 +566,9 @@ describe('HealthController', () => {
 });
 ```
 
-Replace `apps/api/src/app.module.ts` with:
+Replace `apps/api/src/app.module.ts` with the version appropriate for `api_style`:
 
+**If `api_style: 'rest'`:**
 ```typescript
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -536,12 +589,43 @@ import { HealthModule } from './health/health.module';
 export class AppModule {}
 ```
 
+**If `api_style: 'graphql'`:**
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@apollo/server/nestjs';
+import { HealthModule } from './health/health.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRootAsync({
+      useFactory: () => ({
+        uri: process.env.MONGODB_URI ?? 'mongodb://localhost:27017/{project}_dev',
+      }),
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: 'schema.gql',
+      sortSchema: true,
+      playground: process.env.NODE_ENV !== 'production',
+      introspection: process.env.NODE_ENV !== 'production',
+    }),
+    HealthModule,
+  ],
+})
+export class AppModule {}
+```
+
 `ConfigModule.forRoot({ isGlobal: true })` is what actually loads `.env` — without it, `process.env.MONGODB_URI` is undefined at boot. Substitute `{project}` with the actual project name when writing this file. The fallback URI matches the docker-compose default DB (`MONGO_INITDB_DATABASE={project}_dev`).
 
 Write `apps/api/.env.example`:
 ```
 # Server
 PORT=3000
+NODE_ENV=development
 
 # MongoDB
 MONGODB_URI=mongodb://localhost:27017/{project}_dev
