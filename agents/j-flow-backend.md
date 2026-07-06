@@ -68,11 +68,35 @@ describe('{Module} (e2e)', () => {
 });
 ```
 
+## GraphQL Mode
+
+When `PRODUCT.md` `**API Style:**` is `graphql`, the api layer uses resolvers instead of controllers:
+
+- `@Resolver(() => {Type})` replaces `@Controller`
+- `@Query(() => {Type})` and `@Mutation(() => {Type})` replace `@Get`/`@Post`
+- `@Args('{name}', { type: () => {ArgType} })` for input arguments
+- Response types use `@ObjectType()` + `@Field()` decorators
+- Input types use `@InputType()` + `@Field()` decorators
+- `GraphQLModule` in `AppModule` enables Apollo Playground at `/graphql` in dev automatically
+- E2E specs POST to `/graphql` with `{ query: '...' }` body instead of REST routes:
+
+```typescript
+it('query {queryName} → data', async () => {
+  await request(app.getHttpServer())
+    .post('/graphql')
+    .send({ query: `{ {queryName} { {fields} } }` })
+    .expect(200)
+    .expect(res => expect(res.body.data.{queryName}).toBeDefined());
+});
+```
+
 ## Rules
 
 - Never use `any` type
 - Every public service method has a unit test
-- Every controller endpoint has an E2E spec covering happy path + main error cases
-- Repository pattern: controllers → services → repositories → Mongoose
-- No business logic in controllers
+- Every controller endpoint (REST) or resolver method (GraphQL) has an E2E spec covering happy path + main error cases
+- Repository pattern: controllers/resolvers → services → repositories → Mongoose
+- No business logic in controllers or resolvers
 - Error responses use `HttpException` subclasses with shape: `{ error: { code, message } }`
+- **REST mode**: annotate controllers with `@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiBearerAuth`; annotate DTO fields with `@ApiProperty` — keeps Swagger UI at `/api/docs` accurate
+- **GraphQL mode**: annotate all `@ObjectType` fields and `@InputType` fields with `@Field(() => {Type})` — keeps Apollo schema introspection accurate
