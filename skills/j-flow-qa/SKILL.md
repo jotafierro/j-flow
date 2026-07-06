@@ -11,10 +11,11 @@ Before running QA, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and red/green semantics
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — j-flow-quality scope and what to test
-3. `.specs/{slug}/review-guide.md` — manual checklist + environment setup
-4. `.specs/{slug}/tasks.json` — to understand the feature scope
-5. `.specs/{slug}/gate-context.md` — accumulated decisions
-6. Template: `templates/qa-report.md` — output format
+3. `.specs/{slug}/review-guide.md` — environment setup and layer file index
+4. `.specs/{slug}/review/` — per-layer manual testing docs (if present)
+5. `.specs/{slug}/tasks.json` — to understand the feature scope
+6. `.specs/{slug}/gate-context.md` — accumulated decisions
+7. Template: `templates/qa-report.md` — output format
 
 ## Gate Check
 
@@ -26,8 +27,9 @@ If missing: "Gate [BUILD] not completed. Run /j-flow-build first."
 
 Dispatch the **j-flow-quality** agent with:
 - Full contents of `.specs/{slug}/review-guide.md`
+- Contents of each present file in `.specs/{slug}/review/` (api.md, web.md, mobile.md, admin.md, e2e.md)
 - Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/qa-report.md` for the output structure
-- Instruction: "Run all 7 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, include exact failure output for any red stage. For the manual checklist (stage 7), present each item from review-guide.md to the user and record their pass/fail response."
+- Instruction: "Run all 7 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, include exact failure output for any red stage. For the manual checklist (stage 7), use the per-layer review docs if present (see Stage 7 instructions below)."
 
 ### Stages the agent runs:
 
@@ -66,7 +68,17 @@ Storybook: `pnpm storybook --ci` (or equivalent) — verify it builds without er
 Widgetbook: `flutter run -d chrome --headless` from widgetbook directory — verify it launches.
 
 **Stage 7 — Manual checklist:**
-Present each item from `review-guide.md` → Manual Test Steps to the user. Record PASS or FAIL for each.
+Check whether `.specs/{slug}/review/` exists.
+
+If `review/` exists (post-016 feature):
+  Run layer files in this order: api.md → web.md → mobile.md → admin.md → e2e.md
+  For each present file:
+    Present the layer's Checklist table to the user. Record PASS or FAIL for each row.
+  `review/e2e.md` runs last, after all individual layer files pass.
+  A layer file is skipped if absent (no tasks for that layer, or infra-only).
+
+If `review/` absent (pre-016 feature):
+  Fall back: present each item from `review-guide.md` → Manual Test Steps to the user. Record PASS or FAIL.
 
 ## Gate Decision
 

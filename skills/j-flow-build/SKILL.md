@@ -65,7 +65,15 @@ For each layer with tasks:
 5. After agent completes — **smoke check gate before committing**:
 
    a. Collect the ACs covered by this layer's tasks (from `tasks.json` `spec_refs`)
-   b. From `.specs/{slug}/review-guide.md`, extract the manual test steps for those ACs
+   b. Identify the review file for this layer:
+      - api / service layer → `.specs/{slug}/review/api.md`
+      - ui layer → `.specs/{slug}/review/web.md` (and `review/admin.md` if admin in scope)
+      - mobile layer → `.specs/{slug}/review/mobile.md`
+      - infra layer → no review file; skip manual check, proceed to commit
+
+      If the file does not exist (feature pre-016 or infra layer), fall back to extracting
+      the relevant AC steps from `review-guide.md`.
+
    c. Print:
 
    ```
@@ -73,9 +81,8 @@ For each layer with tasks:
    Automated tests: {pass/fail summary from agent output}
 
    Before committing, verify these ACs manually:
-
-   {For each AC covered by this layer, paste the AC title and its
-    manual test steps from review-guide.md verbatim}
+     ACs: {ac-id-1}, {ac-id-2}
+     Testing guide: .specs/{slug}/review/{layer-file}.md
 
    Services needed:
      docker compose up -d
