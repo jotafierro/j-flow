@@ -84,6 +84,7 @@ Provide the agent with:
 - Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-findings.md` for the output structure
 - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for style constraints
 - Instruction: "Audit the implementation against the technical spec. Check for spec conformance, stack pattern violations, security gaps, performance issues, and speculative code. Produce review-findings.md following the template: populate Critical/Major/Minor sections with findings."
+- Additional check — **Swagger coverage (REST mode only)**: scan controller files. Any `@Get`, `@Post`, `@Patch`, `@Delete` method without `@ApiOperation` is a `low` severity finding: "Missing `@ApiOperation` on `{MethodName}` — Swagger UI will show no description for this endpoint." Any DTO property without `@ApiProperty` is also `low`. Skip this check entirely if `@nestjs/graphql` is present in `apps/api/package.json`.
 
 ### Show Findings
 
