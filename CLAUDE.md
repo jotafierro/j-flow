@@ -39,7 +39,7 @@ claude plugin install j-flow
 1. Bump version in `package.json`
 2. In `CHANGELOG.md`: rename `## [Unreleased]` → `## [X.Y.Z] - YYYY-MM-DD`, add empty `## [Unreleased]` above it
 3. `git add package.json CHANGELOG.md && git commit -m "chore: release vX.Y.Z"`
-4. `git tag vX.Y.Z && git push origin vX.Y.Z`
-5. `gh release create vX.Y.Z --title "vX.Y.Z" --notes "$(sed -n '/## \[X.Y.Z\]/,/## \[/p' CHANGELOG.md | head -n -1)"`
+4. `git tag vX.Y.Z && git push origin main --tags`
+5. `gh release create vX.Y.Z --title "vX.Y.Z" --notes "$(sed -n '/## \[X\.Y\.Z\]/,/## \[/p' CHANGELOG.md | sed '$d')"` (`head -n -1` broken on macOS — use `sed '$d'`)
 
 Semver guide: `patch` = bug fix / rule tweak, `minor` = new skill feature or template, `major` = breaking change to skill interface.
