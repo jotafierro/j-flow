@@ -79,6 +79,7 @@ Provide the agent with:
 - Full contents of `.specs/{slug}/technical-spec.md`
 - Full contents of `.specs/{slug}/tasks.json`
 - Full contents of `.specs/{slug}/review-guide.md`
+- Contents of each present file in `.specs/{slug}/review/` (api.md, web.md, mobile.md, admin.md, e2e.md)
 - Full contents of `.specs/.agents/j-flow-reviewer.md` (agent memory)
 - Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-findings.md` for the output structure
 - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for style constraints

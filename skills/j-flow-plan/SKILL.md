@@ -17,7 +17,7 @@ Before generating the task plan, read:
 6. `.specs/{slug}/functional-spec.md` — extract every AC
 7. `.specs/{slug}/technical-spec.md` — implementation patterns to plan against
 8. `.specs/{slug}/gate-context.md` — accumulated decisions
-9. Templates: `templates/tasks.json`, `templates/review-guide.md`
+9. Templates: `templates/tasks.json`, `templates/review-guide.md`, `templates/review-api.md`, `templates/review-web.md`, `templates/review-mobile.md`, `templates/review-e2e.md`
 
 ## Gate Check
 
@@ -79,15 +79,36 @@ Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md`
 **Coverage validation:** If `uncovered_acs` is not empty, stop:
 "Warning: the following ACs have no tasks assigned: {list}. Add tasks before proceeding."
 
-### Step 4: Generate review-guide.md
+### Step 4: Generate review-guide.md and per-layer review docs
 
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md`. Substitute placeholders with feature-specific content: slug, today's date, AC list, environment setup details, and manual test steps derived from the ACs.
+**review-guide.md (index):**
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md`.
+Substitute: slug, today's date, env vars needed by this feature, seed data, and the layer table (one row per layer with tasks, listing AC ids covered).
+
+**Per-layer review docs:**
+For each layer with tasks in `tasks.json`, generate a file in `.specs/{slug}/review/`:
+
+- `api` or `service` tasks → `review/api.md` (template: `templates/review-api.md`)
+  - Write real curl commands: actual HTTP methods, routes from technical-spec API Layer table, real request body shapes, expected response shapes
+  - One section per AC covered by this layer
+  - Include DB or header verification steps for each AC
+- `ui` tasks → `review/web.md` (template: `templates/review-web.md`)
+  - Use actual page paths, form field names, cookie names, redirect targets from technical-spec
+- `mobile` tasks → `review/mobile.md` (template: `templates/review-mobile.md`)
+  - Use actual screen names, navigation routes, storage keys from technical-spec
+- `ui` tasks + admin in scope → `review/admin.md` (template: `templates/review-web.md`, port 3002)
+- Always generate `review/e2e.md` (template: `templates/review-e2e.md`) if 2+ layers have tasks
+  - Identify cross-layer flows from the AC list (e.g. register on web → verify email → login on mobile)
+  - One section per flow that spans the API and at least one client layer
+  - This file is checked last in QA, after individual layer checks pass
+
+Only generate layer files for layers with tasks. Infra layer has no review file.
 
 Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format.
 
 ### Step 5: Show and confirm
 
-Display both `tasks.json` and `review-guide.md` to the user. Ask:
+Display `tasks.json`, `review-guide.md` (index), and the generated per-layer review docs. Ask:
 "Does this plan look right? Reply 'approved' to proceed, or tell me what to change."
 
 ### Step 6: Approval
@@ -95,14 +116,15 @@ Display both `tasks.json` and `review-guide.md` to the user. Ask:
 When approved:
 1. Write `.specs/{slug}/tasks.json`
 2. Write `.specs/{slug}/review-guide.md`
-3. Append to `.specs/{slug}/gate-context.md`:
+3. Write per-layer review docs: create `.specs/{slug}/review/` and write each generated layer file (api.md, web.md, mobile.md, admin.md, e2e.md as applicable)
+4. Append to `.specs/{slug}/gate-context.md`:
    ```
    [TASK PLAN] approved {today's date}
      → {N} tasks across {N} layers, {N} ACs covered
    ```
-4. Update `.specs/{slug}/meta.md`: set `tasks_status: approved`, `tasks_approved_at: {today's date}`, `current_phase: build`.
-5. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[P]`.
-6. Print:
+5. Update `.specs/{slug}/meta.md`: set `tasks_status: approved`, `tasks_approved_at: {today's date}`, `current_phase: build`.
+6. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[P]`.
+7. Print:
    ```
    Task plan approved and saved ✓
    Next step: /j-flow-build
