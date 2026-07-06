@@ -18,6 +18,7 @@ Before finishing, read:
 7. `.specs/_system/` — system behavior files for the domains this feature touches (read to confirm no regression; not required to exist yet)
 8. Template: `templates/feature-readme.md` — README format
 9. Template: `templates/system-domain.md` — system domain file format
+10. Template: `templates/feature-doc.md` — product feature doc format
 
 ## Gate Check
 
@@ -30,6 +31,60 @@ If missing or stale: "Gate [REVIEW] not approved. Run /j-flow-review first."
 ### Step 1: Generate feature README
 
 Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/feature-readme.md`. Substitute placeholders: slug, today's date, branch name, AC table (from functional-spec.md), key files list (grouped by layer from tasks.json), and patterns introduced. Write to `.specs/{slug}/README.md`.
+
+### Step 1b: Generate architecture doc
+
+Read `.specs/{slug}/technical-spec.md`. Extract the `## Architecture Overview` section (including any ASCII diagram) and the `## Design Decisions` section (DD-N list).
+
+Ensure `docs/architecture/` exists in the repo root (create if not).
+
+Write `docs/architecture/{slug}.md`:
+
+```markdown
+# Architecture — {Feature Name}
+
+Date: {feature completion date from gate-context.md}
+Slug: {slug}
+
+{Architecture Overview section, verbatim}
+
+{Design Decisions section, verbatim}
+```
+
+### Step 1c: Generate product feature doc
+
+Read `.specs/{slug}/functional-spec.md`. Extract: Purpose, Feature users, and Acceptance Criteria.
+
+Ensure `docs/features/` exists in the repo root (create if not).
+
+Write `docs/features/{slug}.md` using template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/feature-doc.md`:
+- Substitute slug, today's date, feature name from meta.md
+- Rewrite the Purpose section in user-facing language (no technical jargon — no "JWT", "MongoDB", "HTTP 302", "DTO")
+- Rewrite Feature users as plain personas
+- Rewrite each AC as a user capability bullet: "you can now X", "the system does Y for you", "users see Z"
+- Link to the architecture doc generated in Step 1b
+
+### Step 1d: Upsert docs/features/README.md
+
+Check if `docs/features/README.md` exists.
+
+If it exists, check if a row for `{slug}` is already present — if so, skip (do not duplicate).
+
+If not present, append a new row to the table:
+```
+| [{Feature Name}]({slug}.md) | {one-sentence capability summary from feature-doc} | {today's date} |
+```
+
+If the file does not exist, create it:
+```markdown
+# Product Features
+
+A catalog of all shipped features and what they enable.
+
+| Feature | What it does | Added |
+|---------|-------------|-------|
+| [{Feature Name}]({slug}.md) | {one-sentence capability summary} | {today's date} |
+```
 
 ### Step 2: Update CHANGELOG.md
 
@@ -96,8 +151,9 @@ If the user skips: print `System spec update skipped.` and continue.
 ### Step 4: Commit finish artifacts
 
 ```bash
-git add .specs/{slug}/README.md CHANGELOG.md .specs/.agents/ .specs/_system/
-git commit -m "docs({slug}): feature README, changelog entry, agent memory, and system spec update"
+git add .specs/{slug}/README.md CHANGELOG.md .specs/.agents/ .specs/_system/ \
+        docs/architecture/{slug}.md docs/features/{slug}.md docs/features/README.md
+git commit -m "docs({slug}): feature README, changelog entry, agent memory, system spec, architecture and feature docs"
 ```
 
 ### Step 4b: Update meta.md
@@ -131,6 +187,9 @@ Feature '{slug}' finished ✓
   README: .specs/{slug}/README.md
   CHANGELOG: updated [Unreleased]
   Agent memory: updated
+  Architecture doc: docs/architecture/{slug}.md
+  Feature doc: docs/features/{slug}.md
+  Feature catalog: docs/features/README.md
   PR: {url}
 
 CHANGELOG.md has new [Unreleased] entries.
