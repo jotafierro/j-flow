@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-07-08
+
 ### Changed
 - `j-flow-scaffold`'s six static file templates (project README, docs/STORYBOOK.md, docs/WIDGETBOOK.md, docs/PLAYWRIGHT.md, CLAUDE.md, 01-infra-base functional-spec) moved to `skills/j-flow-shared/templates/` — cuts SKILL.md from 1848 to 1475 lines, no behavior change
 - `j-flow-recommend`'s "Useful tools" list now points to Gemini CLI (bulk-reads) and GitHub Copilot (mechanical boilerplate) for delegating work outside Claude
