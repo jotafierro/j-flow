@@ -76,6 +76,8 @@ Lists complementary plugins, skills, and tools for the j-flow workflow.
   · Bruno or Insomnia      API testing (alternatives to Postman)
   · Mongo Compass          GUI for MongoDB Atlas / local
   · react-query-devtools   included via @tanstack/react-query-devtools in dev
+  · Gemini CLI             bulk-read large diffs/files before /j-flow-analyze or /j-flow-doctor on big repos — cheaper per-token than Claude for pure context-gathering
+  · GitHub Copilot         mechanical, well-specified boilerplate (CRUD DTOs, schemas) once the technical spec is approved — validate the result with /j-flow-review
 ```
 
 ### Step 4: Show useful Claude Code built-in commands and skills
