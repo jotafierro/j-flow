@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-07-08
+
+### Fixed
+- `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` were stuck at version `1.0.0` since initial scaffold — never bumped across 5 releases (1.0.1..1.2.1). Marketplace/plugin install now reports the correct version. Release process (`CLAUDE.md`) updated to bump all three version fields going forward.
+
 ## [1.2.1] - 2026-07-08
 
 ### Changed
