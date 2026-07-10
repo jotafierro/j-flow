@@ -32,6 +32,7 @@
   └─ Dispatches: j-flow-architect
   └─ Writes: .specs/{slug}/technical-spec.md
   └─ [GATE: TECHNICAL SPEC approved]
+  └─ trivial features (few ACs, no new architecture) get a minimal spec — no fabricated sections
 
 /j-flow-plan
   └─ Parses ACs, maps to layers, validates coverage
