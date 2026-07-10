@@ -155,6 +155,7 @@ When `/j-flow-review` returns changes-requested:
 │   └── {slug}/
 │       ├── meta.md                 ← slug, branch, stack, gate checklist
 │       ├── gate-context.md         ← accumulated gate statuses (append-only)
+│       ├── review/                 ← per-layer manual test docs (plan 016); checklist rows flip to [x] on layer/QA approval
 │       ├── functional-spec.md      ← /j-flow-spec output
 │       ├── technical-spec.md       ← /j-flow-spec technical output
 │       ├── tasks.json              ← /j-flow-plan output

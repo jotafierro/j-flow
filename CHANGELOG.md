@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `/j-flow-build` smoke-check and `/j-flow-qa` Stage 7 now flip `review/{layer}.md` checklist rows to `[x]` on approval — previously stayed at `[ ]` forever regardless of pass/fail (gap left by plan 016)
+
 ### Changed
 - `/j-flow-spec technical` now permits a minimal spec for trivial features (bugfixes, config tweaks, small additions following an existing pattern) instead of forcing every template section to be filled with invented content
 
