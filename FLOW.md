@@ -53,6 +53,7 @@
   └─ Stage 4: Playwright E2E
   └─ Stage 5: Visual smoke (Storybook CI + Widgetbook headless)
   └─ Stage 6: Manual checklist (from review-guide.md)
+  └─ Flutter/Playwright/visual-smoke checks skip automatically when the corresponding layer (mobile/ui) has no tasks in this feature
   └─ Writes: .specs/{slug}/qa-report.md
   └─ [GATE: QA green]
 
