@@ -73,7 +73,9 @@ Check whether `.specs/{slug}/review/` exists.
 If `review/` exists (post-016 feature):
   Run layer files in this order: api.md → web.md → mobile.md → admin.md → e2e.md
   For each present file:
-    Present the layer's Checklist table to the user. Record PASS or FAIL for each row.
+    Present the layer's Checklist table to the user. Record PASS or FAIL for each row in qa-report.md.
+    For each row recorded PASS: flip that row's `[ ]` to `[x]` in the review file itself.
+    Leave FAIL rows as `[ ]` — failure detail is captured in qa-report.md.
   `review/e2e.md` runs last, after all individual layer files pass.
   A layer file is skipped if absent (no tasks for that layer, or infra-only).
 

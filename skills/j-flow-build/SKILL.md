@@ -97,7 +97,7 @@ For each layer with tasks:
    ```
 
    d. Wait for user response before proceeding
-   e. If `ok`: append to `.specs/{slug}/gate-context.md` before committing:
+   e. If `ok`: update `.specs/{slug}/review/{layer}.md` — in its `## Checklist` table, flip the row(s) for `{ac-id-1}, {ac-id-2}` from `[ ]` to `[x]`. If the file does not exist (pre-016 feature), skip this update. Then append to `.specs/{slug}/gate-context.md` before committing:
       ```
         ✓ smoke check {layer} {today's date} — ACs confirmed: {ac-id-1}, {ac-id-2}
       ```
