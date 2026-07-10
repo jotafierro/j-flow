@@ -178,7 +178,7 @@ Provide the agent with:
 - Full contents of `.specs/.agents/j-flow-architect.md` (agent memory)
 - Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/technical-spec.md` for the output structure
 - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for style constraints
-- Instruction: "Generate a complete technical spec following the template structure. Every decision must reference an AC. No speculative features."
+- Instruction: "Generate a complete technical spec following the template structure. Every decision must reference an AC. No speculative features. If the functional spec has few ACs and requires no new architectural decisions (a bugfix, a copy/config tweak, or a small addition that follows an existing pattern already in this codebase), keep the spec minimal: a one-paragraph `## Architecture Overview` naming the existing pattern followed, `## Design decisions` stating 'None — follows existing {pattern}', and 'N/A' for any section that doesn't apply. Do not invent content to fill a section that has nothing to say."
 
 ### Draft and Confirm
 
