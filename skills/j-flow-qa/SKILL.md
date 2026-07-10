@@ -29,7 +29,21 @@ Dispatch the **j-flow-quality** agent with:
 - Full contents of `.specs/{slug}/review-guide.md`
 - Contents of each present file in `.specs/{slug}/review/` (api.md, web.md, mobile.md, admin.md, e2e.md)
 - Template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/qa-report.md` for the output structure
-- Instruction: "Run all 7 QA stages in order. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, include exact failure output for any red stage. For the manual checklist (stage 7), use the per-layer review docs if present (see Stage 7 instructions below)."
+- Instruction: "Run all applicable QA stages in order, per the layer-scoping below. Stop on first stage failure and document exact output. Generate qa-report.md following the template: substitute test counts and status per stage, mark skipped stages as N/A with the skip reason, include exact failure output for any red stage. For the manual checklist (stage 7), use the per-layer review docs if present (see Stage 7 instructions below)."
+
+### Determine applicable stages
+
+Read `.specs/{slug}/tasks.json` `layers`. A layer is "in scope" if it has at least one task.
+
+- Stage 4 (Flutter integration) runs only if `mobile` is in scope.
+- Stage 5 (Playwright E2E) runs only if `ui` or `mobile` is in scope.
+- Stage 6 (Visual smoke): run the Storybook check only if `ui` is in scope; run the Widgetbook check only if `mobile` is in scope. If neither applies, skip Stage 6 entirely.
+
+Print which stages/halves were skipped and why, alongside the stage results:
+```
+Skipped: Stage 4 (Flutter integration) — no mobile tasks in this feature.
+Skipped: Stage 6 Widgetbook check — no mobile tasks in this feature.
+```
 
 ### Stages the agent runs:
 
@@ -84,7 +98,7 @@ If `review/` absent (pre-016 feature):
 
 ## Gate Decision
 
-### If all 7 stages pass (green):
+### If all applicable stages pass (green):
 
 1. Write `.specs/{slug}/qa-report.md` with green status
 2. Append to `.specs/{slug}/gate-context.md`:
@@ -97,7 +111,7 @@ If `review/` absent (pre-016 feature):
 5. Print:
    ```
    QA gate green ✓
-   All 7 stages passed.
+   All applicable stages passed.
    
    Next step: /j-flow-review
    ```
