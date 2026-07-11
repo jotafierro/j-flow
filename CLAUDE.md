@@ -25,12 +25,11 @@ claude plugin install j-flow
 
 ## Plans (development tracking)
 
-`plans/` is gitignored — local only. Execute plans directly from the plan file without any SDD scaffold or `.superpowers/` folders.
+Plans live outside this repo, at `../plans/j-flow/` (sibling directory) — not inside j-flow itself, so `.gitignore` no longer needs a `plans/` entry. Execute plans directly from the plan file without any SDD scaffold or `.superpowers/` folders.
 
-- `plans/README.md` — status tracker; mark plan DONE with commit range when finished
+- `../plans/j-flow/README.md` — status tracker; mark plan DONE with commit range when finished
 - `CHANGELOG.md [Unreleased]` — update manually during plan execution (don't wait for release)
 - Pattern: feat commit(s) → validate → `chore(changelog): add unreleased entries for plan NNN`
-- `plans/README.md` is gitignored so its edits don't get committed
 
 ## Release (this repo)
 
