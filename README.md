@@ -35,7 +35,7 @@ git -C ~/j-flow pull && claude plugin update j-flow
 /j-flow-spec technical    # write technical spec via j-flow-architect agent
 /j-flow-plan              # generate task plan + review guide
 /j-flow-build             # implement by layer (data → service → api → ui → mobile → infra)
-/j-flow-qa                # run 6-stage QA gate
+/j-flow-qa                # run QA gate (7 stages, layer-aware — skips stages for untouched layers)
 /j-flow-review            # code quality audit vs specs
 /j-flow-finish            # README + CHANGELOG + PR to develop
 /j-flow-release minor     # semver bump + tag + PR to main
@@ -52,7 +52,7 @@ git -C ~/j-flow pull && claude plugin update j-flow
 | `/j-flow-plan` | Task plan + review guide → approval gate |
 | `/j-flow-build` | Layered implementation by domain agent, unit tests per layer |
 | `/j-flow-build --fix` | Resolve QA or review findings |
-| `/j-flow-qa` | 6-stage QA gate — blocks review if red |
+| `/j-flow-qa` | QA gate — 7 stages, layer-aware (skips stages for untouched layers) — blocks review if red |
 | `/j-flow-review` | Code quality audit vs technical spec |
 | `/j-flow-finish` | Feature README + CHANGELOG \[Unreleased\] + PR to develop |
 | `/j-flow-release [major\|minor\|patch]` | Semver bump + git tag + PR to main |
