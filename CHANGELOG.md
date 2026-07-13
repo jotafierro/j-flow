@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.4] - 2026-07-12
+
 ### Changed
 - `02-observability` feature now defaults error tracking to managed cloud free tier (GlitchTip cloud dev / Sentry cloud prod, DSN swap only) instead of leaving self-hosted vs. cloud undecided — no local docker-compose service is added for it
 - `code-style.md` gained a design constraint: third-party infra defaults to cloud free tier over self-hosted docker when self-hosting adds disproportionate dev complexity
