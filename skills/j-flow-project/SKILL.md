@@ -86,7 +86,7 @@ Based on `PRODUCT.md`, propose a phased backlog.
 **Rules:**
 - Phase 0 always contains these 4 features in order:
   - `01-infra-base` (Monorepo + Docker + CI/CD)
-  - `02-observability` (Error tracking + request tracing + NestJS exception filter + Flutter SDK) — recommended; ask user before including
+  - `02-observability` (Error tracking + request tracing + NestJS exception filter + Flutter SDK — GlitchTip cloud dev / Sentry cloud prod, no local docker service) — recommended; ask user before including
   - `03-design-system` (Tokens + Storybook + Widgetbook)
   - `04-design-polish` (Visual fidelity pass + form UX — submit buttons disabled until required fields filled) — recommended; ask user before including
 - Phase 1 = Core / MVP features — slugs start at `05`
@@ -98,7 +98,7 @@ After proposing Phase 0, ask explicitly:
 
 ```
 Phase 0 includes 2 optional foundation features:
-  02-observability  — error tracking (Sentry/GlitchTip), request tracing, NestJS exception filter, Flutter SDK
+  02-observability  — error tracking (GlitchTip cloud dev / Sentry cloud prod), request tracing, NestJS exception filter, Flutter SDK
   04-design-polish  — visual fidelity pass once designs are approved; form UX (disable submit until valid)
 
 Include them?

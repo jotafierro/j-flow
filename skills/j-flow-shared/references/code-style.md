@@ -9,6 +9,7 @@ Audited by `/j-flow-review`.
 2. Use SDK/framework primitives over custom implementations. Name the specific method.
 3. Don't spec abstractions unless reused across 3+ places.
 4. Match existing repo patterns only when conditions match exactly.
+5. Third-party infra (error tracking, etc.) defaults to managed cloud free tier — not a self-hosted docker-compose service — when self-hosting adds setup/maintenance complexity disproportionate to a dev environment. Example: error tracking uses GlitchTip cloud (dev) / Sentry cloud (prod), DSN swap only, no local GlitchTip container.
 
 ## Implementation Constraints (for code)
 
