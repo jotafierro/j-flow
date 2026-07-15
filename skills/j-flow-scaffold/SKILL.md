@@ -469,6 +469,8 @@ export default tseslint.config({
 
 For each app, ONLY if its directory doesn't exist (idempotent).
 
+**Order matters: create packages/domain, packages/api-client, and packages/ui (full sections below, including `storybook init`) BEFORE running any app CLI.** apps/web and apps/admin `package.json` declare `workspace:*` deps on these three packages. If `pnpm create playwright`, `pnpm exec`, or any other pnpm-aware command runs while those packages don't exist yet on disk, pnpm's workspace resolution fails trying to link them. Sequence: packages/config (Step 3) → packages/domain → packages/api-client → packages/ui → THEN apps/api, apps/web, apps/admin, apps/e2e, apps/mobile, apps/mobile/widgetbook (any order among the apps).
+
 **apps/api (NestJS):**
 ```bash
 cd apps && npx -y @nestjs/cli@latest new api --strict --package-manager pnpm --skip-git
@@ -829,9 +831,11 @@ If apps/admin was generated, add the same smoke test files there too. The test t
 
 **apps/e2e (Playwright):**
 ```bash
-cd apps && pnpm create playwright@latest e2e --quiet --browser=chromium --gha=false --install-deps=false
+cd apps && pnpm create playwright@latest e2e --quiet --browser=chromium --no-browsers
 cd ..
 ```
+
+`--gha` and `--install-deps` are boolean flags with no `=value` form (verified against `create-playwright --help`) — `--gha=false` errors. Omit both entirely; their default is already `false`. `--no-browsers` skips downloading all 3 browser binaries here since only chromium gets installed explicitly below.
 
 Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`.
 
@@ -879,11 +883,11 @@ Use `toContainText` against `body` rather than `toHaveTitle`. Substitute `{Proje
 
 **Install Playwright browser binaries:**
 
-`pnpm create playwright` with `--install-deps=false` skips OS-level deps (apt-get) but does NOT download browser binaries. After scaffolding apps/e2e, run:
+`--no-browsers` in the create step above skips browser binary downloads entirely. After scaffolding apps/e2e, run:
 ```bash
 cd apps/e2e && pnpm exec playwright install chromium && cd ../..
 ```
-This downloads the chromium binary so `pnpm test` works first try without a manual browser install step. It is a one-time download (~120MB) and takes under 30 seconds.
+This downloads only the chromium binary so `pnpm test` works first try without pulling firefox/webkit too. One-time download (~120MB), under 30 seconds.
 
 **apps/mobile (Flutter):**
 ```bash
@@ -1125,33 +1129,18 @@ Do NOT add `@storybook/react`, `@storybook/blocks`, `@storybook/addon-essentials
 Then run init (skips install — root `pnpm install` later resolves everything via workspace + the `.npmrc` hoist patterns we wrote in Step 2):
 
 ```bash
-cd packages/ui && npx -y storybook@latest init --type=react-vite --yes --no-dev --skip-install
+cd packages/ui && npx -y storybook@latest init --yes --no-dev --skip-install --no-features
 cd ../..
 ```
+
+Do NOT pass `--type=react-vite` — current Storybook CLI rejects it (`--type` choices no longer include `react-vite`; valid values are `react`, `nextjs`, etc.). Omit `--type` entirely: the CLI auto-detects `react-vite` correctly from the `vite` + `react` deps already in `packages/ui/package.json`.
+
+`--no-features` disables the CLI's default auto-installed addons (`addon-vitest`, `addon-a11y`, `addon-docs`, `addon-mcp`, `@chromatic-com/storybook`) which otherwise pull in `vitest` + `playwright` + browser binary downloads (triggered even with `--skip-install`) — unwanted duplication with apps/e2e's own Playwright setup. With `--no-features`, `.storybook/main.ts` is generated with `addons: []` directly; do not hand-write or replace it.
 
 `storybook init` creates `src/stories/` with default Button/Header/Page examples — DELETE that directory entirely:
 ```bash
 rm -rf packages/ui/src/stories
 ```
-
-`storybook init` also generates `.storybook/main.ts` with legacy `addons: ['@storybook/addon-essentials', '@storybook/addon-interactions']` references that no longer exist in v10. REPLACE `packages/ui/.storybook/main.ts` with:
-
-```typescript
-import type { StorybookConfig } from '@storybook/react-vite';
-
-const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
-  addons: [],
-  framework: {
-    name: '@storybook/react-vite',
-    options: {},
-  },
-};
-
-export default config;
-```
-
-`addons: []` is intentional — essentials/interactions/blocks are part of core in v10 and listing them as addons causes `Cannot find module '@storybook/addon-essentials'` at startup.
 
 Generate a DESIGN.md-aligned Welcome component instead.
 
@@ -1234,7 +1223,7 @@ export const Light: Story = { args: { variant: 'light' } };
 export const Dark: Story = { args: { variant: 'dark' } };
 ```
 
-Update `packages/ui/.storybook/preview.ts` to set the default background per `default_theme`. If `default_theme === 'dark'`, add:
+Update `packages/ui/.storybook/preview.tsx` (current CLI generates `.tsx`, not `.ts`) to set the default background per `default_theme`. If `default_theme === 'dark'`, add:
 ```ts
 parameters: {
   backgrounds: {

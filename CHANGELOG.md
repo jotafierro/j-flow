@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `j-flow-scaffold`: `pnpm create playwright` used invalid `--gha=false`/`--install-deps=false` syntax (boolean flags, no `=value` form) — current CLI errors on this; replaced with omitting both flags plus `--no-browsers`
+- `j-flow-scaffold`: `storybook init --type=react-vite` no longer valid (current CLI rejects `react-vite` as a `--type` choice) — flag removed, relies on auto-detect from existing vite+react deps; `--no-features` now used instead of hand-rewriting `.storybook/main.ts` to suppress the CLI's newer default addons (addon-vitest/a11y/docs/mcp), which pulled in Playwright + browser binary downloads even with `--skip-install`
+- `j-flow-scaffold`: `.storybook/preview.ts` reference corrected to `.storybook/preview.tsx` (current CLI's actual output filename)
+- `j-flow-scaffold`: packages/domain, packages/api-client, and packages/ui must now be created before any app CLI runs — apps/web and apps/admin declare `workspace:*` deps on them, and pnpm-aware commands (e.g. `pnpm create playwright`) fail resolving the workspace if those packages don't exist yet
+
 ## [1.2.4] - 2026-07-12
 
 ### Changed
