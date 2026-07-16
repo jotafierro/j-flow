@@ -4,16 +4,23 @@
 
 ```
 /j-flow-project
+  └─ git init -b main if no repo yet, then creates develop branch after first commit
   └─ PRODUCT.md, DESIGN.md, .specs/README.md, CHANGELOG.md, agent memory
   └─ first run: auto-triggers /j-flow-scaffold
   └─ --update: syncs backlog from meta.md + triggers /j-flow-scaffold --review
 
 /j-flow-scaffold
+  └─ feature/01-infra-base branch (off develop)
   └─ Turborepo monorepo: apps/{api,web,admin?,e2e,mobile+widgetbook}, packages/{ui+storybook,domain,api-client,config}
   └─ Docker Compose: MongoDB + Redis + Mailhog
   └─ GitHub Actions CI
-  └─ Marks .specs/01-infra-base/ as [✓] in backlog
+  └─ On approval: writes .specs/01-infra-base/README.md, marks [✓] in backlog, merges to develop (no PR), sets finish_status: completed in meta.md (skips /j-flow-finish — no tasks.json for a CLI scaffold)
+  └─ before /j-flow-recommend: asks whether to cut the initial release (1/2 dialogue → /j-flow-release)
   └─ --review: read-only, reports outdated configs
+
+/j-flow-recommend
+  └─ Recommended plugins/skills/tools for the workflow
+  └─ ends with a 1/2 dialogue offering to start the next `[ ]` feature in .specs/README.md (→ /j-flow-start)
 
 /j-flow-start {slug}
   └─ feature/{slug} branch

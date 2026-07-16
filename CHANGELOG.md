@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-16
+
+### Changed
+- `j-flow-project`: init mode now runs `git init -b main` automatically if no repo exists (previously stopped and told the user to run it manually), and creates a `develop` branch after the initial commit so every project has `main`+`develop` from the start.
+- `j-flow-scaffold`: generate mode now works on a `feature/01-infra-base` branch (branched from `develop`) instead of committing straight to `main`/`develop`. On approval it generates `.specs/01-infra-base/README.md` (previously missing — only `/j-flow-finish` produced feature READMEs), sets `finish_status: completed` in `meta.md` (01-infra-base intentionally never runs `/j-flow-finish` — no `tasks.json` to read), and merges the branch into `develop` locally (no PR — nothing to review remotely for CLI-generated scaffolding). Before invoking `/j-flow-recommend`, it now asks (1/2 dialogue, same pattern as every other gate) whether to cut the initial release.
+- `j-flow-release`: Mode A now detects a fresh repo (no git tags yet) and uses the root `package.json` version as-is instead of bumping it — lets the first release be exactly `v0.1.0` as seeded by scaffold. Push/GitHub-Release/PR steps now skip gracefully (with manual-push instructions) when no git remote is configured, instead of failing.
+- `j-flow-recommend`: now ends with a 1/2 dialogue offering to start the next `[ ]` (not-yet-started) feature from `.specs/README.md`, instead of ending silently with no next-step prompt.
+
 ## [1.3.0] - 2026-07-15
 
 ### Changed
