@@ -82,9 +82,15 @@ Uncheck the cleared gates in the checklist in `meta.md`.
 
 ### Step 6: Output
 
+Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: the command for the reopened gate, e.g. `/j-flow-build` when reopened at task plan):
 ```
 Feature '{slug}' reopened at [TASK PLAN] ✓
 Gates cleared: BUILD, QA, REVIEW
 
-Next step: /j-flow-build
+Continue to next step?
+
+  1. Yes — run /j-flow-build now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
 ```

@@ -70,13 +70,18 @@ If all agent memory files are empty: "Agent memory is empty — agents will lear
 
 ### Step 6: Confirm
 
-Print:
+Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-spec`):
 ```
 Feature '{slug}' initialized ✓
   Branch: feature/{slug}
   Spec folder: .specs/{slug}/
 
-Next step: /j-flow-spec
+Continue to next step?
+
+  1. Yes — run /j-flow-spec now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
 ```
 
 ## Output

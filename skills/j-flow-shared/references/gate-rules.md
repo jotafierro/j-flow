@@ -37,6 +37,26 @@ Enter 1, 2, or 3:
 
 Always show numbered options. Never auto-approve.
 
+## Next-step dialogue (display whenever a phase finishes and a next command exists)
+
+Never print `Next step: {command}` as a bare suggestion. Ask instead:
+
+```
+{completion message}
+
+Continue to next step?
+
+  1. Yes — run {next command} now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
+```
+
+- Reply `1`: immediately invoke `{next command}`.
+- Reply `2`: stop. Do not invoke anything else. Wait for the user's next message.
+
+This applies to every phase-completion message that currently ends in a `Next step:` line (start, spec, plan, build, qa, review, reopen). It does not apply to the three documented auto-chains in `FLOW.md` (`/j-flow-project` → `/j-flow-scaffold`, `/j-flow-project --update` → `/j-flow-scaffold --review`, `/j-flow-scaffold` → `/j-flow-recommend`), which keep running without asking.
+
 ## Cascade rules for /j-flow-reopen
 
 Reopening at phase X resets X and all downstream gates back to `pending`. Commits are NOT reverted.

@@ -119,11 +119,16 @@ Update `.specs/{slug}/meta.md`: set `review_status: approved`, `review_approved_
 
 Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[R]`.
 
-Print:
+Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-finish`):
 ```
 Review approved ✓
 
-Next step: /j-flow-finish
+Continue to next step?
+
+  1. Yes — run /j-flow-finish now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
 ```
 
 ### If changes requested (critical findings remain):
@@ -134,11 +139,16 @@ Append to `.specs/{slug}/gate-context.md`:
   → {N} critical findings — see review-findings.md
 ```
 
-Print:
+Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build --fix`):
 ```
 Review: changes requested
 {N} critical finding(s) need resolution.
 See .specs/{slug}/review-findings.md
 
-Next step: /j-flow-build --fix
+Continue to next step?
+
+  1. Yes — run /j-flow-build --fix now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
 ```

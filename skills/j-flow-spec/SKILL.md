@@ -153,10 +153,16 @@ When the user replies 'approved' (or equivalent confirmation):
    ```
 3. Update `.specs/{slug}/meta.md`: set `functional_status: approved`, `functional_approved_at: {today's date}`, `current_phase: technical`.
 4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[SF]`.
-5. Print:
+5. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-spec technical`):
    ```
    Functional spec approved and saved ✓
-   Next step: /j-flow-spec technical
+
+   Continue to next step?
+
+     1. Yes — run /j-flow-spec technical now
+     2. No — stay here, I want to discuss or adjust first
+
+   Enter 1 or 2:
    ```
 
 After writing the gate entry, scan the written `functional-spec.md` for `[NEEDS CLARIFICATION` markers.
@@ -199,8 +205,14 @@ When approved:
    ```
 3. Update `.specs/{slug}/meta.md`: set `technical_status: approved`, `technical_approved_at: {today's date}`, `current_phase: planning`.
 4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[TF]`.
-5. Print:
+5. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-plan`):
    ```
    Technical spec approved and saved ✓
-   Next step: /j-flow-plan
+
+   Continue to next step?
+
+     1. Yes — run /j-flow-plan now
+     2. No — stay here, I want to discuss or adjust first
+
+   Enter 1 or 2:
    ```
