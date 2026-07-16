@@ -31,7 +31,9 @@ If any check fails, report and stop.
 
 ### Step 1: Determine new version
 
-Read `package.json` (root) and extract `version`. Apply semver bump:
+Check `git tag --list`. If it's empty, this is the first release: read `package.json` (root) `version` and use it as-is (no bump) — scaffold seeds it at `0.1.0`. Show: "First release detected — using v{version} as-is (no bump)." Skip the rest of this step and continue to Step 2.
+
+Otherwise, read `package.json` (root) and extract `version`. Apply semver bump:
 - `patch`: increment Z in X.Y.Z
 - `minor`: increment Y, reset Z to 0
 - `major`: increment X, reset Y and Z to 0
@@ -79,12 +81,18 @@ done
 ```
 Build number = minor version number (0.1.0 → +1, 0.2.0 → +2, 1.0.0 → +1).
 
-### Step 4: Commit, tag, and push
+### Step 4: Commit and tag
 
 ```bash
 git add -u
 git commit -m "chore: release v{new_version}"
 git tag -a v{new_version} -m "v{new_version}"
+```
+
+Check `git remote` — if empty, print: "No git remote configured — skipping push, GitHub Release, and PR. Once you add one: `git push -u origin {current_branch} && git push origin v{new_version}`." and skip straight to Step 7.
+
+Otherwise:
+```bash
 git push origin {current_branch}
 git push origin v{new_version}
 ```

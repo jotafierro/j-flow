@@ -101,6 +101,26 @@ Run /j-flow-check anytime to see current feature status.
 ─────────────────────────────────────────────────────────────────────
 ```
 
+### Step 6: Offer next feature
+
+Read `.specs/README.md`. Find the first feature row with status `[ ]` (not yet started), in table order.
+
+If one is found (slug `{next-slug}`), ask:
+```
+Next up: {next-slug} — {one-line description from the table}
+
+Continue to next step?
+
+  1. Yes — run /j-flow-start {next-slug} now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
+```
+- Reply `1`: invoke `/j-flow-start {next-slug}`.
+- Reply `2`: stop. Do not invoke anything else. Wait for the user's next message.
+
+If no `[ ]` row exists (every feature already started or done), skip this step silently — do not print anything.
+
 ## Rules
 
 - This skill is read-only — never writes files

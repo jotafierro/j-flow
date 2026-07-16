@@ -20,10 +20,13 @@ Run once when starting a new project. Creates `PRODUCT.md`, `DESIGN.md`, `CHANGE
 
 ### Step 1: Verify git repo
 
-Check that `.git` exists in the current directory.
+If `.git` does not exist in the current directory, initialize one on `main`:
+```bash
+git init -b main
+```
+Print: "Initialized git repository (branch: main)."
 
-If not found, stop:
-> "Run `git init` first, then re-run `/j-flow-project`."
+If `.git` already exists, leave it as-is.
 
 If `PRODUCT.md` already exists in the current directory, stop:
 > "PRODUCT.md already exists. Use `--update` to modify the backlog."
@@ -212,6 +215,18 @@ Stage and commit all created files:
 git add PRODUCT.md DESIGN.md CHANGELOG.md CONSTITUTION.md .specs/
 git commit -m "chore: j-flow-project — product definition + backlog"
 ```
+
+### Step 9b: Ensure `develop` branch exists
+
+Check: `git show-ref --verify --quiet refs/heads/develop`.
+
+If `develop` does not exist yet, create it from the commit just made and switch to it:
+```bash
+git checkout -b develop
+```
+Print: "Created `develop` branch — features branch off `develop` from here on."
+
+If `develop` already exists, switch to it: `git checkout develop`.
 
 ### Step 10: Print success and invoke scaffold
 

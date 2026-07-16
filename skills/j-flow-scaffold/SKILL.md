@@ -209,6 +209,16 @@ If DESIGN.md is missing or has no color token table, use these fallbacks:
 
 Use `default_theme` and the extracted color tokens in all subsequent steps that generate welcome screens (web, admin, mobile, widgetbook, storybook).
 
+### Step 1c: Create feature branch
+
+Check current branch: `git branch --show-current`.
+
+- If already on `feature/01-infra-base` (re-running after an interruption), stay on it.
+- Otherwise: `git checkout -b feature/01-infra-base`. This branches off `develop` when `/j-flow-project` created it (Step 9b of that skill); if `develop` doesn't exist (repo pre-dates that flow), it branches off whatever is current and print: "No `develop` branch found — branching `feature/01-infra-base` from `{current branch}`."
+- If `feature/01-infra-base` already exists as a branch (not checked out), check it out instead of erroring.
+
+All file writes and the Step 9 approval commit happen on this branch.
+
 ### Step 2: Create root config FIRST (before running CLIs)
 
 Write these files at the project root:
@@ -1341,7 +1351,7 @@ Read `CHANGELOG.md`. Under `## [Unreleased]`, append:
 
 Create `.specs/01-infra-base/`. Use the templates:
 
-**`meta.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute slug=01-infra-base, branch=main (no feature branch — scaffold runs on main), current date. Set ALL status fields to `pending` initially — they update progressively as user verifies.
+**`meta.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute slug=01-infra-base, branch=feature/01-infra-base, current date. Set ALL status fields to `pending` initially — they update progressively as user verifies.
 
 **`functional-spec.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/infra-base-functional-spec.md` and substitute `{today}`. This is a fixed doc (AC-1 through AC-5) — do not regenerate its content per-project.
 
@@ -1392,8 +1402,9 @@ Quick verification:
 
 When all checklist items in review-guide.md pass, reply 'approved' to:
   · Mark gates [FUNCTIONAL SPEC], [TECHNICAL SPEC], [TASK PLAN], [BUILD], [QA], [REVIEW] as completed/approved/green
+  · Generate .specs/01-infra-base/README.md
   · Update .specs/README.md to mark 01-infra-base as [✓]
-  · Commit everything
+  · Commit, then merge feature/01-infra-base into develop
   · Trigger /j-flow-recommend
 
 Reply 'approved' when ready, or describe issues to fix.
@@ -1403,7 +1414,7 @@ Reply 'approved' when ready, or describe issues to fix.
 
 When user replies 'approved':
 
-1. Update `meta.md`: set all gate fields to approved/green/completed with current date, set `current_phase` to done.
+1. Update `meta.md`: set all gate fields to approved/green/completed with current date, set `finish_status: completed` and `finish_completed_at: {today's date}` (01-infra-base skips `/j-flow-finish` — this step is its equivalent), set `current_phase` to done.
 
 2. Update `gate-context.md` with all 6 gate blocks:
 ```
@@ -1432,21 +1443,45 @@ When user replies 'approved':
 
 3. Write `.specs/_system/infra.md` using the system-domain template. Initialize with the 01-infra-base ACs verbatim (Given/When/Then format) under a `### 01-infra-base` entry. This seeds the living system spec that `/j-flow-finish` will append to on future feature completions.
 
-4. Update `.specs/README.md` symbol for `01-infra-base` from `[ ]` to `[✓]`.
+4. Generate `.specs/01-infra-base/README.md`: read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/feature-readme.md` (same template `/j-flow-finish` uses), substitute slug=01-infra-base, branch=feature/01-infra-base, PR=none (merged locally, no PR — see step 6), AC table from `functional-spec.md`, key files from the generated directory tree in `technical-spec.md`, and "Patterns Introduced" = "Initial monorepo scaffold — see technical-spec.md for the full layout."
 
-5. Commit:
+5. Update `.specs/README.md` symbol for `01-infra-base` from `[ ]` to `[✓]`.
+
+6. Commit:
 ```bash
 git add -A
 git commit -m "chore: j-flow-scaffold — 01-infra-base scaffolded and verified"
 ```
 
-6. Print success and invoke `/j-flow-recommend`:
+7. Merge into `develop` and drop the feature branch (no PR — this is the bootstrap feature, nothing to review remotely):
+```bash
+git checkout develop 2>/dev/null || git checkout main
+git merge --no-ff feature/01-infra-base -m "merge: 01-infra-base scaffold"
+git branch -d feature/01-infra-base
+```
+If neither `develop` nor `main` exists as a fallback (shouldn't happen post `/j-flow-project`), stay on `feature/01-infra-base` and warn the user to merge manually.
+
+8. Offer initial release. Read the root `package.json` `version` field (scaffold seeds it at `0.1.0`). Ask:
+```
+01-infra-base done — this is usually the first shippable checkpoint.
+
+Cut the initial release (v{version})?
+
+  1. Yes — run /j-flow-release now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
+```
+- Reply `1`: invoke `/j-flow-release` with no argument. Mode A detects there are no existing git tags and uses the current root `package.json` version as-is (no semver bump) — see `j-flow-release/SKILL.md` Step 1. Wait for it to finish before continuing to item 9.
+- Reply `2`: skip release, continue to item 9.
+
+9. Print success and invoke `/j-flow-recommend`:
 ```
 ✓ 01-infra-base marked as done.
 
 Loading recommended plugins and tools...
 ```
-Then invoke `/j-flow-recommend`.
+Then invoke `/j-flow-recommend` (it ends with its own dialogue offering to start the next backlog feature — nothing further to do here).
 
 ---
 
@@ -1458,6 +1493,7 @@ Then invoke `/j-flow-recommend`.
 - Review mode is read-only — never write any files when `--review` flag is present
 - Never run `pnpm install` or `flutter pub get` — those go in the README instructions for the user
 - Verify prerequisites (node, pnpm, flutter) before running anything
+- Generate mode always works on `feature/01-infra-base` (Step 1c), never commits scaffold output directly to `main`/`develop`
 - Use `--skip-git` flags where supported so we maintain a single commit at the end
 - Read PRODUCT.md to detect admin hint (keywords: "admin", "admin panel", "back-office"), then ALWAYS ask the user explicitly before generating apps/admin
 - Never add `baseUrl` to any tsconfig — use `paths` only when needed, without `baseUrl`
