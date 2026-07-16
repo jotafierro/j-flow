@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Every phase-completion message that used to end in a bare `Next step: /j-flow-x` suggestion (start, spec, plan, build, qa, review, reopen — 11 sites) now asks a 1/2 question instead: run the next command now, or stay and discuss/adjust first. Canonical pattern lives in `references/gate-rules.md` under "Next-step dialogue". The three documented auto-chains (project→scaffold, project --update→scaffold --review, scaffold→recommend) are unchanged — they still run without asking.
+
 ## [1.2.5] - 2026-07-15
 
 ### Fixed

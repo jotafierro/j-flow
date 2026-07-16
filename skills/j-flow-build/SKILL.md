@@ -134,12 +134,17 @@ Update `.specs/{slug}/meta.md`: set `build_status: completed`, `build_completed_
 
 Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[B]`.
 
-Print:
+Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-qa`):
 ```
 Build complete ✓
   Layers implemented: {list of layers}
-  
-Next step: /j-flow-qa
+
+Continue to next step?
+
+  1. Yes — run /j-flow-qa now
+  2. No — stay here, I want to discuss or adjust first
+
+Enter 1 or 2:
 ```
 
 ---

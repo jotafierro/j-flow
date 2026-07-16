@@ -108,12 +108,17 @@ If `review/` absent (pre-016 feature):
    ```
 3. Update `.specs/{slug}/meta.md`: set `qa_status: green`, `qa_completed_at: {today's date}`, `current_phase: review`.
 4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[Q]`.
-5. Print:
+5. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-review`):
    ```
    QA gate green ✓
    All applicable stages passed.
-   
-   Next step: /j-flow-review
+
+   Continue to next step?
+
+     1. Yes — run /j-flow-review now
+     2. No — stay here, I want to discuss or adjust first
+
+   Enter 1 or 2:
    ```
 
 ### If any stage fails (red):
@@ -124,11 +129,16 @@ If `review/` absent (pre-016 feature):
    [QA] red {today's date}
      → BLOCKED: {stage name} failed — see qa-report.md
    ```
-3. Print:
+3. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build --fix`):
    ```
    QA gate red ✗
    Stage failed: {stage name}
    See .specs/{slug}/qa-report.md for details.
-   
-   Next step: /j-flow-build --fix
+
+   Continue to next step?
+
+     1. Yes — run /j-flow-build --fix now
+     2. No — stay here, I want to discuss or adjust first
+
+   Enter 1 or 2:
    ```

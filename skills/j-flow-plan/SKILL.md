@@ -127,8 +127,14 @@ When approved:
    ```
 5. Update `.specs/{slug}/meta.md`: set `tasks_status: approved`, `tasks_approved_at: {today's date}`, `current_phase: build`.
 6. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[P]`.
-7. Print:
+7. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build`):
    ```
    Task plan approved and saved ✓
-   Next step: /j-flow-build
+
+   Continue to next step?
+
+     1. Yes — run /j-flow-build now
+     2. No — stay here, I want to discuss or adjust first
+
+   Enter 1 or 2:
    ```
