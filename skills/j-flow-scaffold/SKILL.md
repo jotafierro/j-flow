@@ -81,6 +81,8 @@ CONSTITUTION.md                         ✓ present / ✗ missing
 .specs/01-infra-base/                   ✓ present / ⚠ outdated
 .specs/02-observability/                ✓ present / [ ] not in backlog (optional Phase 0)
 .specs/04-design-polish/                ✓ present / [ ] not in backlog (optional Phase 0)
+.specs/05-deploy/                       ✓ present / [ ] not in backlog (optional Phase 0)
+.specs/06-legal-pages/                  ✓ present / [ ] not in backlog (optional Phase 0)
 .specs/_system/                         ✓ present / ✗ missing
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -96,6 +98,8 @@ CONSTITUTION.md                         ✓ present / ✗ missing
 - `.specs/01-infra-base/` missing → ⚠ outdated
 - `.specs/02-observability/` present but not in `.specs/README.md` → warn (optional — can be added via `/j-flow-project --update`)
 - `.specs/04-design-polish/` present but not in `.specs/README.md` → warn (optional — can be added via `/j-flow-project --update`)
+- `.specs/05-deploy/` present but not in `.specs/README.md` → warn (optional — can be added via `/j-flow-project --update`)
+- `.specs/06-legal-pages/` present but not in `.specs/README.md` → warn (optional — can be added via `/j-flow-project --update`)
 - `.specs/_system/` missing → ✗ missing
 
 After the table, print:

@@ -87,28 +87,28 @@ Then:
 Based on `PRODUCT.md`, propose a phased backlog.
 
 **Rules:**
-- Phase 0 always contains these 4 features in order:
-  - `01-infra-base` (Monorepo + Docker + CI/CD)
-  - `02-observability` (Error tracking + request tracing + NestJS exception filter + Flutter SDK — GlitchTip cloud dev / Sentry cloud prod, no local docker service) — recommended; ask user before including
-  - `03-design-system` (Tokens + Storybook + Widgetbook)
-  - `04-design-polish` (Visual fidelity pass + form UX — submit buttons disabled until required fields filled) — recommended; ask user before including
-- Phase 1 = Core / MVP features — slugs start at `05`
+- Phase 0 always contains these features in order (required ones cannot be skipped):
+  - `01-infra-base` (Monorepo + Docker + CI/CD) — required
+  - `02-observability` (Error tracking + request tracing + NestJS exception filter + Flutter SDK — GlitchTip cloud dev / Sentry cloud prod, no local docker service) — optional, recommended; needs 01
+  - `03-design-system` (Tokens + Storybook + Widgetbook) — required
+  - `04-design-polish` (Visual fidelity pass + form UX — submit buttons disabled until required fields filled) — optional, recommended; needs 03
+  - `05-deploy` (Shared dev environment — Railway API + Vercel web/admin + MongoDB Atlas, deployed on merge to `develop`, connected to the Sentry/GlitchTip cloud project from `02-observability` if included — gives a live URL to hand to early testers) — optional, recommended; needs 01, 03
+  - `06-legal-pages` (Terms of Service + Privacy Policy static pages, linked from web/admin footer and mobile settings) — optional; only offer if `PRODUCT.md`'s **Monetization → Model** is not `free`; needs 03
+- Phase 1 = Core / MVP features — slugs start after the highest included Phase 0 slug
 - Phase 2+ = value-add and advanced features
-- Slug format: `{2-digit number}-{kebab-case-name}` (e.g. `05-auth`, `06-tenants`)
+- Slug format: `{2-digit number}-{kebab-case-name}` (e.g. `07-auth`, `08-tenants`)
 - Each feature has a 1-line description and dependency list (which slugs it needs)
 
-After proposing Phase 0, ask explicitly:
+After proposing Phase 0, ask explicitly (only list `06-legal-pages` if monetization ≠ free):
 
 ```
-Phase 0 includes 2 optional foundation features:
-  02-observability  — error tracking (GlitchTip cloud dev / Sentry cloud prod), request tracing, NestJS exception filter, Flutter SDK
-  04-design-polish  — visual fidelity pass once designs are approved; form UX (disable submit until valid)
+Phase 0 has {3 or 4} optional foundation features:
+  02-observability   error tracking (GlitchTip cloud dev / Sentry cloud prod), request tracing, NestJS exception filter, Flutter SDK
+  04-design-polish   visual fidelity pass once designs are approved; form UX (disable submit until valid)
+  05-deploy          shared dev environment (Railway + Vercel + MongoDB Atlas) — a live URL to share with early testers
+  06-legal-pages     Terms of Service + Privacy Policy pages — you said this product is "{monetization model}"; line these up before charging anyone   ← only shown if monetization != free
 
-Include them?
-  1. Both (recommended)
-  2. Only 02-observability
-  3. Only 04-design-polish
-  4. Neither — skip both
+Reply with which to include: numbers comma-separated (e.g. "02,05"), "all", or "none".
 ```
 
 Display the proposed backlog as a readable outline:
@@ -116,24 +116,41 @@ Display the proposed backlog as a readable outline:
 ```
 Phase 0 — Foundation
   01-infra-base      Turborepo + Docker + CI/CD
-  02-observability   Error tracking + request tracing     (needs: 01)   ← if included
+  02-observability   Error tracking + request tracing     (needs: 01)         ← if included
   03-design-system   Tokens + Storybook + Widgetbook
-  04-design-polish   Visual fidelity + form UX            (needs: 03)   ← if included
+  04-design-polish   Visual fidelity + form UX            (needs: 03)         ← if included
+  05-deploy          Shared dev env (Railway/Vercel/Atlas) (needs: 01, 03)    ← if included
+  06-legal-pages     ToS + Privacy Policy pages            (needs: 03)        ← if included
 
 Phase 1 — Core
-  05-auth            JWT + refresh + biometrics           (needs: 01, 03)
-  06-tenants         Multi-tenant CRUD                    (needs: 05)
+  07-auth            JWT + refresh + biometrics           (needs: 01, 03)
+  08-tenants         Multi-tenant CRUD                    (needs: 07)
   ...
 
 Phase 2 — {Name}
   ...
 ```
 
-If user skips 02-observability or 04-design-polish, renumber accordingly (e.g. if both skipped, design-system stays 03 and Phase 1 starts at 04).
+Renumber sequentially based on what's actually included — e.g. if only `05-deploy` is included alongside the 2 required features, it becomes `03-deploy` and Phase 1 starts at `04`.
 
 Ask: "Does this look right? Anything to add, remove, or move?"
 
 Iterate until the user approves.
+
+### Step 5b: Business/legal advisory (one-time, non-blocking)
+
+If `PRODUCT.md`'s **Monetization → Model** is not `free`, print once (do not repeat on `--update` runs):
+
+```
+Note — this product charges money. A few things worth lining up before your first paying user
+(not before your first tester): a payment processor (Stripe et al. can usually onboard you as an
+individual before you're a registered company — check your country's requirements), and Terms of
+Service + Privacy Policy (06-legal-pages covers the pages; the legal text itself still needs your
+review). Company formation and trademark registration are usually worth deferring until you have
+real users or revenue — they're jurisdiction-specific, so this isn't advice, just a sequencing tip.
+```
+
+This is informational only — never blocks, never writes a file, never asks a follow-up question.
 
 ### Step 6: Generate .specs/README.md
 
@@ -338,6 +355,6 @@ Then immediately invoke `/j-flow-scaffold --review`.
 - Exception: `.specs/01-infra-base/` is owned by `/j-flow-scaffold` — do not create or modify it here
 - If `PRODUCT.md` already exists in init mode (no `--update`), warn and stop immediately
 - Slug numbering always continues from the highest existing number + 1 (never reuse numbers)
-- Phase 0 always contains `01-infra-base` and `03-design-system` — do not remove them; `02-observability` and `04-design-polish` are optional but recommended
+- Phase 0 always contains `01-infra-base` and `03-design-system` — do not remove them (slug numbers shift if optional Phase 0 features are skipped, but these two are never skipped); `02-observability`, `04-design-polish`, `05-deploy` are optional but recommended, `06-legal-pages` is optional and offered only when monetization ≠ free
 - The `--from` and `--from-design` flags are only used in init mode — they are ignored in update mode
 - Agent memory files in `.specs/.agents/` are never overwritten — skip existing files silently
