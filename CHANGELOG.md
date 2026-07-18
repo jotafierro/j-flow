@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `j-flow-project`: Phase 0 gains 2 new optional foundation features, offered the same way as `02-observability`/`04-design-polish` — `05-deploy` (shared dev environment: Railway API + Vercel web/admin + MongoDB Atlas, connected to the Sentry/GlitchTip cloud project if `02-observability` was included, so early testers get a live URL) and `06-legal-pages` (Terms of Service + Privacy Policy static pages, offered only when `PRODUCT.md`'s monetization model isn't `free`). The optional-features prompt is now a single checklist reply (numbers/`all`/`none`) instead of a fixed 4-option menu, since there can now be up to 4 optional items.
+- `j-flow-project`: init mode prints a one-time, non-blocking business/legal advisory (payment processor, ToS/Privacy Policy timing, deferring company formation/trademark) when the product's monetization model isn't `free`.
+- `j-flow-scaffold`: `--review` drift check now also flags `.specs/05-deploy/` and `.specs/06-legal-pages/` if present on disk but missing from `.specs/README.md`.
+
 ## [1.4.0] - 2026-07-16
 
 ### Changed
