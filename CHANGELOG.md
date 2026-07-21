@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-07-21
+
 ### Added
 - `j-flow-project`: init mode adds Step 2b — asks which stack layers (web/api/mobile/admin) the project needs, default all four. Stored as `**Layers:**` in `PRODUCT.md`.
 - `j-flow-scaffold`: reads `**Layers:**` back from `PRODUCT.md` and skips generation entirely (CLI run, docker-compose, CI jobs/services, docs, changelog bullets, review-guide steps, functional-spec ACs) for any layer not declared. Missing `**Layers:**` field defaults to the full stack (backward compatible with existing projects).
