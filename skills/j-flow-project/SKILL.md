@@ -51,11 +51,29 @@ If `PRODUCT.md` already exists in the current directory, stop:
 9. What is explicitly out of scope for v1?
 10. What makes this product different? (one paragraph)
 
+### Step 2b: Determine stack layers
+
+Ask:
+```
+Which layers does this project need?
+  web     — React frontend
+  api     — NestJS + MongoDB backend
+  mobile  — Flutter app
+  admin   — separate React admin panel
+
+Reply with a comma list (e.g. "web,api") or "all" for the full stack.
+Default: all four.
+```
+
+If the user replies blank or "all", set `stack_layers = [web, api, mobile, admin]`. Otherwise parse the comma list (lowercase, trimmed) into `stack_layers`.
+
+This is the only place layer scope is decided — `/j-flow-scaffold` reads it back from `PRODUCT.md` and skips app generation entirely for any layer not listed.
+
 ### Step 3: Build PRODUCT.md
 
 Read the template from `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/product.md`.
 
-Substitute all `{placeholders}` with the answers collected in Step 2. Keep the Tech Stack section exactly as in the template (MongoDB + NestJS + React + Flutter stack).
+Substitute all `{placeholders}` with the answers collected in Step 2. Keep the Tech Stack section's stack descriptions (Backend/API Style/Web/Mobile/Auth/Infra) exactly as in the template — only fill `**Layers:**` with the comma list from Step 2b (e.g. `web, api` or `web, api, mobile, admin`).
 
 Show the full draft to the user. Ask: "Does this look right? Reply 'yes' to save or tell me what to change."
 
@@ -358,3 +376,4 @@ Then immediately invoke `/j-flow-scaffold --review`.
 - Phase 0 always contains `01-infra-base` and `03-design-system` — do not remove them (slug numbers shift if optional Phase 0 features are skipped, but these two are never skipped); `02-observability`, `04-design-polish`, `05-deploy` are optional but recommended, `06-legal-pages` is optional and offered only when monetization ≠ free
 - The `--from` and `--from-design` flags are only used in init mode — they are ignored in update mode
 - Agent memory files in `.specs/.agents/` are never overwritten — skip existing files silently
+- `**Layers:**` in `PRODUCT.md` (set in Step 2b) is the single source of truth for which apps `/j-flow-scaffold` generates — default when absent is all four (web, api, mobile, admin)
