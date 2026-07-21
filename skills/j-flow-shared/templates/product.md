@@ -49,6 +49,7 @@
 
 ## Tech Stack
 
+**Layers:** {comma list of: web, api, mobile, admin — layers this project needs. Omitted layers are not scaffolded. Default when this field is absent: all four.}
 **Backend:** NestJS 11 + Mongoose (MongoDB)
 **API Style:** {rest|graphql}
 **Web:** React + Vite + React Query + Zustand + Tailwind CSS

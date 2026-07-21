@@ -23,7 +23,7 @@ Print: "Verifying prerequisites..." Check each tool with `--version` and abort w
 
 Read-only. No file writes.
 
-**Detection:** Read existing files and build `detection_map`. Print component statuses:
+**Detection:** Read existing files and build `detection_map`. Parse `stack_layers` from `PRODUCT.md`'s `**Layers:**` line the same way Generate mode does (Step 1) — default to all four if absent. For any component whose layer is not in `stack_layers`, report it as `— not in scope (Layers)` instead of `✗ missing`; do not suggest generating it. Print component statuses:
 
 ```
 j-flow-scaffold — Stack Review
@@ -88,6 +88,7 @@ CONSTITUTION.md                         ✓ present / ✗ missing
 ```
 
 **Outdated detection rules:**
+- `docker-compose.yml` missing → `✗ missing` only if `has_api`; otherwise `— not in scope (Layers)`
 - `apps/api/package.json` exists but no `@nestjs/mongoose` in deps → ⚠ outdated
 - `apps/api/src/health/health.controller.ts` missing → ⚠ outdated
 - `PRODUCT.md` `**API Style:** rest` but no `@nestjs/swagger` in `apps/api/package.json` → ✗ missing
@@ -120,21 +121,11 @@ Stop. Do not write any files.
 
 Read existing files and build `detection_map`. Read `PRODUCT.md`:
 - **Project name:** read the **Name** field. Use as `{project}` slug (lowercase-hyphenated, e.g. "My App" → "my-app"). Keep original casing as `{Project Name}` for display strings.
-- **Admin detection (candidate):** Scan **Audience** and **Core Features** sections for keywords: "admin", "admin panel", "back-office", "dashboard". Record as `admin_hint: detected | not detected`. Do NOT set `wants_admin` yet.
+- **Stack layers:** find the `**Layers:**` line in the Tech Stack section. Parse as a comma list into `stack_layers` (lowercase, trimmed — valid values: `web`, `api`, `mobile`, `admin`). If the line is missing or blank, default `stack_layers = [web, api, mobile, admin]` and print: "No `**Layers:**` field in PRODUCT.md — defaulting to full stack (web, api, mobile, admin). Add a `**Layers:**` line to customize."
 
-**Always ask the user explicitly before continuing:**
+Derive flags from `stack_layers`: `has_web`, `has_api`, `has_mobile`, `has_admin` (each `true` iff present in the list).
 
-```
-Generate apps/admin (React admin panel on port 3002)?
-  PRODUCT.md hint: {detected/not detected}
-
-1. Yes — generate apps/admin
-2. No — skip
-```
-
-Set `wants_admin: true` only if the user answers 1 (yes).
-
-**API style question:**
+**API style question — only if `has_api`:**
 
 Scan PRODUCT.md `## Audience` and `## Core Features` for API style signals:
 - GraphQL hints: "multi-tenant", "B2B SaaS", "analytics", "feed", "dashboard with aggregated data", "developer API", "external integration partner"
@@ -160,21 +151,24 @@ After the user answers, write `api_style` back to `PRODUCT.md`:
 Find the line `**API Style:** {rest|graphql}` and replace with `**API Style:** rest` or `**API Style:** graphql`.
 If `PRODUCT.md` does not have the `**API Style:**` line, insert it under `**Backend:**` in the Tech Stack section.
 
-Then show the scaffold plan and ask for final confirmation:
+If `!has_api`, skip this question entirely — no api_style is set, and nothing is written back to PRODUCT.md.
+
+Then show the scaffold plan (only listing components for included layers) and ask for final confirmation:
 
 ```
-Scaffold plan:
-  Root config:        package.json, turbo.json, pnpm-workspace.yaml, docker-compose.yml, .github/workflows/ci.yml, .env.example, .gitignore, tsconfig.json
-  apps/api:           NestJS — REST (controllers + Swagger)      ← when api_style: rest
-  apps/api:           NestJS — GraphQL (resolvers + Playground)  ← when api_style: graphql
-  apps/web:           React + Vite (via pnpm create vite)
-  apps/admin:         React + Vite (port 3002)   ← only shown if wants_admin: true
-  apps/e2e:           Playwright (via pnpm create playwright)
-  apps/mobile:        Flutter (via flutter create)
-  apps/mobile/widgetbook: Flutter Widgetbook
-  packages/ui:        React + Storybook (via npx storybook init)
+Scaffold plan (layers: {stack_layers.join(', ')}):
+  Root config:        package.json, turbo.json, pnpm-workspace.yaml, .github/workflows/ci.yml, .env.example, .gitignore, tsconfig.json
+  docker-compose.yml: MongoDB, Redis, Mailhog                     ← only if has_api
+  apps/api:           NestJS — REST (controllers + Swagger)       ← only if has_api, api_style: rest
+  apps/api:           NestJS — GraphQL (resolvers + Playground)   ← only if has_api, api_style: graphql
+  apps/web:           React + Vite (via pnpm create vite)          ← only if has_web
+  apps/admin:         React + Vite (port 3002)                     ← only if has_admin
+  apps/e2e:           Playwright (via pnpm create playwright)      ← only if has_web
+  apps/mobile:        Flutter (via flutter create)                 ← only if has_mobile
+  apps/mobile/widgetbook: Flutter Widgetbook                       ← only if has_mobile
+  packages/ui:        React + Storybook (via npx storybook init)   ← only if has_web or has_admin
   packages/domain:    Shared types
-  packages/api-client: Typed API client
+  packages/api-client: Typed API client                            ← only if has_api
   packages/config:    Shared tsconfig + eslint
 
 Continue? (yes/no)
@@ -183,6 +177,8 @@ Continue? (yes/no)
 If user says no, stop.
 
 ### Step 1b: Read DESIGN.md theme defaults
+
+Skip this entire step if `!has_web && !has_admin && !has_mobile` (no layer renders UI, so there's no theme to seed).
 
 Open `DESIGN.md` in the project root. Search for the default theme declaration using these patterns:
 - A line containing `**Default mode:** dark` or `**Default mode:** light`
@@ -325,7 +321,7 @@ public-hoist-pattern[]=@storybook/*
 
 The `public-hoist-pattern` lines are REQUIRED for Storybook to work inside a pnpm workspace — without them, the `storybook` CLI cannot resolve `@storybook/core` from a hoisted location. Confirmed against Storybook 10.x docs.
 
-**`docker-compose.yml`** — reads credentials from root `.env` (loaded via `env_file`):
+**`docker-compose.yml`** — only if `has_api`. Skip entirely if `!has_api` (nothing backend-side needs Mongo/Redis/Mailhog). Reads credentials from root `.env` (loaded via `env_file`):
 ```yaml
 services:
   mongo:
@@ -356,9 +352,10 @@ volumes:
   mongo_data:
 ```
 
-Also write `.env` at root as a copy of `.env.example` (so `docker compose up` works out of the box). Add a note in the post-scaffold output telling the user to change the default credentials before production.
+Also write `.env` at root as a copy of `.env.example` (so `docker compose up` works out of the box, only when `has_api`). Add a note in the post-scaffold output telling the user to change the default credentials before production.
 
-**`.github/workflows/ci.yml`**
+**`.github/workflows/ci.yml`** — the `test` job always runs (covers whatever TS/JS layers exist plus shared packages). Include the `mongodb` service and the Playwright install step only if `has_api` / `has_web` respectively. Include the `flutter` job only if `has_mobile`.
+
 ```yaml
 name: CI
 
@@ -371,7 +368,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mongodb:
+      mongodb:                        # only if has_api
         image: mongo:7
         ports:
           - 27017:27017
@@ -387,12 +384,12 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm install
-      - run: pnpm --filter @{project}/e2e exec playwright install --with-deps chromium
+      - run: pnpm --filter @{project}/e2e exec playwright install --with-deps chromium   # only if has_web
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm test
 
-  flutter:
+  flutter:                            # entire job omitted if !has_mobile
     runs-on: ubuntu-latest
 
     steps:
@@ -412,18 +409,18 @@ jobs:
 
 CI notes:
 - `pnpm/action-setup@v4` reads the version from `packageManager` in `package.json` — do NOT add a `version:` key, it conflicts.
-- `hashFiles()` is invalid in a job-level `if` (only works in step contexts) — the flutter job runs unconditionally since mobile always exists in this scaffold.
-- `playwright install --with-deps chromium` must run in CI before `pnpm test`; the local binary installed during scaffold is not committed.
+- `hashFiles()` is invalid in a job-level `if` (only works in step contexts) — since the flutter job is only written to the file at all when `has_mobile`, no runtime conditional is needed.
+- `playwright install --with-deps chromium` must run in CI before `pnpm test`; the local binary installed during scaffold is not committed. Omit this step (and the `mongodb` service block) from the generated YAML when the corresponding layer is absent — don't leave a no-op step in.
 - `flutter-version: "3.41.x"` matches Dart `^3.11.5` from pubspec. Update this when bumping Flutter in the project.
 
-**`.env.example`**
+**`.env.example`** — the Mongo block only if `has_api`:
 ```
-# Docker Compose (local dev)
+# Docker Compose (local dev)          ← only if has_api
 MONGO_INITDB_DATABASE={project}_dev
 MONGO_INITDB_ROOT_USERNAME=root
 MONGO_INITDB_ROOT_PASSWORD=changeme
 
-# Each app has its own .env.example — see apps/{api,web,admin}/.env.example
+# Each app has its own .env.example — see apps/{api,web,admin}/.env.example  (list only the layers actually generated)
 ```
 
 ### Step 3: Create packages/config first (other tsconfigs extend from here)
@@ -481,11 +478,11 @@ export default tseslint.config({
 
 ### Step 4: Run official CLIs (one at a time, with clear progress messages)
 
-For each app, ONLY if its directory doesn't exist (idempotent).
+For each app, ONLY if its directory doesn't exist (idempotent) AND its layer is included (`has_api`/`has_web`/`has_admin`/`has_mobile` from Step 1). Skip a component's entire section — CLI run, post-processing, generated files — when its layer flag is false.
 
-**Order matters: create packages/domain, packages/api-client, and packages/ui (full sections below, including `storybook init`) BEFORE running any app CLI.** apps/web and apps/admin `package.json` declare `workspace:*` deps on these three packages. If `pnpm create playwright`, `pnpm exec`, or any other pnpm-aware command runs while those packages don't exist yet on disk, pnpm's workspace resolution fails trying to link them. Sequence: packages/config (Step 3) → packages/domain → packages/api-client → packages/ui → THEN apps/api, apps/web, apps/admin, apps/e2e, apps/mobile, apps/mobile/widgetbook (any order among the apps).
+**Order matters: create packages/domain, packages/api-client (if `has_api`), and packages/ui (if `has_web` or `has_admin`; full section below, including `storybook init`) BEFORE running any app CLI.** apps/web and apps/admin `package.json` declare `workspace:*` deps on these packages. If `pnpm create playwright`, `pnpm exec`, or any other pnpm-aware command runs while those packages don't exist yet on disk, pnpm's workspace resolution fails trying to link them. Sequence: packages/config (Step 3) → packages/domain → packages/api-client → packages/ui → THEN whichever of apps/api, apps/web, apps/admin, apps/e2e, apps/mobile, apps/mobile/widgetbook are included (any order among the apps).
 
-**apps/api (NestJS):**
+**apps/api (NestJS) — only if `has_api`:**
 ```bash
 cd apps && npx -y @nestjs/cli@latest new api --strict --package-manager pnpm --skip-git
 cd ..
@@ -689,7 +686,7 @@ and replace with:
 ```
 This eliminates the `@typescript-eslint/no-unsafe-member-access` lint error on `res.body.status`.
 
-**apps/web (React + Vite):**
+**apps/web (React + Vite) — only if `has_web`:**
 ```bash
 cd apps && pnpm create vite@latest web --template react-ts
 cd ..
@@ -697,8 +694,8 @@ cd ..
 
 Post-process `apps/web/package.json`:
 - Rename to `@{project}/web`
-- Add external deps: `@tanstack/react-query`, `zustand`, `react-hook-form`, `zod`, `@hookform/resolvers`, `react-router-dom`, `tailwindcss` (use real version ranges)
-- Add internal workspace deps with `workspace:*` protocol — REQUIRED for pnpm to link locally instead of trying npm registry:
+- Add external deps: `@tanstack/react-query`, `zustand`, `react-hook-form`, `zod`, `@hookform/resolvers`, `react-router-dom`, `tailwindcss` (use real version ranges) — omit `@tanstack/react-query` if `!has_api` (nothing to fetch)
+- Add internal workspace deps with `workspace:*` protocol — REQUIRED for pnpm to link locally instead of trying npm registry. Only include `@{project}/api-client` if `has_api`:
   ```json
   "dependencies": {
     "@{project}/ui": "workspace:*",
@@ -782,9 +779,9 @@ VITE_API_URL=http://localhost:3000/api/v1
 
 Also write `apps/web/.env` as a copy of `apps/web/.env.example`.
 
-**apps/admin (only if user confirms — see Detection step):**
+**apps/admin — only if `has_admin`:**
 
-Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST use `workspace:*` protocol:
+Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST use `workspace:*` protocol (only include `@{project}/api-client` if `has_api`):
 ```json
 "dependencies": {
   "@{project}/ui": "workspace:*",
@@ -843,7 +840,7 @@ Add devDeps to `apps/web/package.json`: `vitest`, `jsdom`, `@testing-library/rea
 
 If apps/admin was generated, add the same smoke test files there too. The test title text must be `'{Project Name} — admin'` to match the admin App.tsx.
 
-**apps/e2e (Playwright):**
+**apps/e2e (Playwright) — only if `has_web`** (e2e drives the web dev server; skip entirely if there's no web app to test):
 ```bash
 cd apps && pnpm create playwright@latest e2e --quiet --browser=chromium --no-browsers
 cd ..
@@ -903,7 +900,7 @@ cd apps/e2e && pnpm exec playwright install chromium && cd ../..
 ```
 This downloads only the chromium binary so `pnpm test` works first try without pulling firefox/webkit too. One-time download (~120MB), under 30 seconds.
 
-**apps/mobile (Flutter):**
+**apps/mobile (Flutter) — only if `has_mobile`:**
 ```bash
 cd apps && flutter create mobile --org com.{project} --platforms=ios,android,web --description="{project} mobile app"
 cd ..
@@ -987,7 +984,7 @@ void main() {
 
 - Verify `apps/mobile/analysis_options.yaml` uses `flutter_lints` (default from `flutter create`). Do NOT add custom rules that conflict.
 
-**apps/mobile/widgetbook (Flutter Widgetbook):**
+**apps/mobile/widgetbook (Flutter Widgetbook) — only if `has_mobile`:**
 ```bash
 cd apps/mobile && flutter create widgetbook --template=app --platforms=web,macos --description="Widgetbook catalog" --project-name=widgetbook_app
 cd ../..
@@ -1104,7 +1101,7 @@ void main() {
 }
 ```
 
-**packages/ui (React design system + Storybook):**
+**packages/ui (React design system + Storybook) — only if `has_web` or `has_admin`:**
 
 Create `packages/ui/package.json` first. Storybook 10.x folded `addon-essentials`, `addon-interactions`, `addon-blocks`, and `@storybook/react` into the core — devDeps simplified:
 
@@ -1284,7 +1281,7 @@ export type ISODate = string;
 
 Note: Only base primitives live here at scaffold time. Domain types (KarmaScore, Level, Streak, etc.) are added as product features are built. Financial types (Cents, ISOCurrency) are added only when billing features are scoped.
 
-**packages/api-client:**
+**packages/api-client — only if `has_api`:**
 
 **`packages/api-client/package.json`** — name `@{project}/api-client`, with workspace dep:
 ```json
@@ -1317,38 +1314,42 @@ export class ApiClient {
 
 If `README.md` exists, prepend a "Local Development" section. If it doesn't exist, create with the full template: read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-readme.md` and substitute `{Project Name}`, `{Tagline from PRODUCT.md}`, `{project}`.
 
+The template assumes the full stack — when a layer isn't in `stack_layers`, delete its lines before writing: the `Backend` bullet (if `!has_api`), `Mobile` bullet (if `!has_mobile`), `Setup` step 2/flutter pub get (if `!has_mobile`), `Setup` step 4/docker compose (if `!has_api`), the corresponding `Run` table rows (API/Admin/Mobile/Widgetbook, and Mailhog UI if `!has_api`), the `Verify it works` curl block (if `!has_api`), and the matching `Tests` lines (NestJS E2E if `!has_api`, Flutter lines if `!has_mobile`). Docs links (Storybook/Widgetbook/Playwright) only for docs actually written in Step 5b.
+
 ### Step 5b: Generate docs/STORYBOOK.md, docs/WIDGETBOOK.md, and docs/PLAYWRIGHT.md
 
-Create a `docs/` directory if it doesn't exist. Write these three documentation files into the TARGET repo:
+Create a `docs/` directory if it doesn't exist. Write only the docs whose layer was generated:
 
-- `docs/STORYBOOK.md` — read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-storybook.md`, substitute `{Project Name}`, `{default_theme}`.
-- `docs/WIDGETBOOK.md` — read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-widgetbook.md`, substitute `{Project Name}`, `{default_theme}`.
-- `docs/PLAYWRIGHT.md` — read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-playwright.md`, substitute `{Project Name}`, `{project}`.
+- `docs/STORYBOOK.md` — only if `has_web` or `has_admin`. Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-storybook.md`, substitute `{Project Name}`, `{default_theme}`.
+- `docs/WIDGETBOOK.md` — only if `has_mobile`. Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-widgetbook.md`, substitute `{Project Name}`, `{default_theme}`.
+- `docs/PLAYWRIGHT.md` — only if `has_web`. Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-playwright.md`, substitute `{Project Name}`, `{project}`.
 
 ### Step 5c: Generate CLAUDE.md
 
 Write `CLAUDE.md` at the project root: read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-claude-md.md`, substitute `{project}` and `{Project Name}`. This file is read by Claude Code on every session — keep it factual and command-focused, no prose.
 
+Same layer-stripping as Step 5: delete Stack/Commands/Key Files lines for layers not in `stack_layers` (Backend/api if `!has_api`, Mobile/flutter lines if `!has_mobile`, E2E if `!has_web`) — don't document commands for apps that weren't generated.
+
 Also add `CLAUDE.md` to the review detection table in `--review` mode: `CLAUDE.md ✓ present / ✗ missing`.
 
 ### Step 6: Update CHANGELOG.md
 
-Read `CHANGELOG.md`. Under `## [Unreleased]`, append:
+Read `CHANGELOG.md`. Under `## [Unreleased]`, append only the bullets for layers actually generated:
 
 ```markdown
 ### Added
-- [01-infra-base] Scaffolded monorepo with apps/{api, web, admin, e2e, mobile, mobile/widgetbook} and packages/{ui, domain, api-client, config}
-- [01-infra-base] Docker Compose with MongoDB, Redis, Mailhog
+- [01-infra-base] Scaffolded monorepo with apps/{included layers only} and packages/{ui and api-client only if their layer is included; domain, config always}
+- [01-infra-base] Docker Compose with MongoDB, Redis, Mailhog                          ← only if has_api
 - [01-infra-base] GitHub Actions CI pipeline
-- [01-infra-base] Health endpoint at GET /api/v1/health
-- [01-infra-base] Storybook + Widgetbook catalogs with Welcome component (DESIGN.md tokens)
+- [01-infra-base] Health endpoint at GET /api/v1/health                                ← only if has_api
+- [01-infra-base] Storybook + Widgetbook catalogs with Welcome component (DESIGN.md tokens)  ← only the ones generated
 - [01-infra-base] Root README.md with local development instructions
-- [01-infra-base] Default theme detection from DESIGN.md (asks user if missing)
-- [01-infra-base] Centered welcome screens for web, admin, mobile, widgetbook, storybook (DESIGN.md tokens)
-- [01-infra-base] Smoke tests (vitest) for web and admin
-- [01-infra-base] Playwright browser auto-install on scaffold
+- [01-infra-base] Default theme detection from DESIGN.md (asks user if missing)        ← only if any UI layer included
+- [01-infra-base] Centered welcome screens for web, admin, mobile, widgetbook, storybook (DESIGN.md tokens)  ← list only generated ones
+- [01-infra-base] Smoke tests (vitest) for web and admin                               ← only for layers generated
+- [01-infra-base] Playwright browser auto-install on scaffold                          ← only if has_web
 - [01-infra-base] CLAUDE.md with stack overview, commands, and conventions for Claude Code sessions
-- [01-infra-base] docs/STORYBOOK.md, docs/WIDGETBOOK.md, and docs/PLAYWRIGHT.md
+- [01-infra-base] docs/STORYBOOK.md, docs/WIDGETBOOK.md, and docs/PLAYWRIGHT.md         ← list only the ones written in Step 5b
 ```
 
 ### Step 7: Initialize .specs/01-infra-base/
@@ -1357,21 +1358,21 @@ Create `.specs/01-infra-base/`. Use the templates:
 
 **`meta.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute slug=01-infra-base, branch=feature/01-infra-base, current date. Set ALL status fields to `pending` initially — they update progressively as user verifies.
 
-**`functional-spec.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/infra-base-functional-spec.md` and substitute `{today}`. This is a fixed doc (AC-1 through AC-5) — do not regenerate its content per-project.
+**`functional-spec.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/infra-base-functional-spec.md` and substitute `{today}`. This is a fixed doc otherwise (AC-2 and AC-3 wording never changes) — the only per-project variance is which ACs are included: keep AC-1 only if `has_api`, AC-2 only if `has_web`, AC-4 only if `has_mobile`, AC-5 only if `has_web` or `has_admin` or `has_mobile`. AC-3 (quality gates) always applies. Renumber the kept ACs sequentially. Update the `Scope` and `Edge cases` sections to list only the apps/packages actually generated.
 
 **`technical-spec.md`:** Write a short doc with the directory tree generated.
 
-**`review-guide.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md` and customize for 01-infra-base. Manual Test Steps must include:
+**`review-guide.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md` and customize for 01-infra-base. Manual Test Steps: include only the steps for layers actually generated, renumbered sequentially:
 1. `pnpm install` succeeds with no errors
-2. `docker compose up -d` starts MongoDB, Redis, Mailhog
-3. `pnpm --filter @{project}/api dev` starts API
-4. `curl http://localhost:3000/api/v1/health` returns `{"status":"ok"}`
-5. `pnpm --filter @{project}/web dev` shows page at http://localhost:3001
-6. (if admin) `pnpm --filter @{project}/admin dev` shows page at http://localhost:3002
-7. `pnpm --filter @{project}/ui storybook` shows Storybook with example stories at http://localhost:6006
-8. `cd apps/mobile && flutter pub get && flutter run` runs on emulator/device
-9. `cd apps/mobile/widgetbook && flutter pub get && flutter run -d chrome` shows Widgetbook
-10. `pnpm --filter @{project}/e2e test` runs Playwright sample
+2. `docker compose up -d` starts MongoDB, Redis, Mailhog                              ← only if has_api
+3. `pnpm --filter @{project}/api dev` starts API                                      ← only if has_api
+4. `curl http://localhost:3000/api/v1/health` returns `{"status":"ok"}`               ← only if has_api
+5. `pnpm --filter @{project}/web dev` shows page at http://localhost:3001             ← only if has_web
+6. `pnpm --filter @{project}/admin dev` shows page at http://localhost:3002           ← only if has_admin
+7. `pnpm --filter @{project}/ui storybook` shows Storybook with example stories at http://localhost:6006  ← only if has_web or has_admin
+8. `cd apps/mobile && flutter pub get && flutter run` runs on emulator/device         ← only if has_mobile
+9. `cd apps/mobile/widgetbook && flutter pub get && flutter run -d chrome` shows Widgetbook  ← only if has_mobile
+10. `pnpm --filter @{project}/e2e test` runs Playwright sample                        ← only if has_web
 11. `pnpm lint && pnpm type-check` pass with no errors
 12. VS Code shows no TypeScript errors when opening the project
 
@@ -1384,12 +1385,12 @@ Create `.specs/_system/.gitkeep` so the system spec directory exists from the st
 Print to user:
 
 ```
-✓ Scaffolding complete.
+✓ Scaffolding complete. (layers: {stack_layers.join(', ')})
 
 Files generated:
-  · Root config (turbo, docker compose, CI, env)
-  · packages/{ui, domain, api-client, config}
-  · apps/{api, web, admin?, e2e, mobile, mobile/widgetbook}
+  · Root config (turbo, CI, env, docker compose ← only if has_api)
+  · packages/{domain, config, ui ← if has_web/has_admin, api-client ← if has_api}
+  · apps/{only the layers included: api, web, admin, e2e, mobile, mobile/widgetbook}
   · README.md (with local development instructions)
   · CLAUDE.md (stack, commands, conventions for Claude Code sessions)
   · CHANGELOG.md updated with [Unreleased] entries
@@ -1398,11 +1399,11 @@ Files generated:
 Before marking 01-infra-base as DONE, verify everything works manually.
 See .specs/01-infra-base/review-guide.md for the full checklist.
 
-Quick verification:
+Quick verification (only the lines for included layers):
   1. pnpm install
-  2. docker compose up -d
-  3. pnpm --filter @{project}/api dev   (then: curl http://localhost:3000/api/v1/health)
-  4. pnpm --filter @{project}/web dev   (then open http://localhost:3001)
+  2. docker compose up -d                                                          ← only if has_api
+  3. pnpm --filter @{project}/api dev   (then: curl http://localhost:3000/api/v1/health)  ← only if has_api
+  4. pnpm --filter @{project}/web dev   (then open http://localhost:3001)           ← only if has_web
 
 When all checklist items in review-guide.md pass, reply 'approved' to:
   · Mark gates [FUNCTIONAL SPEC], [TECHNICAL SPEC], [TASK PLAN], [BUILD], [QA], [REVIEW] as completed/approved/green
@@ -1499,6 +1500,6 @@ Then invoke `/j-flow-recommend` (it ends with its own dialogue offering to start
 - Verify prerequisites (node, pnpm, flutter) before running anything
 - Generate mode always works on `feature/01-infra-base` (Step 1c), never commits scaffold output directly to `main`/`develop`
 - Use `--skip-git` flags where supported so we maintain a single commit at the end
-- Read PRODUCT.md to detect admin hint (keywords: "admin", "admin panel", "back-office"), then ALWAYS ask the user explicitly before generating apps/admin
+- Read `**Layers:**` from `PRODUCT.md` (default: all four — web, api, mobile, admin — if missing) to determine `stack_layers`. Skip an app/package's entire generation section — CLI run, post-processing, docs, CHANGELOG bullets, review-guide steps — when its layer isn't included. Never ask a separate per-layer Y/N question; the scaffold plan confirmation (Step 1) is the single gate.
 - Never add `baseUrl` to any tsconfig — use `paths` only when needed, without `baseUrl`
 - Project name derivation: always read from `PRODUCT.md` **Name** field. Convert to lowercase-hyphenated slug for package names (`{project}`). Use original casing for display names in source files (`{Project Name}`).
