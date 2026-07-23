@@ -197,18 +197,23 @@ If it already exists, leave it untouched and print "CHANGELOG.md already exists 
 
 Create `.specs/.agents/` directory if it does not exist.
 
-For each of the 7 agent templates in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/`:
-- `j-flow-architect.md`
-- `j-flow-backend.md`
-- `j-flow-frontend.md`
-- `j-flow-mobile.md`
-- `j-flow-devops.md`
-- `j-flow-quality.md`
-- `j-flow-reviewer.md`
+Filter the 7 agent templates in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/` by `stack_layers` (from Step 2b):
 
-Read each template, substitute `{project name}` with the name from `PRODUCT.md` and `{date}` with today's ISO date (YYYY-MM-DD). Write to `.specs/.agents/{agent}.md`.
+| Agent | Included when |
+|-------|---------------|
+| `j-flow-architect.md` | always |
+| `j-flow-backend.md` | `api` in `stack_layers` |
+| `j-flow-frontend.md` | `web` or `admin` in `stack_layers` |
+| `j-flow-mobile.md` | `mobile` in `stack_layers` |
+| `j-flow-devops.md` | always (infra/CI layer is generated regardless of app layers) |
+| `j-flow-quality.md` | always |
+| `j-flow-reviewer.md` | always |
+
+For each agent that passes its filter, read the template, substitute `{project name}` with the name from `PRODUCT.md` and `{date}` with today's ISO date (YYYY-MM-DD). Write to `.specs/.agents/{agent}.md`.
 
 If a file already exists, skip it and print `{agent}.md already exists — skipped.`
+
+For agents filtered out, print `{agent}.md skipped — {layer} not in stack_layers.` Do not create the file. If a layer is added later (e.g. project re-scoped), the missing agent memory file must be created manually or via a future `--update` layer change — `/j-flow-project --update` does not currently re-run this step.
 
 ### Step 8b: Generate CONSTITUTION.md
 
@@ -376,4 +381,5 @@ Then immediately invoke `/j-flow-scaffold --review`.
 - Phase 0 always contains `01-infra-base` and `03-design-system` — do not remove them (slug numbers shift if optional Phase 0 features are skipped, but these two are never skipped); `02-observability`, `04-design-polish`, `05-deploy` are optional but recommended, `06-legal-pages` is optional and offered only when monetization ≠ free
 - The `--from` and `--from-design` flags are only used in init mode — they are ignored in update mode
 - Agent memory files in `.specs/.agents/` are never overwritten — skip existing files silently
-- `**Layers:**` in `PRODUCT.md` (set in Step 2b) is the single source of truth for which apps `/j-flow-scaffold` generates — default when absent is all four (web, api, mobile, admin)
+- `**Layers:**` in `PRODUCT.md` (set in Step 2b) is the single source of truth for which apps `/j-flow-scaffold` generates and which agent memory files Step 8 creates — default when absent is all four (web, api, mobile, admin)
+- Agent memory is layer-scoped: `j-flow-backend` only if `api`, `j-flow-frontend` only if `web` or `admin`, `j-flow-mobile` only if `mobile`. `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` are always created — cross-cutting or infra always applies

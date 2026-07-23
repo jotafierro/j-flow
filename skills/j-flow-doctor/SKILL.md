@@ -40,7 +40,11 @@ For each expected project-level file, report present / missing:
 
 ### 2. Agent memory
 
-For each of the 7 agents (j-flow-architect, j-flow-backend, j-flow-frontend, j-flow-mobile, j-flow-devops, j-flow-quality, j-flow-reviewer), verify `.specs/.agents/{agent}.md` exists. Missing files are reported.
+Read `PRODUCT.md`'s `**Layers:**` line to derive `stack_layers` (default: all four — web, api, mobile, admin — if absent).
+
+Expected agents: `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` always; `j-flow-backend` only if `api` in `stack_layers`; `j-flow-frontend` only if `web` or `admin`; `j-flow-mobile` only if `mobile`.
+
+For each expected agent, verify `.specs/.agents/{agent}.md` exists — missing files are reported. For each agent NOT expected (its layer isn't in `stack_layers`) whose file exists anyway, report it as `⚠ present but {layer} not in stack_layers — stale from a prior scope change` rather than flagging as healthy.
 
 ### 3. Stack consistency
 
@@ -112,7 +116,7 @@ j-flow-doctor — repo health report
   ...
 
 ▸ Agent memory
-  ✓ all 7 agent memory files present
+  ✓ all expected agent memory files present (4 of 7 — stack_layers: api, web)
 
 ▸ Stack consistency
   ⚠ PRODUCT.md declares Backend: Express, but .specs/.agents/j-flow-backend.md says NestJS
