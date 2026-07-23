@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-07-22
+
 ### Added
 - `j-flow-project`: Step 8 (agent memory init) now filters by `stack_layers` — `j-flow-backend` only if `api`, `j-flow-frontend` only if `web`/`admin`, `j-flow-mobile` only if `mobile`; `j-flow-architect`/`j-flow-devops`/`j-flow-quality`/`j-flow-reviewer` always created.
 - `j-flow-doctor`: Agent memory check is layer-aware — reads `stack_layers` from `PRODUCT.md` before flagging missing/stale agent memory files.
