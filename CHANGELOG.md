@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-07-24
+
+### Changed
+- `j-flow-build`: normal-build mode now builds every layer with tasks first (no per-layer commit), then runs one combined smoke-check gate covering every touched layer's ACs and review files, then commits per layer. Previously each layer was smoke-checked and committed individually before the next layer was built, which meant testing sometimes ran against a partial build.
+
 ## [1.6.1] - 2026-07-22
 
 ### Added

@@ -8,7 +8,7 @@
     {
       "name": "j-flow",
       "description": "Gate-based Spec-Driven Development workflow for MongoDB + NestJS + React + Flutter projects.",
-      "version": "1.6.1",
+      "version": "1.6.2",
       "source": "./",
       "author": {
         "name": "jotafierro"
