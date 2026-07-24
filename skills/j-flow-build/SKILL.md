@@ -48,9 +48,9 @@ Execute layers in the fixed order defined in `${CLAUDE_PLUGIN_ROOT}/skills/j-flo
 
 See `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` for the full layer→agent mapping and each agent's responsibilities.
 
-### Per-Layer Dispatch
+### Build Loop
 
-For each layer with tasks:
+For each layer with tasks — build only, no gate, no commit:
 
 1. Read tasks for this layer from `.specs/{slug}/tasks.json`
 2. Read agent memory from `.specs/.agents/{agent}.md`
@@ -62,64 +62,73 @@ For each layer with tasks:
    - Agent memory (from .specs/.agents/{agent}.md)
    - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for coding conventions
    - Instruction: "Before writing any code, walk the decision ladder for each piece: (1) does this need to exist at all? (2) does the codebase already have this pattern? (3) can stdlib handle it? (4) is there a native platform feature? (5) does an installed dependency already cover it? (6) can it be one line? Only then write the minimum working code. Implement exactly what the tasks require — no extra features or abstractions. Write unit tests in the same pass. Follow the technical spec patterns."
-5. After agent completes — **smoke check gate before committing**:
+5. Move to the next layer.
 
-   a. Collect the ACs covered by this layer's tasks (from `tasks.json` `spec_refs`)
-   b. Identify the review file for this layer:
-      - api / service layer → `.specs/{slug}/review/api.md`
-      - ui layer → `.specs/{slug}/review/web.md` (and `review/admin.md` if admin in scope)
-      - mobile layer → `.specs/{slug}/review/mobile.md`
-      - infra layer → no review file; skip manual check, proceed to commit
+### Combined Smoke-Check Gate
 
-      If the file does not exist (feature pre-016 or infra layer), fall back to extracting
-      the relevant AC steps from `review-guide.md`.
+After every layer with tasks has been built:
 
-   c. Print:
+a. Collect the ACs covered by every built layer's tasks (from `tasks.json` `spec_refs`), grouped by layer.
+b. Identify the review file for each touched layer:
+   - api / service layer → `.specs/{slug}/review/api.md`
+   - ui layer → `.specs/{slug}/review/web.md` (and `review/admin.md` if admin in scope)
+   - mobile layer → `.specs/{slug}/review/mobile.md`
+   - infra layer → no review file; no manual check for this layer
 
-   ```
-   ── Layer: {layer} complete ──────────────────────────────────────────
-   Automated tests: {pass/fail summary from agent output}
+   If a file does not exist (feature pre-016), fall back to extracting the relevant AC
+   steps from `review-guide.md` for that layer.
 
-   Before committing, verify these ACs manually:
-     ACs: {ac-id-1}, {ac-id-2}
-     Testing guide: .specs/{slug}/review/{layer-file}.md
+c. Print one combined checklist covering every touched layer:
 
-   Services needed:
-     docker compose up -d
-     {only list apps relevant to this layer — e.g. api for service/api layers,
-      web/admin for ui layer, mobile for mobile layer}
+```
+── Build complete — {layer-1}, {layer-2}, ... ─────────────────────────
+Automated tests: {pass/fail summary from agent output, per layer}
 
-   Reply:
-     ok          → commit and continue to next layer
-     fix: <desc> → fix the issue first, then re-show this checklist
-     skip        → commit without testing (not recommended — logged in gate-context)
-   ──────────────────────────────────────────────────────────────────────
-   ```
+Before committing, verify these ACs manually:
+  {layer-1}: ACs {ac-id-1}, {ac-id-2} — testing guide: .specs/{slug}/review/{layer-1-file}.md
+  {layer-2}: ACs {ac-id-3} — testing guide: .specs/{slug}/review/{layer-2-file}.md
 
-   d. Wait for user response before proceeding
-   e. If `ok`: update `.specs/{slug}/review/{layer}.md` — in its `## Checklist` table, flip the row(s) for `{ac-id-1}, {ac-id-2}` from `[ ]` to `[x]`. If the file does not exist (pre-016 feature), skip this update. Then append to `.specs/{slug}/gate-context.md` before committing:
-      ```
-        ✓ smoke check {layer} {today's date} — ACs confirmed: {ac-id-1}, {ac-id-2}
-      ```
-      Then proceed to commit.
-   f. If `fix: <desc>`:
-      - Identify which file(s) the issue affects
-      - Dispatch the appropriate domain agent with: the specific issue description, affected files, relevant technical-spec.md section, agent memory
-      - After fix, re-show the smoke check for this layer (return to step 5a)
-   g. If `skip`: proceed to commit; append to `.specs/{slug}/gate-context.md`:
-      ```
-        ⚠ smoke check {layer} {today's date} — skipped by user
-      ```
+Services needed:
+  docker compose up -d
+  {union of apps relevant to all touched layers — e.g. api, web, admin, mobile}
 
-6. Commit the layer:
+Reply:
+  ok          → commit all layers and continue
+  fix: <desc> → fix the issue first, then re-show this checklist
+  skip        → commit without testing (not recommended — logged in gate-context)
+──────────────────────────────────────────────────────────────────────
+```
+
+d. Wait for user response before proceeding.
+e. If `ok`: proceed to Commit Stage, treating every layer's ACs as confirmed.
+f. If `fix: <desc>`:
+   - Identify which file(s) the issue affects, and from those files which layer owns it
+   - Dispatch that layer's domain agent with: the specific issue description, affected files, relevant technical-spec.md section, agent memory
+   - After fix, re-show the **full combined checklist** (return to step c) — not just the fixed layer's slice
+g. If `skip`: proceed to Commit Stage, treating every unconfirmed layer's ACs as skipped.
+
+### Commit Stage
+
+Walk layers in the fixed order (data → service → api → ui → mobile → infra). For each layer that had tasks:
+
+1. `git add` only the files belonging to that layer (from `tasks.json` task `files` fields for that layer's tasks).
+2. Commit:
 
 ```bash
-git add .
 git commit -m "feat({slug}): implement {layer} layer
 
 Tasks: {task-id-1}, {task-id-2}
 ACs: {ac-id-1}, {ac-id-2}"
 ```
+
+3. If this layer's ACs were confirmed (`ok` path): update `.specs/{slug}/review/{layer-file}.md` — in its `## Checklist` table, flip the row(s) for `{ac-id-1}, {ac-id-2}` from `[ ]` to `[x]`. If the file does not exist (pre-016 feature), skip this update. Then append to `.specs/{slug}/gate-context.md`:
+   ```
+     ✓ smoke check {layer} {today's date} — ACs confirmed: {ac-id-1}, {ac-id-2}
+   ```
+4. If this layer's ACs were skipped (`skip` path): append to `.specs/{slug}/gate-context.md`:
+   ```
+     ⚠ smoke check {layer} {today's date} — skipped by user
+   ```
 
 ### After All Layers
 
