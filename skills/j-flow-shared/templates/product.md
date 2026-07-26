@@ -52,7 +52,8 @@
 **Layers:** {comma list of: web, api, mobile, admin — layers this project needs. Omitted layers are not scaffolded. Default when this field is absent: all four.}
 **Backend:** NestJS 11 + Mongoose (MongoDB)
 **API Style:** {rest|graphql}
-**Web:** React + Vite + React Query + Zustand + Tailwind CSS
+**Web:** React + Vite + React Query + Zustand
+**Styling:** {tailwind|plain-css}
 **Mobile:** Flutter + Riverpod + GoRouter
 **Auth:** JWT (access 15min cookie + refresh 30d cookie/header)
 **Infra:** Railway (API) + Vercel (web/admin) + MongoDB Atlas

@@ -3,7 +3,7 @@
 ## Stack
 
 - **Backend:** NestJS (apps/api) — MongoDB/Mongoose, JWT auth, `api/v1` global prefix
-- **Web:** React + Vite (apps/web) — React Query, Zustand, Tailwind, port 3001
+- **Web:** React + Vite (apps/web) — React Query, Zustand, {Tailwind CSS|plain CSS}, port 3001
 - **E2E:** Playwright (apps/e2e) — headless Chromium, tests web at localhost:3001
 - **Mobile:** Flutter (apps/mobile) — Riverpod, GoRouter, dark default
 - **UI catalog:** Storybook (packages/ui), Widgetbook (apps/mobile/widgetbook)
