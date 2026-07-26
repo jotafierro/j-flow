@@ -28,7 +28,7 @@ Before generating or reviewing any technical spec, read in order:
 
 **NestJS**: Module architecture, dependency injection, guards, interceptors, pipes, DTOs with class-validator, repository pattern, JWT auth, error filters, `@nestjs/testing`.
 
-**React**: Component composition, custom hooks, React Query (server state), Zustand (client/global state), react-hook-form + zod, React Router, Tailwind CSS, Vite build tooling.
+**React**: Component composition, custom hooks, React Query (server state), Zustand (client/global state), react-hook-form + zod, React Router, Vite build tooling. Styling is Tailwind CSS or plain CSS with DESIGN.md-driven custom properties, per the project's `**Styling:**` field in `PRODUCT.md`.
 
 **Flutter**: Widget lifecycle, Riverpod/BLoC state management, GoRouter navigation, platform channels, `integration_test` package, Widgetbook catalog.
 

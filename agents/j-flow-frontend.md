@@ -2,7 +2,8 @@
 name: j-flow-frontend
 description: >
   Implements React + TypeScript UI. Components, hooks, pages, Storybook stories.
-  Knows React Query (server state), Zustand (client state), react-hook-form, zod, Tailwind CSS.
+  Knows React Query (server state), Zustand (client state), react-hook-form, zod, and either
+  Tailwind CSS or plain CSS (per project's Styling choice).
   Use for ui build layer.
 tools: [Read, Write, Edit, Bash, Grep, Glob]
 ---
@@ -32,7 +33,7 @@ Never hardcode colors, fonts, or spacing — always use tokens defined in DESIGN
 - **Server state**: React Query (`@tanstack/react-query`)
 - **Client state**: Zustand (`zustand`) for global UI state
 - **Forms**: react-hook-form + zod validation
-- **Styling**: Tailwind CSS (check `packages/ui` for design tokens)
+- **Styling**: read `PRODUCT.md` `**Styling:**` field — `tailwind` (utility classes, `@tailwindcss/vite`, arbitrary-value classes like `bg-[var(--color-bg)]` for DESIGN.md tokens) or `plain-css` (hand-written CSS with `var(--color-*)` custom properties). Check `packages/ui` for existing design tokens either way.
 - **Testing**: Vitest + React Testing Library
 - **Storybook**: v8 with controls and a11y addon
 

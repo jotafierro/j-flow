@@ -85,7 +85,7 @@ Key files generated in your target repo by j-flow:
 |-------|-----------|
 | Database | MongoDB + Mongoose |
 | Backend | NestJS (TypeScript strict) |
-| Frontend | React + React Query + Zustand + Tailwind CSS |
+| Frontend | React + React Query + Zustand + Tailwind CSS (optional) or plain CSS |
 | Mobile | Flutter + Riverpod + GoRouter |
 | Testing | Jest, `@nestjs/testing` + supertest, flutter_test, Playwright, Storybook, Widgetbook |
 | Infra | Docker Compose + GitHub Actions + Railway + Vercel |

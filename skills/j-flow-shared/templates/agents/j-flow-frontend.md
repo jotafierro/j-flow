@@ -1,7 +1,7 @@
 # j-flow-frontend — Agent Memory
 
 **Project:** {project name}
-**Stack:** React + TypeScript + React Query + Zustand + Tailwind + Storybook
+**Stack:** React + TypeScript + React Query + Zustand + {styling: Tailwind CSS | plain CSS} + Storybook
 **Initialized:** {date}
 
 ## Component Patterns
