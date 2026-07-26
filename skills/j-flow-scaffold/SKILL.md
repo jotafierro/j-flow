@@ -54,6 +54,8 @@ apps/api (NestJS)
 apps/web (React + Vite)
   apps/web/package.json                 ✓ present
   apps/web/src/vite-env.d.ts            ⚠ outdated   (missing css module declaration)
+  Styling: {tailwind|plain-css}          (detected from PRODUCT.md `**Styling:**` field)
+    Tailwind: @tailwindcss/vite in package.json + used in vite.config.ts   ✓ present / ✗ missing
 
 apps/admin (React + Vite)
   detected from PRODUCT.md: {yes/no}
@@ -94,6 +96,8 @@ CONSTITUTION.md                         ✓ present / ✗ missing
 - `PRODUCT.md` `**API Style:** rest` but no `@nestjs/swagger` in `apps/api/package.json` → ✗ missing
 - `PRODUCT.md` `**API Style:** graphql` but no `@nestjs/graphql` in `apps/api/package.json` → ✗ missing
 - `apps/web/package.json` exists but no `vite-env.d.ts` with CSS declaration → ⚠ outdated
+- `PRODUCT.md` `**Styling:** tailwind` but no `@tailwindcss/vite` in `apps/web/package.json` (or `apps/admin/package.json` if `has_admin`) → ✗ missing
+- `PRODUCT.md` `**Styling:** plain-css` but `tailwindcss` present in `apps/web/package.json` → ⚠ outdated (unused dependency — remove or update `**Styling:**`)
 - `README.md` missing → ⚠ outdated
 - `CONSTITUTION.md` missing → ✗ missing (run `/j-flow-project` or create manually)
 - `.specs/01-infra-base/` missing → ⚠ outdated
@@ -153,6 +157,28 @@ If `PRODUCT.md` does not have the `**API Style:**` line, insert it under `**Back
 
 If `!has_api`, skip this question entirely — no api_style is set, and nothing is written back to PRODUCT.md.
 
+**Styling question — only if `has_web` or `has_admin`:**
+
+Ask the user:
+
+```
+Styling for apps/web{admin}?
+  ({admin} = " / apps/admin" if has_admin, else omit)
+
+1. Tailwind CSS — utility classes, @tailwindcss/vite plugin, no separate config file (v4)  (recommended: no)
+2. Plain CSS    — CSS custom properties from DESIGN.md tokens, no extra dependency          (recommended: yes)
+
+Enter 1 or 2 (default: 2):
+```
+
+Set `styling: 'tailwind' | 'plain-css'` from the user's response (default `plain-css` if the user just presses enter).
+
+If `!has_web && !has_admin`, skip this question entirely — no `styling` is set, and nothing is written back to `PRODUCT.md`.
+
+After the user answers, update `PRODUCT.md`:
+Find the line `**Styling:** {tailwind|plain-css}` and replace `{tailwind|plain-css}` with the chosen value.
+If `PRODUCT.md` does not yet have the `**Styling:**` line (older project), insert it under `**Web:**` in the Tech Stack section.
+
 Then show the scaffold plan (only listing components for included layers) and ask for final confirmation:
 
 ```
@@ -162,6 +188,8 @@ Scaffold plan (layers: {stack_layers.join(', ')}):
   apps/api:           NestJS — REST (controllers + Swagger)       ← only if has_api, api_style: rest
   apps/api:           NestJS — GraphQL (resolvers + Playground)   ← only if has_api, api_style: graphql
   apps/web:           React + Vite (via pnpm create vite)          ← only if has_web
+  apps/web:           Styling — Tailwind CSS (utility classes)     ← only if has_web, styling: tailwind
+  apps/web:           Styling — Plain CSS (DESIGN.md tokens)       ← only if has_web, styling: plain-css
   apps/admin:         React + Vite (port 3002)                     ← only if has_admin
   apps/e2e:           Playwright (via pnpm create playwright)      ← only if has_web
   apps/mobile:        Flutter (via flutter create)                 ← only if has_mobile
@@ -694,7 +722,8 @@ cd ..
 
 Post-process `apps/web/package.json`:
 - Rename to `@{project}/web`
-- Add external deps: `@tanstack/react-query`, `zustand`, `react-hook-form`, `zod`, `@hookform/resolvers`, `react-router-dom`, `tailwindcss` (use real version ranges) — omit `@tanstack/react-query` if `!has_api` (nothing to fetch)
+- Add external deps: `@tanstack/react-query`, `zustand`, `react-hook-form`, `zod`, `@hookform/resolvers`, `react-router-dom` (use real version ranges) — omit `@tanstack/react-query` if `!has_api` (nothing to fetch)
+- **If `styling: 'tailwind'`:** also add `tailwindcss`, `@tailwindcss/vite` to devDependencies (Tailwind v4 — no `tailwind.config.js` or `postcss.config.js` needed)
 - Add internal workspace deps with `workspace:*` protocol — REQUIRED for pnpm to link locally instead of trying npm registry. Only include `@{project}/api-client` if `has_api`:
   ```json
   "dependencies": {
@@ -715,9 +744,22 @@ declare module '*.css';
 declare module '*.module.css';
 ```
 
+**If `styling: 'tailwind'`:** edit `apps/web/vite.config.ts` to register the plugin:
+```typescript
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+});
+```
+
 **Replace default Vite welcome content for apps/web:**
 
 DELETE `apps/web/src/App.css` (the default Vite CSS is not aligned with DESIGN.md).
+
+**If `styling: 'plain-css'` (default):**
 
 REPLACE `apps/web/src/App.tsx` with:
 ```tsx
@@ -765,7 +807,42 @@ body { background: var(--color-bg); color: var(--color-fg); font-family: system-
   color: var(--color-primary);
 }
 ```
-Substitute `{color_bg_light}`, `{color_fg_light}`, `{color_primary_light}`, `{color_bg_dark}`, `{color_fg_dark}`, `{color_primary_dark}` with actual hex values from DESIGN.md (or fallbacks if missing).
+
+**If `styling: 'tailwind'`:**
+
+REPLACE `apps/web/src/App.tsx` with:
+```tsx
+import './index.css';
+
+export default function App() {
+  return (
+    <main className="min-h-dvh grid place-items-center bg-[var(--color-bg)] text-[var(--color-fg)]">
+      <h1 className="text-[clamp(2rem,6vw,4rem)] font-bold text-center text-[var(--color-primary)]">{Project Name}</h1>
+    </main>
+  );
+}
+```
+
+REPLACE `apps/web/src/index.css` with:
+```css
+@import "tailwindcss";
+
+:root {
+  --color-bg: {color_bg_light};
+  --color-fg: {color_fg_light};
+  --color-primary: {color_primary_light};
+}
+
+[data-theme="dark"] {
+  --color-bg: {color_bg_dark};
+  --color-fg: {color_fg_dark};
+  --color-primary: {color_primary_dark};
+}
+
+body { font-family: system-ui, sans-serif; }
+```
+
+Both variants substitute `{color_bg_light}`, `{color_fg_light}`, `{color_primary_light}`, `{color_bg_dark}`, `{color_fg_dark}`, `{color_primary_dark}` with actual hex values from DESIGN.md (or fallbacks if missing).
 
 Edit `apps/web/src/main.tsx` to inject the default theme on `<html>` before React renders. Add this line before `ReactDOM.createRoot(...)`:
 ```ts
@@ -791,7 +868,9 @@ Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST u
 }
 ```
 
-Apply the same welcome-screen replacements as apps/web, except the title text in `App.tsx` must be `{Project Name} — admin`.
+If `styling: 'tailwind'`: same devDependencies (`tailwindcss`, `@tailwindcss/vite`) and the same `apps/admin/vite.config.ts` plugin registration as apps/web.
+
+Apply the same welcome-screen replacements as apps/web (both `styling` variants), except the title text in `App.tsx` must be `{Project Name} — admin`.
 
 Write `apps/admin/.env.example`:
 ```
