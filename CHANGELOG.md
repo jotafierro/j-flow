@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `j-flow-scaffold`: Styling question (Tailwind CSS v4 or plain CSS, default plain CSS) asked alongside API style, only when `web`/`admin` layers are included. Choice is written to `PRODUCT.md` `**Styling:**` and drives conditional dependency/config wiring for `apps/web` and `apps/admin`. `--review` mode detects styling mismatches.
+
+### Changed
+- `j-flow-scaffold`: Tailwind is no longer added to generated projects unconditionally — previously it was declared as a dependency but never actually configured (no Tailwind config, no PostCSS/Vite plugin, no `@tailwind` directive). When selected, it's now wired properly via `@tailwindcss/vite`.
+
 ## [1.6.2] - 2026-07-24
 
 ### Changed
