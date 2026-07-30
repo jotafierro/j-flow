@@ -1,6 +1,6 @@
 {
   "name": "j-flow",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "Gate-based SDD workflow plugin for Claude Code",
   "private": true,
   "scripts": {
