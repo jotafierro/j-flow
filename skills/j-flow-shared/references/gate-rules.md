@@ -55,7 +55,7 @@ Always show numbered options. Never auto-approve.
 
 ## Next-step dialogue (display whenever a phase finishes and a next command exists)
 
-Never print `Next step: {command}` as a bare suggestion. Ask instead:
+Never print `Next step: {command}` as a bare suggestion — **except** read-only status/diagnostic skills (`/j-flow-check`, `/j-flow-doctor`, `/j-flow-analyze`), which run no gate and may print a bare next-step pointer since there is nothing to confirm. For every phase-completion message, ask instead:
 
 ```
 {completion message}

@@ -71,7 +71,7 @@ For each feature folder under `.specs/`:
 
 ### 6. Backlog symbol vs gate state
 
-For each feature in `.specs/README.md` with a status symbol (`[ ]`, `[S]`, `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]`):
+For each feature in `.specs/README.md` with a status symbol (`[ ]`, `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]`):
 - Read the corresponding `meta.md` and infer the actual phase from gate status fields
 - Map actual phase to the expected symbol
 - Report any mismatch
@@ -82,7 +82,6 @@ Mapping table:
 |---------------|-----------------|
 | no meta.md | `[ ]` |
 | `current_phase: functional` + `functional_status: pending` | `[ ]` |
-| `current_phase: functional` + `functional_status: in_progress` | `[S]` |
 | `functional_status: approved` only | `[SF]` |
 | `technical_status: approved` only | `[TF]` |
 | `tasks_status: approved` only | `[P]` |

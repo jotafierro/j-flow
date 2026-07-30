@@ -320,8 +320,7 @@ Map each feature's actual state to the correct symbol using this table:
 | `tasks_status: approved` | `[P]` |
 | `technical_status: approved` | `[TF]` |
 | `functional_status: approved` | `[SF]` |
-| `functional_status: pending`, spec file exists | `[S]` |
-| `functional_status: pending`, no spec started | `[ ]` |
+| `functional_status: pending` | `[ ]` |
 
 Evaluation order: top-to-bottom (first matching condition wins).
 
