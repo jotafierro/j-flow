@@ -87,6 +87,16 @@ Reopening at phase X resets X and all downstream gates back to `pending`. Commit
 | review | review + finish |
 | finish | finish |
 
+## Resetting a gate (reopen / update)
+
+When a gate is cleared (`/j-flow-reopen`) or invalidated (`/j-flow-update`), update ALL THREE stores for each affected gate, in this order:
+
+1. **gate-context.md** — reopen: remove the gate's entry (truncate after the last kept gate). update: append ` [stale]` to the gate's status line.
+2. **meta.md** — set the gate's `{phase}_status:` field: reopen → `pending`; update → `stale`. On reopen, also set `current_phase` to the earliest reopened phase.
+3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md (first matching condition wins; a `stale`/`pending` field falls through to the earlier symbol).
+
+Phase → meta field: functional→`functional_status`, technical→`technical_status`, task plan→`tasks_status`, build→`build_status`, qa→`qa_status`, review→`review_status`, finish→`finish_status`. Downstream sets are in "Cascade rules" above.
+
 ## gate-context.md format (append-only)
 
 Each phase appends ONE section. Never rewrite existing sections.

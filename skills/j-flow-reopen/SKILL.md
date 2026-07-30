@@ -76,9 +76,9 @@ Example — reopen at "task plan" on a feature with all 6 gates:
 - Keep: `[FUNCTIONAL SPEC]`, `[TECHNICAL SPEC]`, `[TASK PLAN]` entries
 - Remove: `[BUILD]`, `[QA]`, `[REVIEW]` entries
 
-### Step 5: Update meta.md
+### Step 5: Reset meta.md
 
-Uncheck the cleared gates in the checklist in `meta.md`.
+For each cleared gate, set its `{phase}_status:` field back to `pending` (phase→field map in `references/gate-rules.md` §"Resetting a gate"). Set `current_phase` to the reopened gate's phase. Then recompute this feature's `.specs/README.md` backlog symbol from the updated meta.md.
 
 ### Step 6: Output
 
