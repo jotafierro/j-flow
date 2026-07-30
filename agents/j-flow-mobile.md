@@ -1,5 +1,6 @@
 ---
 name: j-flow-mobile
+model: sonnet
 description: >
   Implements Flutter + Dart code. Widgets, screens, state management (Riverpod),
   GoRouter navigation, Widgetbook catalog, integration_test specs.

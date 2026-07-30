@@ -1,5 +1,6 @@
 ---
 name: j-flow-devops
+model: sonnet
 description: >
   Configures infrastructure: Docker Compose, GitHub Actions CI/CD, Railway
   (backend), Vercel (frontend), environment variables. Does NOT write app code.

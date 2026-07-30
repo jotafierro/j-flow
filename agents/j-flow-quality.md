@@ -1,5 +1,6 @@
 ---
 name: j-flow-quality
+model: sonnet
 description: >
   Runs the full test suite and validates QA gate. Executes jest/vitest,
   NestJS E2E (supertest), flutter test, integration_test, Playwright, and visual smoke.

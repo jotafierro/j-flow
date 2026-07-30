@@ -1,5 +1,6 @@
 ---
 name: j-flow-architect
+model: opus
 description: >
   Generates technical specs for MongoDB + NestJS + React + Flutter projects.
   Domain expert across the full stack. Reviews functional specs, proposes

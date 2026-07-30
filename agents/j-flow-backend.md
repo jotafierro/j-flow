@@ -1,5 +1,6 @@
 ---
 name: j-flow-backend
+model: sonnet
 description: >
   Implements NestJS + MongoDB code. Writes Mongoose schemas, DTOs, services,
   controllers, guards, pipes, and NestJS E2E specs (supertest). TypeScript-first.

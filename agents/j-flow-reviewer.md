@@ -1,5 +1,6 @@
 ---
 name: j-flow-reviewer
+model: opus
 description: >
   Audits code quality against approved technical specs. Detects speculative
   behavior, premature abstractions, pattern violations, security gaps, and

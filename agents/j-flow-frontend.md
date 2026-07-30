@@ -1,5 +1,6 @@
 ---
 name: j-flow-frontend
+model: sonnet
 description: >
   Implements React + TypeScript UI. Components, hooks, pages, Storybook stories.
   Knows React Query (server state), Zustand (client state), react-hook-form, zod, and either
