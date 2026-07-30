@@ -91,11 +91,11 @@
 /j-flow-check --all
   └─ all features summary
 
-/j-flow-doctor [--verbose]
+/j-flow-check --repo [--verbose]
   └─ read-only diagnostics: PRODUCT.md / DESIGN.md / agent memory / backlog drift / per-feature integrity
   └─ never writes; reports a punch list and suggests which fix skills to run
 
-/j-flow-analyze [--verbose]
+/j-flow-check --consistency [--verbose]
   └─ cross-consistency: AC→task, task→AC, AC→test, AC vs _system/ collisions
   └─ read-only; run any time after /j-flow-spec to catch gaps early
 

@@ -8,7 +8,7 @@ The single-feature operation target, resolved in order:
 2. Else, scan `.specs/*/meta.md` for features whose state is non-terminal (`finish_status` not `completed`). If exactly one, that is the active feature.
 3. Else (zero or multiple candidates), do not guess — list the candidates and ask the user which feature to act on.
 
-Read-only inspectors may operate over ALL features when asked (e.g. `/j-flow-check --all`, `/j-flow-doctor`); the rule above is for single-feature operations.
+Read-only inspectors may operate over ALL features when asked (e.g. `/j-flow-check --all`, `/j-flow-check --repo`); the rule above is for single-feature operations.
 
 ## Gate Check Algorithm
 
@@ -55,7 +55,7 @@ Always show numbered options. Never auto-approve.
 
 ## Next-step dialogue (display whenever a phase finishes and a next command exists)
 
-Never print `Next step: {command}` as a bare suggestion — **except** read-only status/diagnostic skills (`/j-flow-check`, `/j-flow-doctor`, `/j-flow-analyze`), which run no gate and may print a bare next-step pointer since there is nothing to confirm. For every phase-completion message, ask instead:
+Never print `Next step: {command}` as a bare suggestion — **except** the read-only inspector `/j-flow-check` (all modes: status, `--repo`, `--consistency`), which runs no gate and may print a bare next-step pointer since there is nothing to confirm. For every phase-completion message, ask instead:
 
 ```
 {completion message}
@@ -117,7 +117,7 @@ When a phase completes and its gate is approved, update ALL THREE stores. This i
 
 ## Backlog symbols
 
-The `.specs/README.md` backlog symbol for a feature, computed from meta.md state (first match wins, top to bottom). This is the single source — `j-flow-project` (sync) and `j-flow-doctor` (drift check) both use it.
+The `.specs/README.md` backlog symbol for a feature, computed from meta.md state (first match wins, top to bottom). This is the single source — `j-flow-project` (sync) and `j-flow-check --repo` (drift check) both use it.
 
 | Condition | Symbol |
 |-----------|--------|
@@ -181,4 +181,4 @@ Stale gates block subsequent skills the same as missing gates.
 
 ## AC format
 
-Acceptance Criteria in `functional-spec.md` use Given/When/Then structure (`### AC-N — {name}` heading, `**Given** / **When** / **Then:**` lines). Free-form ACs from pre-013 specs are accepted but degrade traceability in `/j-flow-analyze` and `/j-flow-qa`.
+Acceptance Criteria in `functional-spec.md` use Given/When/Then structure (`### AC-N — {name}` heading, `**Given** / **When** / **Then:**` lines). Free-form ACs from pre-013 specs are accepted but degrade traceability in `/j-flow-check --consistency` and `/j-flow-qa`.

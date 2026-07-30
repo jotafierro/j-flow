@@ -64,7 +64,7 @@ In `gate-context.md`, append ` [stale]` to each affected gate's status line:
 Before: `[BUILD] completed 2026-06-10`
 After:  `[BUILD] completed 2026-06-10 [stale]`
 
-Then, for the SAME downstream set, set each gate's `meta.md` `{phase}_status:` field to `stale` and recompute this feature's `.specs/README.md` backlog symbol. This keeps meta.md and gate-context.md in sync (otherwise `/j-flow-check` and `/j-flow-doctor` disagree). See `references/gate-rules.md` §"Resetting a gate".
+Then, for the SAME downstream set, set each gate's `meta.md` `{phase}_status:` field to `stale` and recompute this feature's `.specs/README.md` backlog symbol. This keeps meta.md and gate-context.md in sync (otherwise `/j-flow-check` status and `--repo` disagree). See `references/gate-rules.md` §"Resetting a gate".
 
 ### Step 5: Commit
 
