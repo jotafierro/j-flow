@@ -15,6 +15,8 @@ This skill does not execute. It bundles shared assets that other j-flow skills r
 | Topic | File |
 |-------|------|
 | Gate format, status values, cascade rules | `references/gate-rules.md` |
+| How to find the active feature | `references/gate-rules.md` |
+| Gate check algorithm | `references/gate-rules.md` |
 | Build layer order, agent ownership map | `references/layer-order.md` |
 | Implementation + spec constraints | `references/code-style.md` |
 | Agent scopes (what each agent reads and writes) | `references/agent-scopes.md` |

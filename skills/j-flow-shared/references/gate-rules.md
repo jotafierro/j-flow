@@ -1,5 +1,21 @@
 # Gate Rules
 
+## How to Find Active Feature
+
+The single-feature operation target, resolved in order:
+
+1. If the current git branch is `feature/{slug}`, the active feature is `.specs/{slug}/`.
+2. Else, scan `.specs/*/meta.md` for features whose state is non-terminal (`finish_status` not `completed`). If exactly one, that is the active feature.
+3. Else (zero or multiple candidates), do not guess — list the candidates and ask the user which feature to act on.
+
+Read-only inspectors may operate over ALL features when asked (e.g. `/j-flow-check --all`, `/j-flow-doctor`); the rule above is for single-feature operations.
+
+## Gate Check Algorithm
+
+Before running a gate's work: find the active feature (above), read `.specs/{slug}/gate-context.md`, and require the prior gate's entry to be present, approved, and not `[stale]` (see the cascade + status tables below). If missing or stale, print the block message and stop.
+
+`gate-context.md` is the source of truth for gate state. `meta.md` `{phase}_status:` fields and `.specs/README.md` backlog symbols are projections of it — when they disagree, gate-context wins and the projections should be recomputed (see "Resetting a gate").
+
 ## Approval gates
 
 | Gate | meta.md field | Required before |
