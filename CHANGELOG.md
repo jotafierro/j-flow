@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `j-flow-reopen` targeted a nonexistent meta.md "checklist" and left cleared gates reading as approved/green/completed; `j-flow-update` marked `gate-context.md` stale but never touched `meta.md`, so `/j-flow-check` and `/j-flow-doctor` disagreed. Both now reset the real `{phase}_status` fields via one canonical "Resetting a gate" procedure in `gate-rules.md`. (plan 027)
+- `FLOW.md` §"Shared Patterns" pointed at four things in `j-flow-shared/SKILL.md` that lived elsewhere or nowhere; pointers corrected. (plan 026)
+
+### Added
+- `gate-rules.md`: canonical "How to Find Active Feature" and "Gate Check Algorithm" sections — previously referenced by 10 skills but defined nowhere. (plan 026)
+- Per-agent `model:` selection: `opus` for `j-flow-architect`/`j-flow-reviewer`, `sonnet` for the implementation agents. (plan 028)
+- `allowed-tools` (read-only: `Read Grep Glob Bash`) on `j-flow-doctor`/`j-flow-analyze`/`j-flow-check` to mechanically enforce their read-only contract. (plan 029)
+
+### Removed
+- Dead `[S]` backlog symbol — was defined differently in `j-flow-project` vs `j-flow-doctor` and unreachable in both. `functional_status: pending` now maps to `[ ]`. (plan 030)
+
 ## [1.7.0] - 2026-07-26
 
 ### Added
