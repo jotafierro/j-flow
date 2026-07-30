@@ -1,5 +1,6 @@
 ---
 name: j-flow-doctor
+allowed-tools: Read Grep Glob Bash
 description: Read-only diagnostic that checks a target j-flow repo for drift, missing artifacts, and inconsistency. Reports findings; never writes or auto-fixes. Use when returning to a stale repo or cloning a project that uses j-flow. Usage: /j-flow-doctor [--verbose]
 ---
 

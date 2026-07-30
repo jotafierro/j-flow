@@ -1,5 +1,6 @@
 ---
 name: j-flow-check
+allowed-tools: Read Grep Glob Bash
 description: Show current feature status and gate progress. Use --all to list all features. Usage: /j-flow-check [--all]
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: j-flow-analyze
+allowed-tools: Read Grep Glob Bash
 description: Read-only cross-consistency check for the active feature. Verifies every AC has a task, every task maps to an AC, every AC has a test, and no AC contradicts established system behavior. Usage: /j-flow-analyze [--verbose]
 ---
 
