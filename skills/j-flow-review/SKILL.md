@@ -115,9 +115,7 @@ Append to `.specs/{slug}/gate-context.md`:
   → {N} findings resolved
 ```
 
-Update `.specs/{slug}/meta.md`: set `review_status: approved`, `review_approved_at: {today's date}`, `current_phase: finish`.
-
-Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[R]`.
+Advance the **review** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
 
 Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-finish`):
 ```

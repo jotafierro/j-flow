@@ -125,9 +125,8 @@ When approved:
    [TASK PLAN] approved {today's date}
      → {N} tasks across {N} layers, {N} ACs covered
    ```
-5. Update `.specs/{slug}/meta.md`: set `tasks_status: approved`, `tasks_approved_at: {today's date}`, `current_phase: build`.
-6. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[P]`.
-7. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build`):
+5. Advance the **task plan** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+6. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build`):
    ```
    Task plan approved and saved ✓
 

@@ -93,9 +93,44 @@ When a gate is cleared (`/j-flow-reopen`) or invalidated (`/j-flow-update`), upd
 
 1. **gate-context.md** — reopen: remove the gate's entry (truncate after the last kept gate). update: append ` [stale]` to the gate's status line.
 2. **meta.md** — set the gate's `{phase}_status:` field: reopen → `pending`; update → `stale`. On reopen, also set `current_phase` to the earliest reopened phase.
-3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md (first matching condition wins; a `stale`/`pending` field falls through to the earlier symbol).
+3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per §"Backlog symbols" below.
 
 Phase → meta field: functional→`functional_status`, technical→`technical_status`, task plan→`tasks_status`, build→`build_status`, qa→`qa_status`, review→`review_status`, finish→`finish_status`. Downstream sets are in "Cascade rules" above.
+
+## Advancing a gate
+
+When a phase completes and its gate is approved, update ALL THREE stores. This is the single canonical procedure — skills reference it rather than inlining the mechanics.
+
+1. **gate-context.md** — append the phase's `[{GATE NAME}] {status} {date}` section (format below) with the phase's own summary lines.
+2. **meta.md** — set the fields for the phase (table below).
+3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per §"Backlog symbols" below.
+
+| Phase | meta.md fields to set | current_phase → |
+|-------|-----------------------|-----------------|
+| functional | `functional_status: approved`, `functional_approved_at: {date}` | `technical` |
+| technical  | `technical_status: approved`, `technical_approved_at: {date}` | `planning` |
+| task plan  | `tasks_status: approved`, `tasks_approved_at: {date}` | `build` |
+| build      | `build_status: completed`, `build_completed_at: {date}` | `qa` |
+| qa         | `qa_status: green`, `qa_completed_at: {date}` | `review` |
+| review     | `review_status: approved`, `review_approved_at: {date}` | `finish` |
+| finish     | `finish_status: completed`, `finish_completed_at: {date}` | `done` |
+
+## Backlog symbols
+
+The `.specs/README.md` backlog symbol for a feature, computed from meta.md state (first match wins, top to bottom). This is the single source — `j-flow-project` (sync) and `j-flow-doctor` (drift check) both use it.
+
+| Condition | Symbol |
+|-----------|--------|
+| `finish_status: completed` | `[✓]` |
+| `review_status: approved` | `[R]` |
+| `qa_status: green` | `[Q]` |
+| `build_status: completed` | `[B]` |
+| `tasks_status: approved` | `[P]` |
+| `technical_status: approved` | `[TF]` |
+| `functional_status: approved` | `[SF]` |
+| otherwise (`pending`, `stale`, or no meta.md) | `[ ]` |
+
+A `stale` value matches no gate condition and falls through to the earlier gate's symbol.
 
 ## gate-context.md format (append-only)
 

@@ -139,9 +139,7 @@ Append to `.specs/{slug}/gate-context.md`:
 ```
 (Only include layers that had tasks.)
 
-Update `.specs/{slug}/meta.md`: set `build_status: completed`, `build_completed_at: {today's date}`, `current_phase: qa`.
-
-Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[B]`.
+Advance the **build** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
 
 Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-qa`):
 ```

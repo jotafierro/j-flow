@@ -309,20 +309,7 @@ Build a truth map: `slug → { meta fields }` vs `slug → displayed symbol`.
 
 ### Step 2: Sync symbols
 
-Map each feature's actual state to the correct symbol using this table:
-
-| Condition | Symbol |
-|-----------|--------|
-| `finish_status: completed` | `[✓]` |
-| `review_status: approved` | `[R]` |
-| `qa_status: green` | `[Q]` |
-| `build_status: completed` | `[B]` |
-| `tasks_status: approved` | `[P]` |
-| `technical_status: approved` | `[TF]` |
-| `functional_status: approved` | `[SF]` |
-| `functional_status: pending` | `[ ]` |
-
-Evaluation order: top-to-bottom (first matching condition wins).
+Map each feature's actual state to the correct symbol per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` §"Backlog symbols" (first matching condition wins, top to bottom).
 
 For each feature where the actual symbol differs from the displayed symbol, update the `.specs/README.md` table row.
 

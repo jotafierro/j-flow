@@ -106,9 +106,8 @@ If `review/` absent (pre-016 feature):
    [QA] green {today's date}
      → {N} tests passing, checklist {N}/{N}
    ```
-3. Update `.specs/{slug}/meta.md`: set `qa_status: green`, `qa_completed_at: {today's date}`, `current_phase: review`.
-4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[Q]`.
-5. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-review`):
+3. Advance the **qa** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+4. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-review`):
    ```
    QA gate green ✓
    All applicable stages passed.

@@ -151,9 +151,8 @@ When the user replies 'approved' (or equivalent confirmation):
    [FUNCTIONAL SPEC] approved {today's date}
      → key decisions: {1-line summary of main scope decisions}
    ```
-3. Update `.specs/{slug}/meta.md`: set `functional_status: approved`, `functional_approved_at: {today's date}`, `current_phase: technical`.
-4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[SF]`.
-5. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-spec technical`):
+3. Advance the **functional** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+4. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-spec technical`):
    ```
    Functional spec approved and saved ✓
 
@@ -203,9 +202,8 @@ When approved:
      → architecture: {1-line summary of main architecture decisions}
      → patterns: {key patterns chosen, e.g. "repository pattern, JWT guards, Riverpod"}
    ```
-3. Update `.specs/{slug}/meta.md`: set `technical_status: approved`, `technical_approved_at: {today's date}`, `current_phase: planning`.
-4. Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[TF]`.
-5. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-plan`):
+3. Advance the **technical** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+4. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-plan`):
    ```
    Technical spec approved and saved ✓
 

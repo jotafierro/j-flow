@@ -158,7 +158,7 @@ git commit -m "docs({slug}): feature README, changelog entry, agent memory, syst
 
 ### Step 4b: Update meta.md
 
-Update `.specs/{slug}/meta.md`: set `finish_status: completed`, `finish_completed_at: {today's date}`, `current_phase: done`.
+Update `.specs/{slug}/meta.md` for the **finish** gate per `references/gate-rules.md` §"Advancing a gate" (`finish_status: completed`, `finish_completed_at`, `current_phase: done`).
 
 ```bash
 git add .specs/{slug}/meta.md
@@ -177,7 +177,7 @@ gh pr create \
 
 If `gh` CLI is not available: print the URL for manual PR creation with recommended title and body.
 
-Update `.specs/README.md`: find the row where the folder column contains `.specs/{slug}/`, replace its status symbol with `[✓]`.
+Recompute the feature's `.specs/README.md` backlog symbol from meta.md per `references/gate-rules.md` §"Backlog symbols" (finish → `[✓]`).
 
 ### Step 6: Output
 

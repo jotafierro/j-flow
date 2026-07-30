@@ -72,23 +72,8 @@ For each feature folder under `.specs/`:
 ### 6. Backlog symbol vs gate state
 
 For each feature in `.specs/README.md` with a status symbol (`[ ]`, `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]`):
-- Read the corresponding `meta.md` and infer the actual phase from gate status fields
-- Map actual phase to the expected symbol
-- Report any mismatch
-
-Mapping table:
-
-| meta.md state | Expected symbol |
-|---------------|-----------------|
-| no meta.md | `[ ]` |
-| `current_phase: functional` + `functional_status: pending` | `[ ]` |
-| `functional_status: approved` only | `[SF]` |
-| `technical_status: approved` only | `[TF]` |
-| `tasks_status: approved` only | `[P]` |
-| `build_status: completed` only | `[B]` |
-| `qa_status: green` | `[Q]` |
-| `review_status: approved` | `[R]` |
-| `finish_status: completed` | `[✓]` |
+- Read the corresponding `meta.md` and compute the expected symbol per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` §"Backlog symbols" (first matching condition wins)
+- Report any mismatch between the displayed symbol and the computed one
 
 ### 7. Gate-context format
 
