@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Consolidated the 3 read-only inspectors into one command.** `/j-flow-doctor` → `/j-flow-check --repo`; `/j-flow-analyze` → `/j-flow-check --consistency`; default `/j-flow-check` still shows feature status. Both old skills removed. (plan 033)
+- **Single canonical gate-write procedure.** The 3-file gate-advance write (meta.md field + gate-context append + README symbol) and the backlog-symbol map were copy-pasted across `spec/plan/build/qa/review/finish` and duplicated in `project`/`doctor`. Now one "Advancing a gate" procedure + one "Backlog symbols" table in `gate-rules.md`; all callers reference them. (plan 032)
+
+### Removed
+- `/j-flow-release --retroactive` mode (rewrote git history via interactive rebase to insert past version bumps — speculative, high blast radius on the release path). Standard forward release unchanged. (plan 031)
+
 ### Fixed
 - `j-flow-reopen` targeted a nonexistent meta.md "checklist" and left cleared gates reading as approved/green/completed; `j-flow-update` marked `gate-context.md` stale but never touched `meta.md`, so `/j-flow-check` and `/j-flow-doctor` disagreed. Both now reset the real `{phase}_status` fields via one canonical "Resetting a gate" procedure in `gate-rules.md`. (plan 027)
 - `FLOW.md` §"Shared Patterns" pointed at four things in `j-flow-shared/SKILL.md` that lived elsewhere or nowhere; pointers corrected. (plan 026)
