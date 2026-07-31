@@ -1,8 +1,9 @@
 {
   "name": "j-flow-marketplace",
-  "description": "Private marketplace for j-flow plugin",
+  "description": "Marketplace for the j-flow plugin",
   "owner": {
-    "name": "jotafierro"
+    "name": "jotafierro",
+    "email": "connect@jotafierro.me"
   },
   "plugins": [
     {

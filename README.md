@@ -7,8 +7,8 @@ Enforce a consistent workflow across all your projects: spec → plan → build 
 ## Install
 
 ```bash
-# Clone the private repo once
-git clone git@github.com:jotafierro/j-flow.git ~/j-flow
+# Clone the repo once
+git clone https://github.com/jotafierro/j-flow.git ~/j-flow
 
 # Register as a local marketplace (once per machine)
 claude plugin marketplace add ~/j-flow --scope user
