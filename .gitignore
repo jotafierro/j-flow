@@ -4,3 +4,6 @@ node_modules/
 
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json
+
+# Personal, per-project local instructions (not part of the public plugin)
+CLAUDE.local.md
