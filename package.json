@@ -1,7 +1,24 @@
 {
   "name": "j-flow",
   "version": "2.0.0",
-  "description": "Gate-based SDD workflow plugin for Claude Code",
+  "description": "Gate-based Spec-Driven Development workflow for MongoDB + NestJS + React + Flutter projects.",
+  "author": "Jonathan Fierro <connect@jotafierro.me> (https://jotafierro.me)",
+  "license": "MIT",
+  "homepage": "https://github.com/jotafierro/j-flow#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jotafierro/j-flow.git"
+  },
+  "keywords": [
+    "sdd",
+    "workflow",
+    "claude-code",
+    "plugin",
+    "nestjs",
+    "flutter",
+    "mongodb",
+    "react"
+  ],
   "private": true,
   "scripts": {
     "validate": "node tests/validate.js",
