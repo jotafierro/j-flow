@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- MIT `LICENSE` file (the plugin already declared MIT in its manifest).
+- Public marketplace install: `claude plugin marketplace add https://github.com/jotafierro/j-flow`.
+- `.github/CONTRIBUTING.md` and `.github/SECURITY.md`.
+- README: "What problem does it solve?", "How it works" (gate diagram), and a "Your first feature" walkthrough.
+
+### Changed
+- Moved `FLOW.md` → `docs/FLOW.md` and `MIGRATION.md` → `docs/migrations/v2.0.0.md`; added a migrations index.
+- `package.json`: added `license`, `author`, `repository`, `homepage`, `keywords`.
+
+### Fixed
+- QA gate was documented as "6 stages" in `FLOW.md` / `gate-rules.md`; corrected to the canonical 7 (adds the Stage 1 Lint step).
+
 ## [2.0.0] - 2026-07-30
 
 > **Breaking:** two slash commands were removed (folded into `/j-flow-check`) and `/j-flow-release --retroactive` was dropped. No feature-data migration needed — see [docs/migrations/v2.0.0.md](docs/migrations/v2.0.0.md) for the command-rename table.
