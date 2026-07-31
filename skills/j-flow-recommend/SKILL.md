@@ -96,7 +96,7 @@ Lists complementary plugins, skills, and tools for the j-flow workflow.
 
 ```
 ─────────────────────────────────────────────────────────────────────
-For the full j-flow workflow reference, see FLOW.md in the plugin repo.
+For the full j-flow workflow reference, see docs/FLOW.md in the plugin repo.
 Run /j-flow-check anytime to see current feature status.
 ─────────────────────────────────────────────────────────────────────
 ```

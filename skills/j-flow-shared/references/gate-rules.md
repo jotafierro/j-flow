@@ -33,7 +33,7 @@ Before running a gate's work: find the active feature (above), read `.specs/{slu
 | Status | Set by | Meaning |
 |--------|--------|---------|
 | `approved` | User confirms | Spec or plan approved by user |
-| `green` | QA automation | All 6 test stages passed |
+| `green` | QA automation | All 7 test stages passed |
 | `completed` | Build / Finish | Phase ran to completion |
 | `red` | QA automation | At least one test stage failed |
 | `changes-requested` | Review | Critical findings require fixes |
@@ -71,7 +71,7 @@ Enter 1 or 2:
 - Reply `1`: immediately invoke `{next command}`.
 - Reply `2`: stop. Do not invoke anything else. Wait for the user's next message.
 
-This applies to every phase-completion message that currently ends in a `Next step:` line (start, spec, plan, build, qa, review, reopen). It does not apply to the three documented auto-chains in `FLOW.md` (`/j-flow-project` → `/j-flow-scaffold`, `/j-flow-project --update` → `/j-flow-scaffold --review`, `/j-flow-scaffold` → `/j-flow-recommend`), which keep running without asking.
+This applies to every phase-completion message that currently ends in a `Next step:` line (start, spec, plan, build, qa, review, reopen). It does not apply to the three documented auto-chains in `docs/FLOW.md` (`/j-flow-project` → `/j-flow-scaffold`, `/j-flow-project --update` → `/j-flow-scaffold --review`, `/j-flow-scaffold` → `/j-flow-recommend`), which keep running without asking.
 
 ## Cascade rules for /j-flow-reopen
 

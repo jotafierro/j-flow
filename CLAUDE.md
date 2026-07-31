@@ -9,6 +9,7 @@ Plans live outside this repo, at `../plans/j-flow/` (sibling directory) — not 
 - `../plans/j-flow/README.md` — status tracker; mark plan DONE with commit range when finished
 - `CHANGELOG.md [Unreleased]` — update manually during plan execution (don't wait for release)
 - Pattern: feat commit(s) → validate → `chore(changelog): add unreleased entries for plan NNN`
+- CHANGELOG is public-facing: do NOT append `(plan NNN)` to changelog entry text. The plan→commit mapping lives in the private plans tracker (`../plans/j-flow/README.md`), not the shipped CHANGELOG. The commit subject may still name the plan.
 
 ## Release (this repo)
 

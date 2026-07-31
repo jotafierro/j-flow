@@ -54,12 +54,13 @@
   └─ [BUILD completed]
 
 /j-flow-qa                          ← GATE — blocks review if red
-  └─ Stage 1: Unit tests (jest/vitest + flutter test)
-  └─ Stage 2: NestJS E2E (supertest + @nestjs/testing, real MongoDB)
-  └─ Stage 3: Flutter integration_test
-  └─ Stage 4: Playwright E2E
-  └─ Stage 5: Visual smoke (Storybook CI + Widgetbook headless)
-  └─ Stage 6: Manual checklist (from review-guide.md)
+  └─ Stage 1: Lint (ESLint + flutter analyze)
+  └─ Stage 2: Unit tests (jest/vitest + flutter test)
+  └─ Stage 3: NestJS E2E (supertest + @nestjs/testing, real MongoDB)
+  └─ Stage 4: Flutter integration_test
+  └─ Stage 5: Playwright E2E
+  └─ Stage 6: Visual smoke (Storybook CI + Widgetbook headless)
+  └─ Stage 7: Manual checklist (from review-guide.md)
   └─ Flutter/Playwright/visual-smoke checks skip automatically when the corresponding layer (mobile/ui) has no tasks in this feature
   └─ Writes: .specs/{slug}/qa-report.md
   └─ [GATE: QA green]
@@ -110,7 +111,7 @@ When `/j-flow-qa` returns red:
 ```
 /j-flow-qa → red
   → /j-flow-build --fix  (reads qa-report.md, dispatches domain agent per failure)
-  → /j-flow-qa           (re-run all 6 stages)
+  → /j-flow-qa           (re-run all 7 stages)
   → repeat until green
   → /j-flow-review
 ```
@@ -129,7 +130,7 @@ When `/j-flow-review` returns changes-requested:
 | Status | Set by | Meaning |
 |--------|--------|---------|
 | `approved` | User confirms | Spec or plan approved by user |
-| `green` | QA automation | All 6 test stages passed |
+| `green` | QA automation | All 7 test stages passed |
 | `completed` | Build | All layers implemented |
 | `red` | QA automation | At least one test stage failed |
 | `changes-requested` | Review | Critical findings require fixes |

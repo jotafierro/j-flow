@@ -1,30 +1,73 @@
 # j-flow
 
-> Gate-based Spec-Driven Development for MongoDB + NestJS + React + Flutter.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![CI](https://github.com/jotafierro/j-flow/actions/workflows/ci.yml/badge.svg)
 
-Enforce a consistent workflow across all your projects: spec → plan → build → qa → review → finish → release. Each phase gates the next. QA must be green before review. Review must be approved before finish.
+> Gate-based Spec-Driven Development for Claude Code — MongoDB + NestJS + React + Flutter.
+
+## What problem does it solve?
+
+AI coding assistants are fast but undisciplined: they implement features you never asked for, skip the spec, and leave no trail from requirement → code → test. On a real full-stack project that drift compounds fast.
+
+j-flow puts **blocking gates** between every phase of a feature. You can't plan until the spec is approved. You can't review until QA is green. You can't finish until review passes. The workflow's state lives in an append-only `gate-context.md`, so neither you nor the model can quietly skip a step — every acceptance criterion stays traceable to a task, a test, and a commit.
+
+## How it works
+
+A **gate** is a checkpoint that must reach a required state before the next phase can start. j-flow drives one feature through seven phases, each guarded by a gate:
+
+```mermaid
+flowchart LR
+    spec["spec"] -->|approved| plan["plan"]
+    plan -->|approved| build["build"]
+    build --> qa["qa"]
+    qa -->|green| review["review"]
+    review -->|approved| finish["finish"]
+    finish --> release["release"]
+    qa -.->|red · fix loop| build
+    review -.->|changes| build
+```
+
+- **spec / plan / review** gates are approved by *you* — an explicit yes/no dialogue.
+- **qa** is approved by *tests*: all 7 stages must pass (lint, unit, NestJS E2E, Flutter integration, Playwright E2E, visual smoke, manual checklist). Red bounces you back to `build --fix`.
+- Each feature's gate state is recorded in `.specs/{slug}/gate-context.md` — append-only, the single source of truth that `/j-flow-check` reads. The model reads it too, so it can't advance a gate that isn't actually met.
 
 ## Install
 
 ```bash
-# Clone the repo once
-git clone https://github.com/jotafierro/j-flow.git ~/j-flow
+# Add the marketplace (once)
+claude plugin marketplace add https://github.com/jotafierro/j-flow
 
-# Register as a local marketplace (once per machine)
-claude plugin marketplace add ~/j-flow --scope user
-
-# Install globally (available in all projects)
+# Install the plugin
 claude plugin install j-flow
 
-# Or install per-project (no conflicts with other plugins)
-claude plugin marketplace add ~/j-flow --scope project
-claude plugin install j-flow --scope project
-
 # Update later
-git -C ~/j-flow pull && claude plugin update j-flow
+claude plugin marketplace update
+```
+
+To scope the plugin to a single project instead of globally:
+
+```bash
+claude plugin marketplace add https://github.com/jotafierro/j-flow --scope project
+claude plugin install j-flow --scope project
 ```
 
 > **Requirement:** `/j-flow-project` requires an existing git repository. Run `git init` first if needed.
+
+## Your first feature
+
+```
+/j-flow-start checkout-coupons   # creates the feature branch + .specs/checkout-coupons/
+/j-flow-spec                     # dialogue: what / who / trigger / acceptance criteria
+                                 #   → writes functional-spec.md, waits for your approval   [GATE]
+/j-flow-spec technical           # the architect agent drafts the technical spec            [GATE]
+/j-flow-plan                     # breaks ACs into layered tasks + a manual review guide     [GATE]
+/j-flow-build                    # implements data → service → api → ui → mobile, one commit per layer
+/j-flow-qa                       # runs the 7 QA stages; red → /j-flow-build --fix → repeat  [GATE]
+/j-flow-review                   # audits the code against the spec; changes → fix loop      [GATE]
+/j-flow-finish                   # writes the feature README, updates CHANGELOG, opens a PR
+```
+
+At each `[GATE]` j-flow stops and asks — nothing advances until the gate is met. Run `/j-flow-check` anytime to see exactly where the feature stands.
 
 ## Quick Start
 
@@ -47,6 +90,7 @@ git -C ~/j-flow pull && claude plugin update j-flow
 |-------|---------|
 | `/j-flow-project [--update] [--from FILE] [--from-design FILE]` | Define project — PRODUCT.md, DESIGN.md, agent memory; first run auto-triggers scaffold |
 | `/j-flow-scaffold [--review]` | Generate monorepo scaffold (React + Vite, NestJS, Flutter); `--review` is read-only |
+| `/j-flow-recommend` | Suggest plugins/tools for the workflow, then offer to start the next backlog feature |
 | `/j-flow-start {slug}` | Initialize feature — git branch, `.specs/{slug}/`, gate-context |
 | `/j-flow-spec [technical\|--explore]` | Functional spec via dialogue → approval gate; `technical` generates technical spec; `--explore` for lightweight scoping before committing |
 | `/j-flow-plan` | Task plan + review guide → approval gate |
@@ -64,6 +108,21 @@ git -C ~/j-flow pull && claude plugin update j-flow
 | `/j-flow-check --consistency [--verbose]` | Cross-consistency check — every AC has a task, every task has an AC, every AC has a test, no AC contradicts system spec |
 | `/j-flow-eject [path]` | Copy a template / reference / agent into `.specs/.overrides/` for customization |
 
+For the complete command-by-command workflow reference, see **[docs/FLOW.md](docs/FLOW.md)**.
+
+## Stack
+
+j-flow is **deliberately opinionated**: the build agents assume this exact stack. The *gate workflow itself* is stack-agnostic, but if your stack differs you'll need to adapt the domain agents — start with `/j-flow-eject` to customize them without forking. On MongoDB + NestJS + React + Flutter it works out of the box.
+
+| Layer | Technology |
+|-------|-----------|
+| Database | MongoDB + Mongoose |
+| Backend | NestJS (TypeScript strict) |
+| Frontend | React + React Query + Zustand + Tailwind CSS (optional) or plain CSS |
+| Mobile | Flutter + Riverpod + GoRouter |
+| Testing | Jest, `@nestjs/testing` + supertest, flutter_test, Playwright, Storybook, Widgetbook |
+| Infra | Docker Compose + GitHub Actions + Railway + Vercel |
+
 ## Project file structure
 
 Key files generated in your target repo by j-flow:
@@ -79,25 +138,18 @@ Key files generated in your target repo by j-flow:
 | `.specs/{slug}/` | Per-feature folder: `meta.md`, `gate-context.md`, specs, tasks, README |
 | `.specs/_system/` | **Living system spec** — one file per domain (e.g. `auth.md`, `users.md`). Accumulates Acceptance Criteria from every finished feature. Auto-updated by `/j-flow-finish`. Read by `/j-flow-spec` as the behavioral baseline to avoid contradictions. |
 
-## Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Database | MongoDB + Mongoose |
-| Backend | NestJS (TypeScript strict) |
-| Frontend | React + React Query + Zustand + Tailwind CSS (optional) or plain CSS |
-| Mobile | Flutter + Riverpod + GoRouter |
-| Testing | Jest, `@nestjs/testing` + supertest, flutter_test, Playwright, Storybook, Widgetbook |
-| Infra | Docker Compose + GitHub Actions + Railway + Vercel |
-
-## Validate Plugin Structure
+## Validate plugin structure
 
 ```bash
 node tests/validate.js
 ```
 
-Checks all 14 skills, 7 agents, shared templates, and references have valid structure and frontmatter. No LLM required.
+Checks all skills, agents, shared templates, and references have valid structure and frontmatter. No LLM required.
+
+## Contributing
+
+Issues and suggestions are welcome. If you open a PR, run `node tests/validate.js` first and keep to Conventional Commits. See [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) for details and [`.github/SECURITY.md`](.github/SECURITY.md) to report a vulnerability.
 
 ## Credits
 
-Created by [Jonathan Fierro](https://github.com/jotafierro).
+Created by [Jonathan Fierro](https://jotafierro.me). Licensed under [MIT](LICENSE).

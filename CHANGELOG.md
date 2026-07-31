@@ -9,26 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2026-07-30
 
-> **Breaking:** two slash commands were removed (folded into `/j-flow-check`) and `/j-flow-release --retroactive` was dropped. No feature-data migration needed — see [MIGRATION.md](MIGRATION.md) for the command-rename table.
+> **Breaking:** two slash commands were removed (folded into `/j-flow-check`) and `/j-flow-release --retroactive` was dropped. No feature-data migration needed — see [docs/migrations/v2.0.0.md](docs/migrations/v2.0.0.md) for the command-rename table.
 
 ### Changed
-- **Consolidated the 3 read-only inspectors into one command.** `/j-flow-doctor` → `/j-flow-check --repo`; `/j-flow-analyze` → `/j-flow-check --consistency`; default `/j-flow-check` still shows feature status. Both old skills removed. (plan 033)
-- **Single canonical gate-write procedure.** The 3-file gate-advance write (meta.md field + gate-context append + README symbol) and the backlog-symbol map were copy-pasted across `spec/plan/build/qa/review/finish` and duplicated in `project`/`doctor`. Now one "Advancing a gate" procedure + one "Backlog symbols" table in `gate-rules.md`; all callers reference them. (plan 032)
+- **Consolidated the 3 read-only inspectors into one command.** `/j-flow-doctor` → `/j-flow-check --repo`; `/j-flow-analyze` → `/j-flow-check --consistency`; default `/j-flow-check` still shows feature status. Both old skills removed.
+- **Single canonical gate-write procedure.** The 3-file gate-advance write (meta.md field + gate-context append + README symbol) and the backlog-symbol map were copy-pasted across `spec/plan/build/qa/review/finish` and duplicated in `project`/`doctor`. Now one "Advancing a gate" procedure + one "Backlog symbols" table in `gate-rules.md`; all callers reference them.
 
 ### Removed
-- **`/j-flow-doctor` and `/j-flow-analyze`** as standalone commands — merged into `/j-flow-check --repo` and `/j-flow-check --consistency`. (plan 033)
-- `/j-flow-release --retroactive` mode (rewrote git history via interactive rebase to insert past version bumps — speculative, high blast radius on the release path). Standard forward release unchanged. (plan 031)
-- Dead `[S]` backlog symbol — was defined differently in `j-flow-project` vs `j-flow-doctor` and unreachable in both. `functional_status: pending` now maps to `[ ]`. (plan 030)
+- **`/j-flow-doctor` and `/j-flow-analyze`** as standalone commands — merged into `/j-flow-check --repo` and `/j-flow-check --consistency`.
+- `/j-flow-release --retroactive` mode (rewrote git history via interactive rebase to insert past version bumps — speculative, high blast radius on the release path). Standard forward release unchanged.
+- Dead `[S]` backlog symbol — was defined differently in `j-flow-project` vs `j-flow-doctor` and unreachable in both. `functional_status: pending` now maps to `[ ]`.
 
 ### Fixed
-- `j-flow-reopen` targeted a nonexistent meta.md "checklist" and left cleared gates reading as approved/green/completed; `j-flow-update` marked `gate-context.md` stale but never touched `meta.md`, so `/j-flow-check` and `/j-flow-doctor` disagreed. Both now reset the real `{phase}_status` fields via one canonical "Resetting a gate" procedure in `gate-rules.md`. (plan 027)
-- `FLOW.md` §"Shared Patterns" pointed at four things in `j-flow-shared/SKILL.md` that lived elsewhere or nowhere; pointers corrected. (plan 026)
+- `j-flow-reopen` targeted a nonexistent meta.md "checklist" and left cleared gates reading as approved/green/completed; `j-flow-update` marked `gate-context.md` stale but never touched `meta.md`, so `/j-flow-check` and `/j-flow-doctor` disagreed. Both now reset the real `{phase}_status` fields via one canonical "Resetting a gate" procedure in `gate-rules.md`.
+- `FLOW.md` §"Shared Patterns" pointed at four things in `j-flow-shared/SKILL.md` that lived elsewhere or nowhere; pointers corrected.
 
 ### Added
-- `MIGRATION.md` — 1.7.0 → 2.0.0 command-rename guide.
-- `gate-rules.md`: canonical "How to Find Active Feature" and "Gate Check Algorithm" sections — previously referenced by 10 skills but defined nowhere. (plan 026)
-- Per-agent `model:` selection: `opus` for `j-flow-architect`/`j-flow-reviewer`, `sonnet` for the implementation agents. (plan 028)
-- `allowed-tools` (read-only: `Read Grep Glob Bash`) on the read-only inspectors to mechanically enforce their read-only contract. (plan 029)
+- `docs/migrations/v2.0.0.md` — 1.7.0 → 2.0.0 command-rename guide.
+- `gate-rules.md`: canonical "How to Find Active Feature" and "Gate Check Algorithm" sections — previously referenced by 10 skills but defined nowhere.
+- Per-agent `model:` selection: `opus` for `j-flow-architect`/`j-flow-reviewer`, `sonnet` for the implementation agents.
+- `allowed-tools` (read-only: `Read Grep Glob Bash`) on the read-only inspectors to mechanically enforce their read-only contract.
 
 ## [1.7.0] - 2026-07-26
 
