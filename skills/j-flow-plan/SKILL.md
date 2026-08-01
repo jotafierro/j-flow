@@ -7,6 +7,8 @@ description: Generate task plan (tasks.json) and review guide (review-guide.md) 
 
 ## Required reading
 
+**Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default.
+
 Before generating the task plan, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format

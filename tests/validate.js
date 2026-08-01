@@ -131,6 +131,24 @@ for (const ref of EXPECTED_REFERENCES) {
   });
 }
 
+// ── override resolution wiring ───────────────────────────────────────────────
+// Every skill that loads overridable assets must reference the override-resolution
+// rule so ejected overrides are honored (plan 035). scaffold is intentionally excluded
+// (its generation is not overridable — the opinionated core).
+const OVERRIDE_WIRED_SKILLS = [
+  'j-flow-build', 'j-flow-spec', 'j-flow-plan', 'j-flow-review',
+  'j-flow-qa', 'j-flow-finish', 'j-flow-project', 'j-flow-eject',
+];
+
+console.log('\noverride resolution/');
+
+for (const skill of OVERRIDE_WIRED_SKILLS) {
+  check(`${skill} references overrides.md`, () => {
+    const content = fs.readFileSync(path.join(ROOT, 'skills', skill, 'SKILL.md'), 'utf8');
+    assert(content.includes('overrides.md'), `${skill}/SKILL.md must reference references/overrides.md`);
+  });
+}
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);

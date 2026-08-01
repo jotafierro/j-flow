@@ -103,7 +103,7 @@
 /j-flow-eject [path]
   └─ copy templates/references/agent files into .specs/.overrides/ so you can customize without forking
   └─ stages the file; does not commit
-  └─ override-resolution behavior across other skills is tracked in a future plan
+  └─ forward skills resolve overrides from `.specs/.overrides/` — see `references/overrides.md`
 
 ## QA Fix Loop
 

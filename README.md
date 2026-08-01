@@ -112,7 +112,7 @@ For the complete command-by-command workflow reference, see **[docs/FLOW.md](doc
 
 ## Stack
 
-j-flow is **deliberately opinionated**: the build agents assume this exact stack. The *gate workflow itself* is stack-agnostic, but if your stack differs you'll need to adapt the domain agents — start with `/j-flow-eject` to customize them without forking. On MongoDB + NestJS + React + Flutter it works out of the box.
+j-flow is **deliberately opinionated**: the build agents assume this exact stack. The *gate workflow itself* is stack-agnostic, but if your stack differs you'll need to adapt the domain agents — `/j-flow-eject` lets you override them without forking. See **[docs/adapting-your-stack.md](docs/adapting-your-stack.md)** for the full adaptation guide (and its honest boundaries). On MongoDB + NestJS + React + Flutter it works out of the box.
 
 | Layer | Technology |
 |-------|-----------|

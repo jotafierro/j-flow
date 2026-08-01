@@ -7,6 +7,8 @@ description: Generate functional spec (default) via dialogue, or technical spec 
 
 ## Required reading
 
+**Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default. Before dispatching **j-flow-architect**, if `.specs/.overrides/agents/j-flow-architect.md` exists, dispatch a general-purpose agent seeded with that file's content instead of the built-in subagent (task context and memory forwarded unchanged).
+
 Before drafting any spec, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and approval rules

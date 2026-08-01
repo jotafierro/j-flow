@@ -7,6 +7,8 @@ description: Audit code quality against approved technical specs. Only reachable
 
 ## Required reading
 
+**Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default. Before dispatching **j-flow-reviewer**, if `.specs/.overrides/agents/j-flow-reviewer.md` exists, dispatch a general-purpose agent seeded with that file's content instead of the built-in subagent (task context and memory forwarded unchanged).
+
 Before auditing, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format

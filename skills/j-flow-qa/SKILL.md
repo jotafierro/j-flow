@@ -7,6 +7,8 @@ description: Run full QA gate across 7 stages: lint, unit tests, NestJS E2E, Flu
 
 ## Required reading
 
+**Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default. Before dispatching **j-flow-quality**, if `.specs/.overrides/agents/j-flow-quality.md` exists, dispatch a general-purpose agent seeded with that file's content instead of the built-in subagent (task context and memory forwarded unchanged).
+
 Before running QA, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and red/green semantics

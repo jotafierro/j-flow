@@ -66,7 +66,7 @@ Create the destination directory if needed. Copy the source file verbatim to the
   source: ${CLAUDE_PLUGIN_ROOT}/.../<file>
   dest:   .specs/.overrides/<argument>
 
-Edit the destination file. Skills will prefer it over the plugin default once the override-resolution pattern is enabled (tracked in plans/008 — not yet active).
+Edit the destination file. Forward skills resolve it over the plugin default automatically — see ${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md.
 ```
 
 ### Step 6: Stage but do not commit
@@ -78,5 +78,5 @@ Do `git add` for the new file. Do NOT commit — the user reviews the diff and c
 - Single file per invocation. No bulk eject.
 - Never overwrite an existing override.
 - The destination is always under `.specs/.overrides/` — no other location is supported.
-- This skill only COPIES — it does not enable the override-lookup behavior elsewhere. Until plan 008 (override-resolution) ships, ejected files exist but are inert. Tell the user this in the confirmation message.
-- Do not eject SKILL.md files themselves. Reject those paths.
+- This skill only COPIES the asset. Forward skills honor the override at load/dispatch time per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — an edited override wins over the plugin default.
+- Do not eject SKILL.md files themselves. Reject those paths. SKILL bodies, the `/j-flow-scaffold` generation, and the `/j-flow-qa` stage commands are deliberately NOT overridable (the opinionated core) — see the boundary note in `references/overrides.md`.
