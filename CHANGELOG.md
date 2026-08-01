@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-31
+
 ### Added
 - **Stack adaptability.** Ejected overrides are now resolved by the forward skills — edit an ejected agent / template / reference under `.specs/.overrides/` and j-flow uses it instead of the built-in default (see `references/overrides.md`). Lets you retarget the opinionated stack without forking. New guide: `docs/adapting-your-stack.md`. Previously `/j-flow-eject` copied assets but they were inert.
 - MIT `LICENSE` file (the plugin already declared MIT in its manifest).
