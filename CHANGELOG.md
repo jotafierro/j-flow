@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`e2e` is now a first-class, independently-selectable layer.** Choose `e2e` on its own or in any combination (`e2e` only, `e2e,api`, …). When `web` is also present, Playwright boots the local dev server automatically; otherwise it drives an external target via `BASE_URL` (a staging/deployed URL). QA Stage 5 gates on the presence of the e2e harness rather than the web/mobile build layers.
+- **Right-sized scaffold profiles.** `/j-flow-scaffold` derives a `scaffold_profile` from the selected layers: `minimal-workspace` (the default for any TypeScript layer — workspace manifests + `packages/config`/`domain`, with heavy contents deferred to the layer that needs them) that scales seamlessly to the full monorepo as layers are added; and `flutter-only` (mobile as the sole layer) which emits no TypeScript shell at all.
+- **Additive layer growth.** Start a project with a single layer and add more later without restructuring: edit `**Layers:**` in `PRODUCT.md` and run `/j-flow-project --update` — agent memory is backfilled and `/j-flow-scaffold --review` reports the app/package/CI delta to generate. Every layer lives under `apps/<layer>/` from day one, so growth never moves existing code.
+- The `j-flow-backend` agent now documents the in-process scripts/seeders/migrations pattern (NestFactory standalone context / nest-commander) — the right tool for backend one-offs and cron, distinct from a standalone CLI.
+
+### Changed
+- The absent-`**Layers:**` default now includes `e2e`, so existing full-stack scaffolds keep Playwright. An explicit `**Layers:**` list that names `web` without `e2e` intentionally scaffolds no Playwright.
+- Root scaffold files are written create-if-missing / carry-forward: a growth re-run never clobbers hand-edited `package.json`, `turbo.json`, or `ci.yml` (CI additions are print-and-merge).
+
 ## [2.1.0] - 2026-07-31
 
 ### Added

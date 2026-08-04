@@ -11,9 +11,13 @@
 
 /j-flow-scaffold
   └─ feature/01-infra-base branch (off develop)
-  └─ Turborepo monorepo: apps/{api,web,admin?,e2e,mobile+widgetbook}, packages/{ui+storybook,domain,api-client,config}
-  └─ Docker Compose: MongoDB + Redis + Mailhog
-  └─ GitHub Actions CI
+  └─ Right-sized by scaffold_profile from **Layers:** — every layer (web/api/mobile/admin/e2e[/cli]) is independently selectable; apps live under apps/<layer>/
+     · minimal-workspace (default): apps/{included} + packages/{config,domain, ui?/api-client? per layer}; scales to the full monorepo as layers are added
+     · flutter-only (mobile is the sole layer): apps/mobile only, no TS workspace
+     · e2e is a first-class layer: local webServer with web, else external BASE_URL
+  └─ Docker Compose: MongoDB + Redis + Mailhog  ← only if api
+  └─ GitHub Actions CI  ← test job for TS layers (+ flutter job if mobile)
+  └─ Grow later: edit **Layers:** → /j-flow-project --update (backfills agents + scaffold delta, additive)
   └─ On approval: writes .specs/01-infra-base/README.md, marks [✓] in backlog, merges to develop (no PR), sets finish_status: completed in meta.md (skips /j-flow-finish — no tasks.json for a CLI scaffold)
   └─ before /j-flow-recommend: asks whether to cut the initial release (1/2 dialogue → /j-flow-release)
   └─ --review: read-only, reports outdated configs
