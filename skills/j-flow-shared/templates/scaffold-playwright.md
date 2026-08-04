@@ -1,6 +1,11 @@
 # Playwright E2E — {Project Name}
 
-End-to-end browser tests for the web stack in `apps/e2e`. Runs against the React + Vite web app at `http://localhost:3001`.
+End-to-end browser tests in `apps/e2e`. The e2e layer is independent of `web`; its target depends on whether a local web app was scaffolded:
+
+- **With `web`** (local target): runs against the React + Vite web app at `http://localhost:3001`, which `playwright.config.ts` boots automatically via its `webServer` block.
+- **Without `web`** (external target): runs against `process.env.BASE_URL` — a deployed/staging URL or another repo's server. There is no `webServer` block; set `BASE_URL` before running (e.g. `BASE_URL=https://staging.example.com pnpm --filter @{project}/e2e test`).
+
+> When generating this doc, keep only the bullet that matches the project (`has_web` vs `!has_web`) and drop the other.
 
 ## Run
 
@@ -10,7 +15,9 @@ pnpm --filter @{project}/e2e test:headed     # headed (visible browser)
 pnpm --filter @{project}/e2e report          # open last HTML report
 ```
 
-`playwright.config.ts` declares a `webServer` block that boots `pnpm --filter @{project}/web dev` automatically. No need to start the web app separately — locally Playwright reuses a running dev server if one is already up (`reuseExistingServer: !CI`); in CI it starts a fresh one.
+**With `web`:** `playwright.config.ts` declares a `webServer` block that boots `pnpm --filter @{project}/web dev` automatically. No need to start the web app separately — locally Playwright reuses a running dev server if one is already up (`reuseExistingServer: !CI`); in CI it starts a fresh one.
+
+**Without `web`:** there is no `webServer` block. `baseURL` is `process.env.BASE_URL` — point it at your running target before invoking the tests.
 
 ## Where tests live
 

@@ -125,9 +125,9 @@ Stop. Do not write any files.
 
 Read existing files and build `detection_map`. Read `PRODUCT.md`:
 - **Project name:** read the **Name** field. Use as `{project}` slug (lowercase-hyphenated, e.g. "My App" → "my-app"). Keep original casing as `{Project Name}` for display strings.
-- **Stack layers:** find the `**Layers:**` line in the Tech Stack section. Parse as a comma list into `stack_layers` (lowercase, trimmed — valid values: `web`, `api`, `mobile`, `admin`). If the line is missing or blank, default `stack_layers = [web, api, mobile, admin]` and print: "No `**Layers:**` field in PRODUCT.md — defaulting to full stack (web, api, mobile, admin). Add a `**Layers:**` line to customize."
+- **Stack layers:** find the `**Layers:**` line in the Tech Stack section. Parse as a comma list into `stack_layers` (lowercase, trimmed — valid values: `web`, `api`, `mobile`, `admin`, `e2e`). If the line is missing or blank, default `stack_layers = [web, api, mobile, admin, e2e]` and print: "No `**Layers:**` field in PRODUCT.md — defaulting to full stack (web, api, mobile, admin, e2e). Add a `**Layers:**` line to customize." (The absent-line default includes `e2e` so existing full-stack scaffolds keep Playwright — back-compat. An **explicit** `**Layers:**` list that names `web` without `e2e` intentionally scaffolds no Playwright.)
 
-Derive flags from `stack_layers`: `has_web`, `has_api`, `has_mobile`, `has_admin` (each `true` iff present in the list).
+Derive flags from `stack_layers`: `has_web`, `has_api`, `has_mobile`, `has_admin`, `has_e2e` (each `true` iff present in the list).
 
 **API style question — only if `has_api`:**
 
@@ -191,7 +191,7 @@ Scaffold plan (layers: {stack_layers.join(', ')}):
   apps/web:           Styling — Tailwind CSS (utility classes)     ← only if has_web, styling: tailwind
   apps/web:           Styling — Plain CSS (DESIGN.md tokens)       ← only if has_web, styling: plain-css
   apps/admin:         React + Vite (port 3002)                     ← only if has_admin
-  apps/e2e:           Playwright (via pnpm create playwright)      ← only if has_web
+  apps/e2e:           Playwright (via pnpm create playwright)      ← only if has_e2e (local webServer if has_web, else external BASE_URL)
   apps/mobile:        Flutter (via flutter create)                 ← only if has_mobile
   apps/mobile/widgetbook: Flutter Widgetbook                       ← only if has_mobile
   packages/ui:        React + Storybook (via npx storybook init)   ← only if has_web or has_admin
@@ -382,7 +382,7 @@ volumes:
 
 Also write `.env` at root as a copy of `.env.example` (so `docker compose up` works out of the box, only when `has_api`). Add a note in the post-scaffold output telling the user to change the default credentials before production.
 
-**`.github/workflows/ci.yml`** — the `test` job always runs (covers whatever TS/JS layers exist plus shared packages). Include the `mongodb` service and the Playwright install step only if `has_api` / `has_web` respectively. Include the `flutter` job only if `has_mobile`.
+**`.github/workflows/ci.yml`** — the `test` job always runs (covers whatever TS/JS layers exist plus shared packages). Include the `mongodb` service and the Playwright install step only if `has_api` / `has_e2e` respectively. Include the `flutter` job only if `has_mobile`.
 
 ```yaml
 name: CI
@@ -412,7 +412,7 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm install
-      - run: pnpm --filter @{project}/e2e exec playwright install --with-deps chromium   # only if has_web
+      - run: pnpm --filter @{project}/e2e exec playwright install --with-deps chromium   # only if has_e2e
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm test
@@ -506,7 +506,7 @@ export default tseslint.config({
 
 ### Step 4: Run official CLIs (one at a time, with clear progress messages)
 
-For each app, ONLY if its directory doesn't exist (idempotent) AND its layer is included (`has_api`/`has_web`/`has_admin`/`has_mobile` from Step 1). Skip a component's entire section — CLI run, post-processing, generated files — when its layer flag is false.
+For each app, ONLY if its directory doesn't exist (idempotent) AND its layer is included (`has_api`/`has_web`/`has_admin`/`has_mobile`/`has_e2e` from Step 1). Skip a component's entire section — CLI run, post-processing, generated files — when its layer flag is false.
 
 **Order matters: create packages/domain, packages/api-client (if `has_api`), and packages/ui (if `has_web` or `has_admin`; full section below, including `storybook init`) BEFORE running any app CLI.** apps/web and apps/admin `package.json` declare `workspace:*` deps on these packages. If `pnpm create playwright`, `pnpm exec`, or any other pnpm-aware command runs while those packages don't exist yet on disk, pnpm's workspace resolution fails trying to link them. Sequence: packages/config (Step 3) → packages/domain → packages/api-client → packages/ui → THEN whichever of apps/api, apps/web, apps/admin, apps/e2e, apps/mobile, apps/mobile/widgetbook are included (any order among the apps).
 
@@ -919,7 +919,10 @@ Add devDeps to `apps/web/package.json`: `vitest`, `jsdom`, `@testing-library/rea
 
 If apps/admin was generated, add the same smoke test files there too. The test title text must be `'{Project Name} — admin'` to match the admin App.tsx.
 
-**apps/e2e (Playwright) — only if `has_web`** (e2e drives the web dev server; skip entirely if there's no web app to test):
+**apps/e2e (Playwright) — only if `has_e2e`.** The e2e layer is a first-class, independently-selectable Playwright harness. Its target depends on whether `web` is also present:
+- **`has_e2e && has_web`** → Playwright boots the local web dev server (a `webServer` block), today's behavior.
+- **`has_e2e && !has_web`** (e2e-only, or e2e+api/mobile/cli) → NO `webServer`; Playwright drives an **external** target at `process.env.BASE_URL` (a deployed URL, a staging env, or another repo's server). This is the "e2e test project against an external target" case.
+
 ```bash
 cd apps && pnpm create playwright@latest e2e --quiet --browser=chromium --no-browsers
 cd ..
@@ -929,7 +932,7 @@ cd ..
 
 Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`.
 
-**Configure `apps/e2e/playwright.config.ts`** — set `baseURL` AND add a `webServer` block so `pnpm test` starts the web app automatically:
+**Configure `apps/e2e/playwright.config.ts`** — `baseURL` always reads `process.env.BASE_URL` with a localhost fallback; the `webServer` block is emitted **only when `has_web`**:
 
 ```ts
 import { defineConfig, devices } from '@playwright/test';
@@ -941,12 +944,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:3001',
+    baseURL: process.env.BASE_URL ?? 'http://localhost:3001',
     trace: 'on-first-retry',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
+  // webServer: ONLY when has_web — boots the local web dev server automatically.
+  // Omit this whole block when !has_web; Playwright then drives BASE_URL directly.
   webServer: {
     command: 'pnpm --filter @{project}/web dev',
     url: 'http://localhost:3001',
@@ -956,9 +961,12 @@ export default defineConfig({
 });
 ```
 
-`webServer` makes `pnpm --filter @{project}/e2e test` boot the web dev server on demand and shut it down afterward. `reuseExistingServer: !CI` lets local dev reuse an already-running web server.
+- **`has_web`**: keep the `webServer` block — `pnpm --filter @{project}/e2e test` boots the web dev server on demand and shuts it down afterward (`reuseExistingServer: !CI` reuses a running one locally).
+- **`!has_web`**: DELETE the entire `webServer` block. Playwright runs against whatever `BASE_URL` points at; there is no local server to boot. Print in the post-scaffold output: "e2e is external-target — set `BASE_URL` (e.g. `BASE_URL=https://staging.example.com pnpm --filter @{project}/e2e test`)."
 
-**Replace `apps/e2e/tests/health.spec.ts`** (the default `toHaveTitle` test fails because the welcome page sets the project name in the body, not the `<title>` tag):
+**Replace `apps/e2e/tests/health.spec.ts`** — branch the smoke by whether a local web app exists:
+
+- **`has_web`** (asserts the web welcome page; the default `toHaveTitle` test fails because the welcome page sets the project name in the body, not the `<title>` tag):
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -969,7 +977,18 @@ test('homepage shows project title', async ({ page }) => {
 });
 ```
 
-Use `toContainText` against `body` rather than `toHaveTitle`. Substitute `{Project Name}` with the actual product name from PRODUCT.md.
+Substitute `{Project Name}` with the actual product name from PRODUCT.md.
+
+- **`!has_web`** (target-agnostic reachability smoke — no assumption about the external app's content):
+
+```ts
+import { test, expect } from '@playwright/test';
+
+test('target is reachable', async ({ page }) => {
+  const res = await page.goto('/');
+  expect(res?.ok(), `BASE_URL (${process.env.BASE_URL ?? 'unset'}) did not return a 2xx`).toBeTruthy();
+});
+```
 
 **Install Playwright browser binaries:**
 
@@ -1401,13 +1420,13 @@ Create a `docs/` directory if it doesn't exist. Write only the docs whose layer 
 
 - `docs/STORYBOOK.md` — only if `has_web` or `has_admin`. Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-storybook.md`, substitute `{Project Name}`, `{default_theme}`.
 - `docs/WIDGETBOOK.md` — only if `has_mobile`. Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-widgetbook.md`, substitute `{Project Name}`, `{default_theme}`.
-- `docs/PLAYWRIGHT.md` — only if `has_web`. Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-playwright.md`, substitute `{Project Name}`, `{project}`.
+- `docs/PLAYWRIGHT.md` — only if `has_e2e`. Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-playwright.md`, substitute `{Project Name}`, `{project}`. The template branches on `has_web` (local webServer vs external `BASE_URL`) — strip the branch that does not apply.
 
 ### Step 5c: Generate CLAUDE.md
 
 Write `CLAUDE.md` at the project root: read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/scaffold-claude-md.md`, substitute `{project}` and `{Project Name}`. This file is read by Claude Code on every session — keep it factual and command-focused, no prose.
 
-Same layer-stripping as Step 5: delete Stack/Commands/Key Files lines for layers not in `stack_layers` (Backend/api if `!has_api`, Mobile/flutter lines if `!has_mobile`, E2E if `!has_web`) — don't document commands for apps that weren't generated.
+Same layer-stripping as Step 5: delete Stack/Commands/Key Files lines for layers not in `stack_layers` (Backend/api if `!has_api`, Mobile/flutter lines if `!has_mobile`, E2E if `!has_e2e`) — don't document commands for apps that weren't generated.
 
 Also add `CLAUDE.md` to the review detection table in `--review` mode: `CLAUDE.md ✓ present / ✗ missing`.
 
@@ -1426,7 +1445,7 @@ Read `CHANGELOG.md`. Under `## [Unreleased]`, append only the bullets for layers
 - [01-infra-base] Default theme detection from DESIGN.md (asks user if missing)        ← only if any UI layer included
 - [01-infra-base] Centered welcome screens for web, admin, mobile, widgetbook, storybook (DESIGN.md tokens)  ← list only generated ones
 - [01-infra-base] Smoke tests (vitest) for web and admin                               ← only for layers generated
-- [01-infra-base] Playwright browser auto-install on scaffold                          ← only if has_web
+- [01-infra-base] Playwright browser auto-install on scaffold                          ← only if has_e2e
 - [01-infra-base] CLAUDE.md with stack overview, commands, and conventions for Claude Code sessions
 - [01-infra-base] docs/STORYBOOK.md, docs/WIDGETBOOK.md, and docs/PLAYWRIGHT.md         ← list only the ones written in Step 5b
 ```
@@ -1451,7 +1470,7 @@ Create `.specs/01-infra-base/`. Use the templates:
 7. `pnpm --filter @{project}/ui storybook` shows Storybook with example stories at http://localhost:6006  ← only if has_web or has_admin
 8. `cd apps/mobile && flutter pub get && flutter run` runs on emulator/device         ← only if has_mobile
 9. `cd apps/mobile/widgetbook && flutter pub get && flutter run -d chrome` shows Widgetbook  ← only if has_mobile
-10. `pnpm --filter @{project}/e2e test` runs Playwright sample                        ← only if has_web
+10. `pnpm --filter @{project}/e2e test` runs Playwright sample                        ← only if has_e2e
 11. `pnpm lint && pnpm type-check` pass with no errors
 12. VS Code shows no TypeScript errors when opening the project
 

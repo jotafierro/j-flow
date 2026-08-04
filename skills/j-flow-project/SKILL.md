@@ -62,12 +62,13 @@ Which layers does this project need?
   api     — NestJS + MongoDB backend
   mobile  — Flutter app
   admin   — separate React admin panel
+  e2e     — Playwright end-to-end tests (local web app if web is selected, else an external URL)
 
-Reply with a comma list (e.g. "web,api") or "all" for the full stack.
-Default: all four.
+Reply with a comma list (e.g. "web,api,e2e") or "all" for the full stack.
+Default: all five. (e2e is recommended whenever web is selected.)
 ```
 
-If the user replies blank or "all", set `stack_layers = [web, api, mobile, admin]`. Otherwise parse the comma list (lowercase, trimmed) into `stack_layers`.
+If the user replies blank or "all", set `stack_layers = [web, api, mobile, admin, e2e]`. Otherwise parse the comma list (lowercase, trimmed) into `stack_layers`. If the list names `web` but not `e2e`, remind the user that Playwright will not be scaffolded and offer to add `e2e`.
 
 This is the only place layer scope is decided — `/j-flow-scaffold` reads it back from `PRODUCT.md` and skips app generation entirely for any layer not listed.
 

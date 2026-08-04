@@ -17,6 +17,12 @@ Fixed implementation order for j-flow. Applied by `/j-flow-plan` (task grouping)
 
 Layers run sequentially. Each layer commits independently. The api layer (3) must complete before ui (4) or mobile (5) start, because they consume API contracts.
 
+## Harness layers (no build row)
+
+Some STACK layers are not build layers — they toggle a test/tooling harness rather than adding an implementation row. They get **no numbered row, no renumber, no dedicated build agent**.
+
+- **`e2e`** — the Playwright end-to-end harness (`apps/e2e`). Owned by `j-flow-quality` (the qa phase, always created), not a build agent. Runs against the local web app when `web` is present, else an external `BASE_URL` target. Its tests live in `apps/e2e/tests/*.spec.ts` and run in QA Stage 5, gated on `has_e2e`.
+
 ## Skipping layers
 
 Layers with no tasks in `tasks.json` are skipped. Document the omission in `gate-context.md` after build:

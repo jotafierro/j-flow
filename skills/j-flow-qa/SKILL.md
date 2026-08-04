@@ -38,7 +38,7 @@ Dispatch the **j-flow-quality** agent with:
 Read `.specs/{slug}/tasks.json` `layers`. A layer is "in scope" if it has at least one task.
 
 - Stage 4 (Flutter integration) runs only if `mobile` is in scope.
-- Stage 5 (Playwright E2E) runs only if `ui` or `mobile` is in scope.
+- Stage 5 (Playwright E2E) runs only if the `e2e` harness exists — i.e. `apps/e2e/` is present in the repo (equivalently `has_e2e`). This is a scaffolded harness, not a build-task layer, so gate on its presence rather than on `tasks.json` layers. When `!has_web`, the harness targets an external `BASE_URL`; if `BASE_URL` is unset, skip Stage 5 with the reason "e2e is external-target and BASE_URL is unset."
 - Stage 6 (Visual smoke): run the Storybook check only if `ui` is in scope; run the Widgetbook check only if `mobile` is in scope. If neither applies, skip Stage 6 entirely.
 
 Print which stages/halves were skipped and why, alongside the stage results:
@@ -77,7 +77,7 @@ flutter drive --target=integration_test/app_test.dart
 ```bash
 npx playwright test
 ```
-Requires full stack running (docker compose + backend + frontend).
+Requires the target reachable at `baseURL`. When a local web app exists (`has_web`), `playwright.config.ts`'s `webServer` block boots it automatically (plus whatever it depends on — docker compose + backend). When `!has_web`, the harness has no `webServer`: ensure `BASE_URL` points at a running target (staging/deployed URL) before this stage — e.g. `BASE_URL=https://staging.example.com npx playwright test`.
 
 **Stage 6 — Visual smoke:**
 Storybook: `pnpm storybook --ci` (or equivalent) — verify it builds without errors.

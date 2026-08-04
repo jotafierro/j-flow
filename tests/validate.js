@@ -169,7 +169,7 @@ const STACK_LAYERS = {
   api:    { agent: 'j-flow-backend' },
   mobile: { agent: 'j-flow-mobile' },
   admin:  { agent: 'j-flow-frontend' },   // reuses frontend — a mapping, not 1:1
-  // e2e:  { agent: 'j-flow-quality' },    // ← plan 037 Phase 1 (harness layer, quality-owned, no new agent)
+  e2e:    { agent: 'j-flow-quality' },    // harness layer — quality-owned, no new agent (plan 037)
   // cli:  { agent: 'j-flow-cli' },        // ← plan 036 (consumes 037's profile)
 };
 

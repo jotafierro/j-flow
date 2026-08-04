@@ -125,7 +125,7 @@ For each expected project-level file, report present / missing: `PRODUCT.md`, `D
 
 ### 2. Agent memory
 
-Read `PRODUCT.md`'s `**Layers:**` line to derive `stack_layers` (default: all four — web, api, mobile, admin — if absent).
+Read `PRODUCT.md`'s `**Layers:**` line to derive `stack_layers` (default: web, api, mobile, admin, e2e if absent). `e2e` adds no agent — the Playwright harness is owned by `j-flow-quality`, which is always expected regardless of layers.
 
 Expected agents: `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` always; `j-flow-backend` only if `api` in `stack_layers`; `j-flow-frontend` only if `web` or `admin`; `j-flow-mobile` only if `mobile`.
 

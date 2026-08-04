@@ -48,6 +48,8 @@ What each agent reads from agent memory, what it writes back via `/j-flow-finish
 
 **Layer-scoped creation:** `/j-flow-project` Step 8 only creates memory for agents whose layer is in `PRODUCT.md`'s `**Layers:**`. `j-flow-backend` needs `api`, `j-flow-frontend` needs `web` or `admin`, `j-flow-mobile` needs `mobile`. `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` are always created regardless of layers. A mobile-only project never gets `j-flow-backend.md`; a web+api project never gets `j-flow-mobile.md`.
 
+**Harness layers add no agent:** the `e2e` layer toggles the Playwright harness (`apps/e2e`) but creates no new agent — it is owned by `j-flow-quality`, which is always created. `e2e` is not in the parallel-dispatch table and adds no build-order row.
+
 ---
 
 ## Parallel Dispatch Rules
