@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-08-04
+
 ### Added
 - **Optional `cli` layer** — a TypeScript commander CLI (`apps/cli`) with a dedicated, light `j-flow-cli` agent (commander + tsup + vitest + picocolors). Opt-in via `**Layers:**`. A CLI-only project starts as a growth-safe minimal workspace by default (add web/mobile later without restructuring) or, if declared terminal, a flat single-package for a published npm-leaf tool. Consumes `packages/api-client` when an `api` layer is present; QA runs lint + unit (vitest) only.
 - **`e2e` is now a first-class, independently-selectable layer.** Choose `e2e` on its own or in any combination (`e2e` only, `e2e,api`, …). When `web` is also present, Playwright boots the local dev server automatically; otherwise it drives an external target via `BASE_URL` (a staging/deployed URL). QA Stage 5 gates on the presence of the e2e harness rather than the web/mobile build layers.
