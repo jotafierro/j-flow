@@ -129,6 +129,18 @@ Read existing files and build `detection_map`. Read `PRODUCT.md`:
 
 Derive flags from `stack_layers`: `has_web`, `has_api`, `has_mobile`, `has_admin`, `has_e2e` (each `true` iff present in the list).
 
+**Scaffold profile (derived — right-sizes the generated shell):**
+
+TS/Node layers are `web`, `api`, `admin`, `e2e` (and `cli`, plan 036); `mobile` is Dart. Let `ts_layers` = the TS/Node layers present in `stack_layers`. Derive `scaffold_profile`:
+
+- **`flutter-only`** — `stack_layers == [mobile]` (mobile is the ONLY layer): emit **no** TypeScript root shell (no `pnpm-workspace.yaml`, `turbo.json`, root `package.json`/`tsconfig.json`/`.npmrc`, no `packages/*`). Scaffold only `apps/mobile/` (Flutter) + widgetbook + a Flutter-only `ci.yml` + README. Flutter is not a pnpm package, so a workspace around a lone Dart app is inert noise. Mobile still lives at `apps/mobile/`, so a later TS layer drops a workspace beside it additively.
+- **`bare-single-package`** — `ts_layers == [cli]` AND the project is declared terminal (won't grow): a flat single-package repo, no workspace. **Realized by plan 036** (the `cli` layer); until `cli` exists this branch is unreachable.
+- **`minimal-workspace`** — the DEFAULT for any selection with ≥1 TS/Node layer: emit the TS root shell (`pnpm-workspace.yaml` + `turbo.json` + root `package.json`/`tsconfig.json`/`.npmrc` + `packages/config` + `packages/domain`), each app under `apps/<layer>/`, with heavy contents deferred to their triggering layer (`packages/api-client` only `has_api`, `packages/ui` only `has_web`/`has_admin`, `docker-compose` only `has_api`, per-layer CI jobs). This same emitter scales to the full 4-app monorepo as more layers turn on — **`full` is not a separate profile, just minimal-workspace with more layers enabled**.
+
+**Growth invariant:** every layer lives under `apps/<layer>/` from day one (never at repo root), so growth is purely additive — the `apps/*` glob discovers a newly-added app and nothing moves. The workspace manifests (`pnpm-workspace.yaml` + `turbo.json`, ~20 lines) are the cheap tax paid up front; the expensive migration (single-package → workspace) is what this avoids.
+
+Note: `packages/config` and `packages/domain` are **always present in a workspace** — a trivial, always-safe shared seam (`apps/web`/`apps/admin` declare a `workspace:*` dep on `domain`). Only the heavy packages (`api-client`, `ui`) and app/CI blocks are deferred. (This keeps single-TS-layer projects working without making the domain dep conditional.)
+
 **API style question — only if `has_api`:**
 
 Scan PRODUCT.md `## Audience` and `## Core Features` for API style signals:
@@ -182,8 +194,9 @@ If `PRODUCT.md` does not yet have the `**Styling:**` line (older project), inser
 Then show the scaffold plan (only listing components for included layers) and ask for final confirmation:
 
 ```
-Scaffold plan (layers: {stack_layers.join(', ')}):
-  Root config:        package.json, turbo.json, pnpm-workspace.yaml, .github/workflows/ci.yml, .env.example, .gitignore, tsconfig.json
+Scaffold plan (layers: {stack_layers.join(', ')} · profile: {scaffold_profile}):
+  Root config:        package.json, turbo.json, pnpm-workspace.yaml, tsconfig.json, .npmrc  ← workspace profiles only (omitted for flutter-only)
+  CI + meta:          .github/workflows/ci.yml, .env.example, .gitignore
   docker-compose.yml: MongoDB, Redis, Mailhog                     ← only if has_api
   apps/api:           NestJS — REST (controllers + Swagger)       ← only if has_api, api_style: rest
   apps/api:           NestJS — GraphQL (resolvers + Playground)   ← only if has_api, api_style: graphql
@@ -249,7 +262,12 @@ All file writes and the Step 9 approval commit happen on this branch.
 
 ### Step 2: Create root config FIRST (before running CLIs)
 
-Write these files at the project root:
+**Profile gate (from Step 1's `scaffold_profile`):**
+- **`minimal-workspace` / `full`** — run this step in full (the TypeScript workspace shell below).
+- **`flutter-only`** — SKIP the entire TS shell. Emit only: a Flutter-appropriate `.gitignore` (the `**/.dart_tool/`, `**/build/`, `**/.flutter-plugins*` patterns below — drop the `node_modules/`/`.turbo/`/`dist/` TS lines) and the `ci.yml` with the **`flutter` job only** (omit the `test` job — there is no pnpm/TS to lint or test). No `pnpm-workspace.yaml`, `turbo.json`, root `package.json`/`tsconfig.json`/`.npmrc`, no `docker-compose.yml`, no `packages/*`. Ensure `apps/` exists (`mkdir -p apps`) before Step 4's `flutter create`.
+- **`bare-single-package`** — the workspace shell is replaced by a single-package `package.json` with `bin`; see the `cli` layer (plan 036).
+
+Write these files at the project root (workspace profiles):
 
 **`.gitignore`**
 
@@ -382,7 +400,7 @@ volumes:
 
 Also write `.env` at root as a copy of `.env.example` (so `docker compose up` works out of the box, only when `has_api`). Add a note in the post-scaffold output telling the user to change the default credentials before production.
 
-**`.github/workflows/ci.yml`** — the `test` job always runs (covers whatever TS/JS layers exist plus shared packages). Include the `mongodb` service and the Playwright install step only if `has_api` / `has_e2e` respectively. Include the `flutter` job only if `has_mobile`.
+**`.github/workflows/ci.yml`** — the `test` job runs whenever there is a TS/JS workspace (`minimal-workspace`/`full`); it is **omitted entirely for `flutter-only`** (no pnpm/TS to lint or test), leaving only the `flutter` job. Include the `mongodb` service and the Playwright install step only if `has_api` / `has_e2e` respectively. Include the `flutter` job only if `has_mobile`.
 
 ```yaml
 name: CI
@@ -452,6 +470,8 @@ MONGO_INITDB_ROOT_PASSWORD=changeme
 ```
 
 ### Step 3: Create packages/config first (other tsconfigs extend from here)
+
+**Workspace profiles only** (`minimal-workspace`/`full`). Skip Step 3 entirely for `flutter-only` (no `packages/*`). `packages/config` and `packages/domain` are always created in a workspace; `packages/api-client` (if `has_api`) and `packages/ui` (if `has_web`/`has_admin`) are deferred to their layers.
 
 **`packages/config/package.json`**
 ```json
@@ -1483,11 +1503,11 @@ Create `.specs/_system/.gitkeep` so the system spec directory exists from the st
 Print to user:
 
 ```
-✓ Scaffolding complete. (layers: {stack_layers.join(', ')})
+✓ Scaffolding complete. (layers: {stack_layers.join(', ')} · profile: {scaffold_profile})
 
 Files generated:
-  · Root config (turbo, CI, env, docker compose ← only if has_api)
-  · packages/{domain, config, ui ← if has_web/has_admin, api-client ← if has_api}
+  · Root config (turbo, workspace, CI, env, docker compose ← only if has_api)   ← workspace profiles; for flutter-only only .gitignore + CI (flutter job)
+  · packages/{domain, config, ui ← if has_web/has_admin, api-client ← if has_api}   ← workspace profiles only (none for flutter-only)
   · apps/{only the layers included: api, web, admin, e2e, mobile, mobile/widgetbook}
   · README.md (with local development instructions)
   · CLAUDE.md (stack, commands, conventions for Claude Code sessions)
@@ -1498,7 +1518,7 @@ Before marking 01-infra-base as DONE, verify everything works manually.
 See .specs/01-infra-base/review-guide.md for the full checklist.
 
 Quick verification (only the lines for included layers):
-  1. pnpm install
+  1. pnpm install                                                                 ← workspace profiles (skip for flutter-only)
   2. docker compose up -d                                                          ← only if has_api
   3. pnpm --filter @{project}/api dev   (then: curl http://localhost:3000/api/v1/health)  ← only if has_api
   4. pnpm --filter @{project}/web dev   (then open http://localhost:3001)           ← only if has_web
