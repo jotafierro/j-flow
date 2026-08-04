@@ -216,7 +216,9 @@ For each agent that passes its filter, read the template, substitute `{project n
 
 If a file already exists, skip it and print `{agent}.md already exists — skipped.`
 
-For agents filtered out, print `{agent}.md skipped — {layer} not in stack_layers.` Do not create the file. If a layer is added later (e.g. project re-scoped), the missing agent memory file must be created manually or via a future `--update` layer change — `/j-flow-project --update` does not currently re-run this step.
+For agents filtered out, print `{agent}.md skipped — {layer} not in stack_layers.` Do not create the file.
+
+**Growth (a layer added later):** this step is idempotent and re-runnable — it creates only *missing* agent memory for now-included layers and never touches existing files (per the skip rule above). When a layer is added to `**Layers:**`, `/j-flow-project --update` (Update-mode Step 2b) re-applies the filter table against the current `stack_layers` and backfills the new agent (adding `api` → creates `j-flow-backend.md`; `mobile` → `j-flow-mobile.md`; `web`/`admin` → `j-flow-frontend.md` if absent). Harness/agent-less layers add nothing here (`e2e` is owned by `j-flow-quality`; `cli` brings its own `j-flow-cli` per plan 036).
 
 ### Step 8b: Generate CONSTITUTION.md
 
@@ -316,6 +318,12 @@ Map each feature's actual state to the correct symbol per `${CLAUDE_PLUGIN_ROOT}
 
 For each feature where the actual symbol differs from the displayed symbol, update the `.specs/README.md` table row.
 
+### Step 2b: Backfill agent memory for layer changes (growth)
+
+Re-read `PRODUCT.md`'s `**Layers:**` line into `stack_layers`, then re-run Init **Step 8**'s filter table in create-if-missing mode: for any layer added since the last run, write the now-included agent's memory from its template; leave existing files untouched. Print each backfill: `{agent}.md created — {layer} added to stack_layers.` If nothing was added, print nothing.
+
+This closes the growth gap: the full "add a layer later" flow is **edit `**Layers:**` in `PRODUCT.md` → `/j-flow-project --update`** — Step 2b backfills the agent memory and the auto-invoked `/j-flow-scaffold --review` (see Step 4) reports the new app/package/CI artifacts to generate. No file is ever created by hand.
+
 ### Step 3: Show summary and prompt
 
 Show:
@@ -370,5 +378,5 @@ Then immediately invoke `/j-flow-scaffold --review`.
 - Phase 0 always contains `01-infra-base` and `03-design-system` — do not remove them (slug numbers shift if optional Phase 0 features are skipped, but these two are never skipped); `02-observability`, `04-design-polish`, `05-deploy` are optional but recommended, `06-legal-pages` is optional and offered only when monetization ≠ free
 - The `--from` and `--from-design` flags are only used in init mode — they are ignored in update mode
 - Agent memory files in `.specs/.agents/` are never overwritten — skip existing files silently
-- `**Layers:**` in `PRODUCT.md` (set in Step 2b) is the single source of truth for which apps `/j-flow-scaffold` generates and which agent memory files Step 8 creates — default when absent is all four (web, api, mobile, admin)
+- `**Layers:**` in `PRODUCT.md` (set in Step 2b) is the single source of truth for which apps `/j-flow-scaffold` generates and which agent memory files Step 8 creates — default when absent is all five (web, api, mobile, admin, e2e). Editing this line then running `--update` is the supported way to grow (or shrink) a project's layers: Update-mode Step 2b backfills any newly-included agent memory, and the auto-invoked `/j-flow-scaffold --review` reports the app/package/CI delta to generate.
 - Agent memory is layer-scoped: `j-flow-backend` only if `api`, `j-flow-frontend` only if `web` or `admin`, `j-flow-mobile` only if `mobile`. `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` are always created — cross-cutting or infra always applies

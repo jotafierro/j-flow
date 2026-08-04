@@ -269,6 +269,8 @@ All file writes and the Step 9 approval commit happen on this branch.
 
 Write these files at the project root (workspace profiles):
 
+**Re-run / growth safety (create-if-missing, never clobber):** On a first scaffold these files don't exist, so write them. On a **growth re-run** (a layer was added to `**Layers:**` and scaffold runs again) they already exist and may be **hand-edited** — so for every root file below: if it does NOT exist, create it; if it DOES exist, treat it as authoritative and only **merge in** the additive bits a newly-enabled layer needs (e.g. a new `workspace:*` dep, a new `.env.example` block), never rewrite the file wholesale. `package.json`, `turbo.json`, `pnpm-workspace.yaml`, `tsconfig.json`, `.npmrc` are carry-forward — do not overwrite a user's edits. For `ci.yml` specifically, see the print-and-merge rule in its section below.
+
 **`.gitignore`**
 
 Include these patterns (one per line):
@@ -454,6 +456,7 @@ jobs:
 ```
 
 CI notes:
+- **Growth (print-and-merge, no automated YAML surgery):** `ci.yml` is one file with interleaved `has_*`-conditional jobs the user may have hand-edited. On a first scaffold, write it. On a growth re-run where a newly-added layer needs a CI change (e.g. adding `mobile` needs the `flutter` job; adding `api` needs the `mongodb` service; adding `e2e` needs the Playwright install step), do NOT rewrite the file — **print the exact job/step block to add and ask the user to merge it** into their `ci.yml`. This keeps hand-edited workflows safe.
 - `pnpm/action-setup@v4` reads the version from `packageManager` in `package.json` — do NOT add a `version:` key, it conflicts.
 - `hashFiles()` is invalid in a job-level `if` (only works in step contexts) — since the flutter job is only written to the file at all when `has_mobile`, no runtime conditional is needed.
 - `playwright install --with-deps chromium` must run in CI before `pnpm test`; the local binary installed during scaffold is not committed. Omit this step (and the `mongodb` service block) from the generated YAML when the corresponding layer is absent — don't leave a no-op step in.
@@ -527,6 +530,8 @@ export default tseslint.config({
 ### Step 4: Run official CLIs (one at a time, with clear progress messages)
 
 For each app, ONLY if its directory doesn't exist (idempotent) AND its layer is included (`has_api`/`has_web`/`has_admin`/`has_mobile`/`has_e2e` from Step 1). Skip a component's entire section — CLI run, post-processing, generated files — when its layer flag is false.
+
+**Growth (idempotent by layer-artifact, not just by directory):** on a re-run after a layer was added to `**Layers:**`, generate every artifact the newly-included layer needs that is still MISSING — its `apps/<layer>/` dir (as above), any package it newly unlocks (`packages/api-client` when `api` was just added; `packages/ui` when the first of `web`/`admin` was just added), its `docker-compose.yml` (when `api` was just added), and its CI job/step (print-and-merge, see `ci.yml`). Existing apps and packages are left untouched. This makes "start with one layer, add more later" purely additive — nothing that already exists moves or is rewritten.
 
 **Order matters: create packages/domain, packages/api-client (if `has_api`), and packages/ui (if `has_web` or `has_admin`; full section below, including `storybook init`) BEFORE running any app CLI.** apps/web and apps/admin `package.json` declare `workspace:*` deps on these packages. If `pnpm create playwright`, `pnpm exec`, or any other pnpm-aware command runs while those packages don't exist yet on disk, pnpm's workspace resolution fails trying to link them. Sequence: packages/config (Step 3) → packages/domain → packages/api-client → packages/ui → THEN whichever of apps/api, apps/web, apps/admin, apps/e2e, apps/mobile, apps/mobile/widgetbook are included (any order among the apps).
 
