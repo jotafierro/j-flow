@@ -91,6 +91,46 @@ it('query {queryName} → data', async () => {
 });
 ```
 
+## Scripts, seeders & migrations (in-process — NOT the `cli` layer)
+
+When the api layer needs one-off or scheduled logic that reuses the app's DI, config, and
+Mongoose connection — **seeders, data migrations, cron entrypoints, admin scripts** — do NOT
+reach for a standalone CLI. The `cli` layer (commander) is for shipped devtool binaries, not
+in-process backend logic. Use a NestJS **standalone application context**, which boots the
+providers without the HTTP server.
+
+Location: `apps/api/src/scripts/{name}.ts`.
+
+```typescript
+// apps/api/src/scripts/seed-users.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../app.module';
+import { UsersService } from '../users/users.service';
+
+async function bootstrap() {
+  const app = await NestFactory.createApplicationContext(AppModule);
+  try {
+    const users = app.get(UsersService);
+    await users.seedDefaults();
+  } finally {
+    await app.close();
+  }
+}
+
+void bootstrap();
+```
+
+Run with the repo's TS runner, e.g. `pnpm --filter @{project}/api exec ts-node src/scripts/seed-users.ts`.
+
+For a richer subcommand surface (several scripts under one entrypoint, flags, `--help`), use
+**nest-commander** (`@Command` / `CommandRunner`) — still inside the api layer, still reusing
+DI/config/Mongoose — rather than a separate commander binary.
+
+Rules for scripts:
+- Reuse services/repositories — never re-implement data access or duplicate business logic.
+- Always `await app.close()` in a `finally` so the process exits and the Mongoose connection releases.
+- Typed like the rest of the api layer — no `any`.
+
 ## Rules
 
 - Never use `any` type
