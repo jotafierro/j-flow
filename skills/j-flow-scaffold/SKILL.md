@@ -125,16 +125,26 @@ Stop. Do not write any files.
 
 Read existing files and build `detection_map`. Read `PRODUCT.md`:
 - **Project name:** read the **Name** field. Use as `{project}` slug (lowercase-hyphenated, e.g. "My App" → "my-app"). Keep original casing as `{Project Name}` for display strings.
-- **Stack layers:** find the `**Layers:**` line in the Tech Stack section. Parse as a comma list into `stack_layers` (lowercase, trimmed — valid values: `web`, `api`, `mobile`, `admin`, `e2e`). If the line is missing or blank, default `stack_layers = [web, api, mobile, admin, e2e]` and print: "No `**Layers:**` field in PRODUCT.md — defaulting to full stack (web, api, mobile, admin, e2e). Add a `**Layers:**` line to customize." (The absent-line default includes `e2e` so existing full-stack scaffolds keep Playwright — back-compat. An **explicit** `**Layers:**` list that names `web` without `e2e` intentionally scaffolds no Playwright.)
+- **Stack layers:** find the `**Layers:**` line in the Tech Stack section. Parse as a comma list into `stack_layers` (lowercase, trimmed — valid values: `web`, `api`, `mobile`, `admin`, `e2e`, `cli`). If the line is missing or blank, default `stack_layers = [web, api, mobile, admin, e2e]` and print: "No `**Layers:**` field in PRODUCT.md — defaulting to full stack (web, api, mobile, admin, e2e). Add a `**Layers:**` line to customize." (The absent-line default includes `e2e` so existing full-stack scaffolds keep Playwright — back-compat. It does **not** include `cli`: the CLI layer is opt-in, added explicitly to `**Layers:**`.)
 
-Derive flags from `stack_layers`: `has_web`, `has_api`, `has_mobile`, `has_admin`, `has_e2e` (each `true` iff present in the list).
+Derive flags from `stack_layers`: `has_web`, `has_api`, `has_mobile`, `has_admin`, `has_e2e`, `has_cli` (each `true` iff present in the list).
 
 **Scaffold profile (derived — right-sizes the generated shell):**
 
-TS/Node layers are `web`, `api`, `admin`, `e2e` (and `cli`, plan 036); `mobile` is Dart. Let `ts_layers` = the TS/Node layers present in `stack_layers`. Derive `scaffold_profile`:
+TS/Node layers are `web`, `api`, `admin`, `e2e`, `cli`; `mobile` is Dart. Let `ts_layers` = the TS/Node layers present in `stack_layers`. Derive `scaffold_profile`:
 
 - **`flutter-only`** — `stack_layers == [mobile]` (mobile is the ONLY layer): emit **no** TypeScript root shell (no `pnpm-workspace.yaml`, `turbo.json`, root `package.json`/`tsconfig.json`/`.npmrc`, no `packages/*`). Scaffold only `apps/mobile/` (Flutter) + widgetbook + a Flutter-only `ci.yml` + README. Flutter is not a pnpm package, so a workspace around a lone Dart app is inert noise. Mobile still lives at `apps/mobile/`, so a later TS layer drops a workspace beside it additively.
-- **`bare-single-package`** — `ts_layers == [cli]` AND the project is declared terminal (won't grow): a flat single-package repo, no workspace. **Realized by plan 036** (the `cli` layer); until `cli` exists this branch is unreachable.
+- **`bare-single-package`** — `ts_layers == [cli]` AND the user declares the project **terminal** (see the terminal prompt below): a flat single-package repo (`src/` at root, `package.json` with `bin`, tsup, vitest — no workspace). For a published npm-leaf CLI that will never grow.
+
+**Terminal prompt — only when `ts_layers == [cli]` (cli is the sole TypeScript layer):** ask the user:
+```
+This is a CLI-only project. Will it grow into web/mobile/api later?
+  1. Might grow — use a minimal workspace (apps/cli/, adding a layer later is additive)   (recommended)
+  2. Terminal — a single-package npm-leaf CLI (flat src/, no workspace)
+
+Enter 1 or 2 (default: 1):
+```
+Default (option 1) → `minimal-workspace`; option 2 → `bare-single-package`. If `cli` is NOT the sole TS layer (e.g. `cli,api`), skip this prompt — the project is already a workspace.
 - **`minimal-workspace`** — the DEFAULT for any selection with ≥1 TS/Node layer: emit the TS root shell (`pnpm-workspace.yaml` + `turbo.json` + root `package.json`/`tsconfig.json`/`.npmrc` + `packages/config` + `packages/domain`), each app under `apps/<layer>/`, with heavy contents deferred to their triggering layer (`packages/api-client` only `has_api`, `packages/ui` only `has_web`/`has_admin`, `docker-compose` only `has_api`, per-layer CI jobs). This same emitter scales to the full 4-app monorepo as more layers turn on — **`full` is not a separate profile, just minimal-workspace with more layers enabled**.
 
 **Growth invariant:** every layer lives under `apps/<layer>/` from day one (never at repo root), so growth is purely additive — the `apps/*` glob discovers a newly-added app and nothing moves. The workspace manifests (`pnpm-workspace.yaml` + `turbo.json`, ~20 lines) are the cheap tax paid up front; the expensive migration (single-package → workspace) is what this avoids.
@@ -205,6 +215,7 @@ Scaffold plan (layers: {stack_layers.join(', ')} · profile: {scaffold_profile})
   apps/web:           Styling — Plain CSS (DESIGN.md tokens)       ← only if has_web, styling: plain-css
   apps/admin:         React + Vite (port 3002)                     ← only if has_admin
   apps/e2e:           Playwright (via pnpm create playwright)      ← only if has_e2e (local webServer if has_web, else external BASE_URL)
+  apps/cli:           commander + tsup + vitest (hand-templated)   ← only if has_cli (flat src/ if bare-single-package)
   apps/mobile:        Flutter (via flutter create)                 ← only if has_mobile
   apps/mobile/widgetbook: Flutter Widgetbook                       ← only if has_mobile
   packages/ui:        React + Storybook (via npx storybook init)   ← only if has_web or has_admin
@@ -1022,6 +1033,77 @@ test('target is reachable', async ({ page }) => {
 cd apps/e2e && pnpm exec playwright install chromium && cd ../..
 ```
 This downloads only the chromium binary so `pnpm test` works first try without pulling firefox/webkit too. One-time download (~120MB), under 30 seconds.
+
+**apps/cli (commander CLI) — only if `has_cli`.** There is no official commander scaffolder, so this app is **hand-templated** — the one acknowledged exception to the "official CLIs first" rule (see Rules). Layout depends on `scaffold_profile`: under `apps/cli/` for `minimal-workspace`/`full`, or at the repo root (flat `src/`) for `bare-single-package`. Below, `{cli_root}` = `apps/cli` (workspace) or `.` (bare).
+
+Generate:
+
+1. **`{cli_root}/package.json`** — bundled bin, ESM. In a workspace, name `@{project}/cli` and add `@{project}/domain` (`workspace:*`) always plus `@{project}/api-client` **only if `has_api`** (same rule as apps/web). In `bare-single-package`, name `{project}`, and OMIT all `workspace:*` deps (there are no packages).
+```json
+{
+  "name": "@{project}/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": { "{project}": "./dist/index.js" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "picocolors": "^1.0.0",
+    "@{project}/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "vitest": "^2.0.0",
+    "typescript": "^5.4.0",
+    "@types/node": "^22.0.0"
+  }
+}
+```
+
+2. **`{cli_root}/tsup.config.ts`** — bundles `src/index.ts` to a self-contained bin with a shebang banner (do NOT put the shebang in `src/`):
+```ts
+import { defineConfig } from 'tsup';
+
+export default defineConfig({
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  banner: { js: '#!/usr/bin/env node' },
+  clean: true,
+});
+```
+
+3. **`{cli_root}/tsconfig.json`** — workspace: `{ "extends": "../../packages/config/tsconfig.base.json" }`; bare: a standalone strict config (target ES2022, module ESNext, `moduleResolution: bundler`, strict).
+
+4. **`{cli_root}/src/index.ts`** — a commander entrypoint with one sample command and a `-y` escape hatch:
+```ts
+import { Command } from 'commander';
+import pc from 'picocolors';
+
+const program = new Command();
+program.name('{project}').description('{Project Name} CLI').version('0.1.0');
+
+program
+  .command('hello')
+  .description('print a greeting')
+  .option('-y, --yes', 'skip confirmation')
+  .action((opts: { yes?: boolean }) => {
+    console.log(pc.green(`Hello from {Project Name}${opts.yes ? '' : ' 👋'}`));
+  });
+
+program.parseAsync();
+```
+
+5. **`{cli_root}/src/hello.test.ts`** — a vitest unit test for a pure function (proves the test runner is wired). Keep the tested logic pure (parse/format), separate from the command action.
+
+In a workspace, the root `pnpm build`/`test`/`lint`/`type-check` (turbo) pick up `apps/cli` automatically — no CI change needed (the always-on `test` job covers it). In `bare-single-package`, the scripts above are the project's own entrypoints.
 
 **apps/mobile (Flutter) — only if `has_mobile`:**
 ```bash

@@ -49,7 +49,7 @@
 
 ## Tech Stack
 
-**Layers:** {comma list of: web, api, mobile, admin, e2e — layers this project needs. Omitted layers are not scaffolded. e2e is the Playwright harness (local web app if web is present, else an external BASE_URL target). Default when this field is absent: all five.}
+**Layers:** {comma list of: web, api, mobile, admin, e2e, cli — layers this project needs. Omitted layers are not scaffolded. e2e is the Playwright harness (local web app if web is present, else an external BASE_URL target). cli is an opt-in TypeScript commander CLI. Default when this field is absent: web, api, mobile, admin, e2e (cli is opt-in only).}
 **Backend:** NestJS 11 + Mongoose (MongoDB)
 **API Style:** {rest|graphql}
 **Web:** React + Vite + React Query + Zustand

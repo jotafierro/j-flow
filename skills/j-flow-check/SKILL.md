@@ -127,7 +127,7 @@ For each expected project-level file, report present / missing: `PRODUCT.md`, `D
 
 Read `PRODUCT.md`'s `**Layers:**` line to derive `stack_layers` (default: web, api, mobile, admin, e2e if absent). `e2e` adds no agent — the Playwright harness is owned by `j-flow-quality`, which is always expected regardless of layers.
 
-Expected agents: `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` always; `j-flow-backend` only if `api` in `stack_layers`; `j-flow-frontend` only if `web` or `admin`; `j-flow-mobile` only if `mobile`.
+Expected agents: `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` always; `j-flow-backend` only if `api` in `stack_layers`; `j-flow-frontend` only if `web` or `admin`; `j-flow-mobile` only if `mobile`; `j-flow-cli` only if `cli`.
 
 For each expected agent, verify `.specs/.agents/{agent}.md` exists — missing files are reported. For each agent NOT expected (its layer isn't in `stack_layers`) whose file exists anyway, report it as `⚠ present but {layer} not in stack_layers — stale from a prior scope change` rather than flagging as healthy.
 

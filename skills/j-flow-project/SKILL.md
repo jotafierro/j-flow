@@ -63,6 +63,7 @@ Which layers does this project need?
   mobile  — Flutter app
   admin   — separate React admin panel
   e2e     — Playwright end-to-end tests (local web app if web is selected, else an external URL)
+  cli     — TypeScript commander CLI (opt-in; single-package when it's the only layer)
 
 Reply with a comma list (e.g. "web,api,e2e") or "all" for the full stack.
 Default: all five. (e2e is recommended whenever web is selected.)
@@ -200,7 +201,7 @@ If it already exists, leave it untouched and print "CHANGELOG.md already exists 
 
 Create `.specs/.agents/` directory if it does not exist.
 
-Filter the 7 agent templates in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/` by `stack_layers` (from Step 2b):
+Filter the 8 agent templates in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/agents/` by `stack_layers` (from Step 2b):
 
 | Agent | Included when |
 |-------|---------------|
@@ -208,6 +209,7 @@ Filter the 7 agent templates in `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/temp
 | `j-flow-backend.md` | `api` in `stack_layers` |
 | `j-flow-frontend.md` | `web` or `admin` in `stack_layers` |
 | `j-flow-mobile.md` | `mobile` in `stack_layers` |
+| `j-flow-cli.md` | `cli` in `stack_layers` |
 | `j-flow-devops.md` | always (infra/CI layer is generated regardless of app layers) |
 | `j-flow-quality.md` | always |
 | `j-flow-reviewer.md` | always |

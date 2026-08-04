@@ -40,6 +40,7 @@ Read `.specs/{slug}/tasks.json` `layers`. A layer is "in scope" if it has at lea
 - Stage 4 (Flutter integration) runs only if `mobile` is in scope.
 - Stage 5 (Playwright E2E) runs only if the `e2e` harness exists — i.e. `apps/e2e/` is present in the repo (equivalently `has_e2e`). This is a scaffolded harness, not a build-task layer, so gate on its presence rather than on `tasks.json` layers. When `!has_web`, the harness targets an external `BASE_URL`; if `BASE_URL` is unset, skip Stage 5 with the reason "e2e is external-target and BASE_URL is unset."
 - Stage 6 (Visual smoke): run the Storybook check only if `ui` is in scope; run the Widgetbook check only if `mobile` is in scope. If neither applies, skip Stage 6 entirely.
+- The `cli` layer maps to **Stages 1-2 only** (lint + unit via vitest — already covered by `pnpm lint` / `pnpm test` across the workspace). It triggers no NestJS E2E, Flutter, Playwright, or visual-smoke stage.
 
 Print which stages/halves were skipped and why, alongside the stage results:
 ```

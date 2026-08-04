@@ -22,6 +22,7 @@ Layers run sequentially. Each layer commits independently. The api layer (3) mus
 Some STACK layers are not build layers — they toggle a test/tooling harness rather than adding an implementation row. They get **no numbered row, no renumber, no dedicated build agent**.
 
 - **`e2e`** — the Playwright end-to-end harness (`apps/e2e`). Owned by `j-flow-quality` (the qa phase, always created), not a build agent. Runs against the local web app when `web` is present, else an external `BASE_URL` target. Its tests live in `apps/e2e/tests/*.spec.ts` and run in QA Stage 5, gated on `has_e2e`.
+- **`cli`** — a TypeScript commander app (`apps/cli`, or the repo root in `bare-single-package`). Owned by **`j-flow-cli`** (a dedicated light agent — no NestJS/Mongoose), which runs during `/j-flow-build` for `cli`-layer tasks. It is a client of the api contract like ui/mobile — when `api` is present it consumes `packages/api-client`; it runs sequentially in the client tier and takes **no numbered build-order row and no parallel-dispatch entry**. Unit tests (vitest) live in `apps/cli/**/*.test.ts` (or `src/**/*.test.ts` when bare).
 
 ## Skipping layers
 

@@ -26,6 +26,12 @@ What each agent reads from agent memory, what it writes back via `/j-flow-finish
 - **Reads memory:** Riverpod patterns, GoRouter setup, Dio config, widget conventions, Widgetbook patterns
 - **Writes memory:** new Riverpod patterns, navigation flows, widget conventions
 
+## j-flow-cli
+
+- **Activated by:** `/j-flow-build` for `cli` layer
+- **Reads memory:** command/subcommand structure, arg/flag conventions, exit-code + stdout/stderr contract, config-file handling, tsup/bin packaging, picocolors output patterns
+- **Writes memory:** new command patterns, config conventions, output/formatting helpers discovered
+
 ## j-flow-devops
 
 - **Activated by:** `/j-flow-build` for `infra` layer
@@ -46,7 +52,7 @@ What each agent reads from agent memory, what it writes back via `/j-flow-finish
 
 **Important:** All agent memory files live at `.specs/.agents/{agent-name}.md`. They are populated by `/j-flow-project` (initial templates) and updated by `/j-flow-finish` (after each feature, except j-flow-reviewer which only updates from `/j-flow-review`).
 
-**Layer-scoped creation:** `/j-flow-project` Step 8 only creates memory for agents whose layer is in `PRODUCT.md`'s `**Layers:**`. `j-flow-backend` needs `api`, `j-flow-frontend` needs `web` or `admin`, `j-flow-mobile` needs `mobile`. `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` are always created regardless of layers. A mobile-only project never gets `j-flow-backend.md`; a web+api project never gets `j-flow-mobile.md`.
+**Layer-scoped creation:** `/j-flow-project` Step 8 only creates memory for agents whose layer is in `PRODUCT.md`'s `**Layers:**`. `j-flow-backend` needs `api`, `j-flow-frontend` needs `web` or `admin`, `j-flow-mobile` needs `mobile`, `j-flow-cli` needs `cli`. `j-flow-architect`, `j-flow-devops`, `j-flow-quality`, `j-flow-reviewer` are always created regardless of layers. A mobile-only project never gets `j-flow-backend.md`; a web+api project never gets `j-flow-mobile.md`.
 
 **Harness layers add no agent:** the `e2e` layer toggles the Playwright harness (`apps/e2e`) but creates no new agent — it is owned by `j-flow-quality`, which is always created. `e2e` is not in the parallel-dispatch table and adds no build-order row.
 

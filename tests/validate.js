@@ -69,7 +69,7 @@ for (const skill of EXPECTED_SKILLS) {
 // ── agents ───────────────────────────────────────────────────────────────────
 const EXPECTED_AGENTS = [
   'j-flow-architect', 'j-flow-backend', 'j-flow-frontend',
-  'j-flow-mobile', 'j-flow-devops', 'j-flow-quality', 'j-flow-reviewer',
+  'j-flow-mobile', 'j-flow-cli', 'j-flow-devops', 'j-flow-quality', 'j-flow-reviewer',
 ];
 
 console.log('\nagents/');
@@ -107,7 +107,7 @@ for (const tpl of EXPECTED_TEMPLATES) {
 
 const EXPECTED_AGENT_TEMPLATES = [
   'j-flow-architect.md', 'j-flow-backend.md', 'j-flow-frontend.md',
-  'j-flow-mobile.md', 'j-flow-devops.md', 'j-flow-quality.md', 'j-flow-reviewer.md',
+  'j-flow-mobile.md', 'j-flow-cli.md', 'j-flow-devops.md', 'j-flow-quality.md', 'j-flow-reviewer.md',
 ];
 
 for (const tpl of EXPECTED_AGENT_TEMPLATES) {
@@ -170,7 +170,7 @@ const STACK_LAYERS = {
   mobile: { agent: 'j-flow-mobile' },
   admin:  { agent: 'j-flow-frontend' },   // reuses frontend — a mapping, not 1:1
   e2e:    { agent: 'j-flow-quality' },    // harness layer — quality-owned, no new agent (plan 037)
-  // cli:  { agent: 'j-flow-cli' },        // ← plan 036 (consumes 037's profile)
+  cli:    { agent: 'j-flow-cli' },        // dedicated light agent, consumes 037's profile (plan 036)
 };
 
 console.log('\nlayer consistency/');
