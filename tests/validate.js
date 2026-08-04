@@ -149,6 +149,59 @@ for (const skill of OVERRIDE_WIRED_SKILLS) {
   });
 }
 
+// ── layer consistency (mapping completeness) ─────────────────────────────────
+// Every selectable STACK layer must be wired consistently across the surfaces that
+// use the STACK taxonomy (web/api/mobile/admin[/e2e/cli]): the scaffold valid-values
+// enum, its `has_<layer>` flag, the product.md **Layers:** enum, and an owning agent.
+//
+// This is MAPPING-COMPLETENESS, not string-equality: each layer must map to the RIGHT
+// thing per surface. We deliberately do NOT assert a stack-layer name appears in the
+// BUILD-taxonomy files (references/layer-order.md, skills/j-flow-qa) — those use
+// data/service/ui/mobile/infra, and admin+web BOTH map to build-layer `ui`, so asserting
+// stack names there would false-positive-block. QA/check layer-scoping is exercised by
+// scenario fixtures (tests/scenarios), not by this structural guard.
+//
+// Adding a layer to STACK_LAYERS without wiring every surface below fails the guard by
+// design — that is what stops a half-wired layer from shipping green (plan 037 Phase 0).
+// When a layer is added: register it here AND in every surface, atomically.
+const STACK_LAYERS = {
+  web:    { agent: 'j-flow-frontend' },
+  api:    { agent: 'j-flow-backend' },
+  mobile: { agent: 'j-flow-mobile' },
+  admin:  { agent: 'j-flow-frontend' },   // reuses frontend — a mapping, not 1:1
+  // e2e:  { agent: 'j-flow-quality' },    // ← plan 037 Phase 1 (harness layer, quality-owned, no new agent)
+  // cli:  { agent: 'j-flow-cli' },        // ← plan 036 (consumes 037's profile)
+};
+
+console.log('\nlayer consistency/');
+
+const scaffoldSkill = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/SKILL.md'), 'utf8');
+const productTpl = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/templates/product.md'), 'utf8');
+const validValuesLine = scaffoldSkill.split('\n').find((l) => l.includes('valid values')) || '';
+const layersEnumLine = productTpl.split('\n').find((l) => l.includes('**Layers:**')) || '';
+
+for (const [layer, { agent }] of Object.entries(STACK_LAYERS)) {
+  check(`scaffold valid-values enum lists \`${layer}\``, () => {
+    assert(validValuesLine.includes('`' + layer + '`'),
+      `scaffold "valid values:" line must list \`${layer}\``);
+  });
+
+  check(`scaffold derives has_${layer}`, () => {
+    assert(scaffoldSkill.includes('has_' + layer),
+      `scaffold must derive the has_${layer} flag`);
+  });
+
+  check(`product.md Layers enum lists ${layer}`, () => {
+    assert(layersEnumLine.includes(layer),
+      `product.md **Layers:** enum must list ${layer}`);
+  });
+
+  check(`${layer} maps to an owning agent (${agent})`, () => {
+    assert(fs.existsSync(path.join(ROOT, 'agents', `${agent}.md`)),
+      `owning agent ${agent}.md missing for layer ${layer}`);
+  });
+}
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);
