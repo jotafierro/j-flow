@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/hero.webp" alt="j-flow — Spec-Driven Development: gate-based workflow for Claude Code" width="100%">
+</p>
+
 # j-flow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
