@@ -63,18 +63,18 @@ Show the diff and ask: "Does this CHANGELOG entry look right? Reply 'yes' to pro
 
 ### Step 3: Bump versions in all files
 
-Detect and bump all of the following:
+Detect and bump all of the following. Both loops below are scoped to this monorepo's declared workspaces (root + `apps/*` + `packages/*`) — never the whole tree, which could otherwise pick up an unrelated `package.json`/`pubspec.yaml` nested somewhere incidental. Both use `-print0` / `read -r -d ''` for filename safety, and pass the path as an **argument**, never interpolated into the `node -e` script body.
 
-**Node packages** — every `package.json` in the repo with a `version` field:
+**Node packages** — every `package.json` under root, `apps/*`, or `packages/*` with a `version` field:
 ```bash
-find . -name "package.json" -not -path "*/node_modules/*" | while read f; do
-  node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync('$f','utf8'));if(p.version){p.version='{new_version}';fs.writeFileSync('$f',JSON.stringify(p,null,2)+'\n');}"
+find package.json apps packages -maxdepth 2 -name "package.json" -not -path "*/node_modules/*" -print0 2>/dev/null | while IFS= read -r -d '' f; do
+  node -e "const fs=require('fs'),p=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));if(p.version){p.version='{new_version}';fs.writeFileSync(process.argv[1],JSON.stringify(p,null,2)+'\n');}" "$f"
 done
 ```
 
-**Flutter apps** — every `pubspec.yaml` with a `version:` line:
+**Flutter apps** — every `pubspec.yaml` under `apps/*` with a `version:` line:
 ```bash
-find . -name "pubspec.yaml" -not -path "*/node_modules/*" | while read f; do
+find apps -maxdepth 2 -name "pubspec.yaml" -not -path "*/node_modules/*" -print0 2>/dev/null | while IFS= read -r -d '' f; do
   sed -i '' 's/^version: .*/version: {new_version}+{build_number}/' "$f"
 done
 ```

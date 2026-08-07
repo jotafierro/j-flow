@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`/j-flow-scaffold` no longer writes literal `changeme*` secrets into real `.env` files.** The Mongo root password and the two JWT secrets are now generated with `openssl rand -hex 32` at scaffold time; `changeme*` placeholders remain only in `.env.example`.
 - The scaffolded `docker-compose.yml` now binds Mongo, Redis, and Mailhog to `127.0.0.1` instead of all interfaces.
 - `/j-flow-scaffold`'s bootstrap commit and `/j-flow-build --fix`'s commit no longer use `git add -A` / `git add .` — both stage an explicit path list instead. The scaffold commit also refuses to proceed (loudly) if any `.env` it wrote isn't covered by `.gitignore`.
+- `/j-flow-release`'s Node/Flutter version-bump loops no longer interpolate a file path into a `node -e` script body, no longer scan the whole repo tree, and are now filename-safe (`find -print0` / `read -r -d ''`) instead of a bare `while read`.
+- `/j-flow-scaffold` now resolves and shows the actual version its first `@latest` CLI will install, and asks for one confirmation before running any of the five official-CLI invocations that follow.
+- Both `.github/workflows/ci.yml` (this repo's own, and the template `/j-flow-scaffold` generates) now declare `permissions: contents: read` and pin third-party actions by commit SHA (with a `# vN` comment) instead of a mutable version tag.
+- CI now also runs `claude plugin validate . --strict`.
 
 ## [2.2.0] - 2026-08-04
 

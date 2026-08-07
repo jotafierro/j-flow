@@ -424,6 +424,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -435,11 +438,11 @@ jobs:
           - 27017:27017
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
           cache: "pnpm"
@@ -454,9 +457,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           flutter-version: "3.41.x"
           channel: "stable"
@@ -474,6 +477,7 @@ CI notes:
 - `hashFiles()` is invalid in a job-level `if` (only works in step contexts) — since the flutter job is only written to the file at all when `has_mobile`, no runtime conditional is needed.
 - `playwright install --with-deps chromium` must run in CI before `pnpm test`; the local binary installed during scaffold is not committed. Omit this step (and the `mongodb` service block) from the generated YAML when the corresponding layer is absent — don't leave a no-op step in.
 - `flutter-version: "3.41.x"` matches Dart `^3.11.5` from pubspec. Update this when bumping Flutter in the project.
+- Third-party actions (`actions/checkout`, `actions/setup-node`, `pnpm/action-setup`, `subosito/flutter-action`) are pinned by commit SHA with a `# vN` comment, not by mutable tag — resolve the SHA for a tag with `gh api repos/{owner}/{repo}/tags --jq '.[] | select(.name=="vN") | .commit.sha'` before bumping any of them.
 
 **`.env.example`** — the Mongo block only if `has_api`:
 ```
@@ -543,6 +547,14 @@ export default tseslint.config({
 ### Step 4: Run official CLIs (one at a time, with clear progress messages)
 
 For each app, ONLY if its directory doesn't exist (idempotent) AND its layer is included (`has_api`/`has_web`/`has_admin`/`has_mobile`/`has_e2e` from Step 1). Skip a component's entire section — CLI run, post-processing, generated files — when its layer flag is false.
+
+**Before running the first `@latest` CLI in this step:** resolve and show what it will actually install — e.g. `npm view @nestjs/cli version` (or the equivalent for the first CLI this run actually needs) — and ask once:
+```
+This scaffold runs {N} official CLIs pinned to @latest (always the newest framework release, by design — see the Rules section). First one resolves to {package}@{resolved version}.
+
+Proceed with @latest for all of them? [y/n]
+```
+One confirmation covers every `@latest` CLI invocation for the rest of this run — don't ask again per-CLI. If declined, stop and let the user re-run with pinned versions of their choosing; this skill does not offer a pinned-version mode itself (see Rules — `@latest` is deliberate, not a default that can be silently overridden).
 
 **Growth (idempotent by layer-artifact, not just by directory):** on a re-run after a layer was added to `**Layers:**`, generate every artifact the newly-included layer needs that is still MISSING — its `apps/<layer>/` dir (as above), any package it newly unlocks (`packages/api-client` when `api` was just added; `packages/ui` when the first of `web`/`admin` was just added), its `docker-compose.yml` (when `api` was just added), and its CI job/step (print-and-merge, see `ci.yml`). Existing apps and packages are left untouched. This makes "start with one layer, add more later" purely additive — nothing that already exists moves or is rewritten.
 
@@ -1706,7 +1718,7 @@ Then invoke `/j-flow-recommend` (it ends with its own dialogue offering to start
 ## Rules
 
 - Always use official CLIs first (`@nestjs/cli`, `pnpm create vite`, `pnpm create playwright`, `flutter create`, `storybook init`) — never hand-roll their setup
-- Use `@latest` to always get the newest framework version
+- Use `@latest` to always get the newest framework version — deliberate, not a placeholder for a version this skill forgot to pin. Show the resolved version and get one confirmation before the first `@latest` CLI runs (Step 4) rather than running five unpinned installs silently.
 - Idempotent: never re-run a CLI if the target directory already has content
 - Review mode is read-only — never write any files when `--review` flag is present
 - Never run `pnpm install` or `flutter pub get` — those go in the README instructions for the user
