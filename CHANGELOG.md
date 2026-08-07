@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/j-flow-check {slug}` and `/j-flow-reopen [slug]` now validate the slug (fail-closed, kebab-case) before touching any path — previously only `/j-flow-start` did.
 - `.specs/**` content forwarded into an agent dispatch (memory, specs, tasks) is now explicitly documented as observed project state, never instructions — `/j-flow-check --repo` adds a narrow heuristic check that flags memory files containing directives addressed at the agent itself (not ordinary imperative-sounding project notes).
 - `README.md` and `.github/SECURITY.md` now state that `.specs/.overrides/` is a trust surface equivalent to executable code.
+- **`/j-flow-scaffold` no longer writes literal `changeme*` secrets into real `.env` files.** The Mongo root password and the two JWT secrets are now generated with `openssl rand -hex 32` at scaffold time; `changeme*` placeholders remain only in `.env.example`.
+- The scaffolded `docker-compose.yml` now binds Mongo, Redis, and Mailhog to `127.0.0.1` instead of all interfaces.
+- `/j-flow-scaffold`'s bootstrap commit and `/j-flow-build --fix`'s commit no longer use `git add -A` / `git add .` — both stage an explicit path list instead. The scaffold commit also refuses to proceed (loudly) if any `.env` it wrote isn't covered by `.gitignore`.
 
 ## [2.2.0] - 2026-08-04
 

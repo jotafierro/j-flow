@@ -80,10 +80,10 @@ When `ui` and `mobile` both have tasks and `api` is committed:
 
 1. Dispatch `j-flow-frontend` (ui tasks) and `j-flow-mobile` (mobile tasks) as concurrent sub-agents via the `superpowers:dispatching-parallel-agents` skill.
 2. Wait for both to complete before committing.
-3. Commit both layers together:
+3. Commit both layers together — `git add` only the files belonging to the `ui` and `mobile` tasks (from `tasks.json`), never `git add .`:
 
 ```bash
-git add .
+git add {ui and mobile task files, listed explicitly}
 git commit -m "feat({slug}): implement ui + mobile layers (parallel)
 
 Tasks: {ui-task-ids}, {mobile-task-ids}

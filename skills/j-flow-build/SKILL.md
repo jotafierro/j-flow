@@ -175,12 +175,13 @@ For each failure or finding:
    - The relevant technical-spec.md section
    - Agent memory
    - Instruction: "Fix only this specific issue. Do not change anything else. If the fix changes a value, error code, status code, redirect target, or any other behavior that tests could assert, grep the entire repo for test files (`*.spec.ts`, `*.e2e-spec.ts`, `*.test.tsx`, `*_test.dart`, `*.spec.ts` under apps/e2e) that reference the old value and update those assertions too."
-3. After fixing, verify the specific change looks correct
+3. After fixing, verify the specific change looks correct. Record every file touched (the original affected file(s) plus any test files updated) into a running list across all fixes in this pass.
 
 ### Commit Fixes
 
+Stage only the files recorded in that running list — never `git add .`, which would also pick up anything untracked and unrelated in the working tree:
 ```bash
-git add .
+git add {every file recorded above, listed explicitly}
 git commit -m "fix({slug}): resolve {QA|review} findings
 
 Fixed: {brief list of what was fixed}"

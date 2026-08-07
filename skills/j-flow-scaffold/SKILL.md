@@ -392,26 +392,28 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
 
   redis:
     image: redis:7
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
   mailhog:
     image: mailhog/mailhog
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
 
 volumes:
   mongo_data:
 ```
 
-Also write `.env` at root as a copy of `.env.example` (so `docker compose up` works out of the box, only when `has_api`). Add a note in the post-scaffold output telling the user to change the default credentials before production.
+All three services bind to `127.0.0.1` — loopback-only, not `0.0.0.0` — so Mongo/Redis/Mailhog aren't reachable from other machines on the same network by default. A user who deliberately wants LAN access can widen the binding themselves.
+
+Also write `.env` at root as a copy of `.env.example`, only when `has_api` — but replace `MONGO_INITDB_ROOT_PASSWORD=changeme` with a freshly generated value: run `openssl rand -hex 32` and substitute its output. `docker compose up` still works out of the box; the real `.env` never carries the literal `changeme` placeholder. Add a note in the post-scaffold output that this dev secret is randomly generated per scaffold and must not be reused in production.
 
 **`.github/workflows/ci.yml`** — the `test` job runs whenever there is a TS/JS workspace (`minimal-workspace`/`full`); it is **omitted entirely for `flutter-only`** (no pnpm/TS to lint or test), leaving only the `flutter` job. Include the `mongodb` service and the Playwright install step only if `has_api` / `has_e2e` respectively. Include the `flutter` job only if `has_mobile`.
 
@@ -722,7 +724,7 @@ SMTP_HOST=localhost
 SMTP_PORT=1025
 ```
 
-Also write `apps/api/.env` as a copy of `apps/api/.env.example` so the API runs out of the box.
+Also write `apps/api/.env` as a copy of `apps/api/.env.example` so the API runs out of the box — but replace `JWT_ACCESS_SECRET=changeme-access-secret` and `JWT_REFRESH_SECRET=changeme-refresh-secret` with two independently generated values: run `openssl rand -hex 32` twice and substitute each output (never reuse one value for both). The real `.env` never carries the literal `changeme-*` placeholders — those stay in `.env.example` only.
 
 **`apps/api/test/tsconfig.json`** — fixes ts(2593) (`describe`/`it` not found) and ts(6059) (`rootDir` mismatch) in the VS Code TS language server. The test dir imports from `../src/`, so the common source root becomes `..`; `noEmit` prevents emit conflicts with the main tsconfig:
 ```json
@@ -1658,10 +1660,16 @@ When user replies 'approved':
 5. Update `.specs/README.md` symbol for `01-infra-base` from `[ ]` to `[✓]`.
 
 6. Commit:
-```bash
-git add -A
-git commit -m "chore: j-flow-scaffold — 01-infra-base scaffolded and verified"
-```
+
+   Before staging anything, verify no real secret file gets swept in: for every `.env` file written in this run (root `.env` if `has_api`, `apps/api/.env` if `has_api`, and any other per-app `.env`), run `git check-ignore <path>`. If any path is NOT reported as ignored — e.g. a pre-existing, hand-edited `.gitignore` doesn't cover it — **abort loudly and do not commit**: "REFUSING TO COMMIT: {path} is not covered by .gitignore and would be committed with real secrets. Add it to .gitignore and re-run this step." A pre-existing `.gitignore` is treated as authoritative and is never auto-corrected by this skill, so this check is the only thing standing between a real secret and the commit.
+
+   Only once every `.env` passes, stage explicitly — never `git add -A` / `git add .`, which would also catch anything `.gitignore` fails to cover:
+   ```bash
+   git add apps/ docs/ .specs/ .github/ README.md CHANGELOG.md CLAUDE.md .gitignore .env.example
+   git add packages/ package.json turbo.json pnpm-workspace.yaml tsconfig.json .npmrc docker-compose.yml   # workspace profiles only — skip for flutter-only
+   git commit -m "chore: j-flow-scaffold — 01-infra-base scaffolded and verified"
+   ```
+   Adjust the path list to whatever this run actually generated (per the scaffold profile and enabled layers) — the point is naming every generated top-level path explicitly, never a wildcard that could also match an uncovered `.env`.
 
 7. Merge into `develop` and drop the feature branch (no PR — this is the bootstrap feature, nothing to review remotely):
 ```bash
