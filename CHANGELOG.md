@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-08-07
+
 ### Added
 - **`/j-flow-start {slug} --quick` — fast-track mode.** Sets `fast_track: true` in `meta.md`; every later gate collapses a redundant confirmation on the happy path (replying "approved" to a spec/plan/review gate now also continues to the next command; a non-blocking build/qa result advances without a separate "Continue? 1/2" prompt). `/j-flow-build`'s smoke-check defaults to `skip` on an empty reply in fast-track (logged distinctly from an explicit skip). Never collapses a blocking outcome — QA red, review changes-requested, or unresolved clarification markers always stop and ask regardless. `/j-flow-check` shows `Fast-track: on` when set.
 - `.github/ISSUE_TEMPLATE/` (bug report, feature request) and `.github/PULL_REQUEST_TEMPLATE.md`.
