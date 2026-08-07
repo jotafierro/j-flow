@@ -1,4 +1,7 @@
-# Gate Rules
+# Gate Core
+
+Universal gate mechanics — every forward skill needs these. If this reference is
+already in your session context from earlier in this conversation, don't re-read it.
 
 ## How to Find Active Feature
 
@@ -10,11 +13,21 @@ The single-feature operation target, resolved in order:
 
 Read-only inspectors may operate over ALL features when asked (e.g. `/j-flow-check --all`, `/j-flow-check --repo`); the rule above is for single-feature operations.
 
+## Slug validation (fail-closed)
+
+Every skill that accepts a `{slug}` argument (`/j-flow-start`, `/j-flow-check {slug}`, `/j-flow-reopen`, and any future one) must validate it **before** using it in any path or git command. This is a required step, not best-effort — fail closed, don't fall through to a fuzzy match against `.specs/`:
+
+1. Match against `^[a-z0-9]+(-[a-z0-9]+)*$` — kebab-case, no leading/trailing hyphen, and (by construction of the pattern) no `.`, `/`, `~`, whitespace, or shell metacharacters.
+2. If it doesn't match, stop immediately: `Invalid slug '{slug}'. Use kebab-case (e.g. user-profile, invoice-list).`
+3. Only after validation, use `{slug}` to build a path (`.specs/{slug}/...`) or a git ref (`feature/{slug}`) — and always double-quote it in any shell command (`"feature/$slug"`, never a bare interpolation), even though step 1 already excludes the characters that would make quoting matter.
+
+This applies to read-only skills too (`/j-flow-check {slug}`) — a slug is untrusted user input regardless of whether the resulting command writes anything.
+
 ## Gate Check Algorithm
 
-Before running a gate's work: find the active feature (above), read `.specs/{slug}/gate-context.md`, and require the prior gate's entry to be present, approved, and not `[stale]` (see the cascade + status tables below). If missing or stale, print the block message and stop.
+Before running a gate's work: find the active feature (above), read `.specs/{slug}/gate-context.md`, and require the prior gate's entry to be present, approved, and not `[stale]` (see `gate-cascade.md` for the cascade + status tables). If missing or stale, print the block message and stop.
 
-`gate-context.md` is the source of truth for gate state. `meta.md` `{phase}_status:` fields and `.specs/README.md` backlog symbols are projections of it — when they disagree, gate-context wins and the projections should be recomputed (see "Resetting a gate").
+`gate-context.md` is the source of truth for gate state. `meta.md` `{phase}_status:` fields and `.specs/README.md` backlog symbols are projections of it — when they disagree, gate-context wins and the projections should be recomputed (see `gate-cascade.md` §"Resetting a gate").
 
 ## Approval gates
 
@@ -73,37 +86,13 @@ Enter 1 or 2:
 
 This applies to every phase-completion message that currently ends in a `Next step:` line (start, spec, plan, build, qa, review, reopen). It does not apply to the three documented auto-chains in `docs/FLOW.md` (`/j-flow-project` → `/j-flow-scaffold`, `/j-flow-project --update` → `/j-flow-scaffold --review`, `/j-flow-scaffold` → `/j-flow-recommend`), which keep running without asking.
 
-## Cascade rules for /j-flow-reopen
-
-Reopening at phase X resets X and all downstream gates back to `pending`. Commits are NOT reverted.
-
-| Reopen at | Resets |
-|-----------|--------|
-| functional | functional + technical + tasks + build + qa + review + finish |
-| technical | technical + tasks + build + qa + review + finish |
-| tasks | tasks + build + qa + review + finish |
-| build | build + qa + review + finish |
-| qa | qa + review + finish |
-| review | review + finish |
-| finish | finish |
-
-## Resetting a gate (reopen / update)
-
-When a gate is cleared (`/j-flow-reopen`) or invalidated (`/j-flow-update`), update ALL THREE stores for each affected gate, in this order:
-
-1. **gate-context.md** — reopen: remove the gate's entry (truncate after the last kept gate). update: append ` [stale]` to the gate's status line.
-2. **meta.md** — set the gate's `{phase}_status:` field: reopen → `pending`; update → `stale`. On reopen, also set `current_phase` to the earliest reopened phase.
-3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per §"Backlog symbols" below.
-
-Phase → meta field: functional→`functional_status`, technical→`technical_status`, task plan→`tasks_status`, build→`build_status`, qa→`qa_status`, review→`review_status`, finish→`finish_status`. Downstream sets are in "Cascade rules" above.
-
 ## Advancing a gate
 
 When a phase completes and its gate is approved, update ALL THREE stores. This is the single canonical procedure — skills reference it rather than inlining the mechanics.
 
 1. **gate-context.md** — append the phase's `[{GATE NAME}] {status} {date}` section (format below) with the phase's own summary lines.
 2. **meta.md** — set the fields for the phase (table below).
-3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per §"Backlog symbols" below.
+3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per `gate-symbols.md` §"Backlog symbols".
 
 | Phase | meta.md fields to set | current_phase → |
 |-------|-----------------------|-----------------|
@@ -114,23 +103,6 @@ When a phase completes and its gate is approved, update ALL THREE stores. This i
 | qa         | `qa_status: green`, `qa_completed_at: {date}` | `review` |
 | review     | `review_status: approved`, `review_approved_at: {date}` | `finish` |
 | finish     | `finish_status: completed`, `finish_completed_at: {date}` | `done` |
-
-## Backlog symbols
-
-The `.specs/README.md` backlog symbol for a feature, computed from meta.md state (first match wins, top to bottom). This is the single source — `j-flow-project` (sync) and `j-flow-check --repo` (drift check) both use it.
-
-| Condition | Symbol |
-|-----------|--------|
-| `finish_status: completed` | `[✓]` |
-| `review_status: approved` | `[R]` |
-| `qa_status: green` | `[Q]` |
-| `build_status: completed` | `[B]` |
-| `tasks_status: approved` | `[P]` |
-| `technical_status: approved` | `[TF]` |
-| `functional_status: approved` | `[SF]` |
-| otherwise (`pending`, `stale`, or no meta.md) | `[ ]` |
-
-A `stale` value matches no gate condition and falls through to the earlier gate's symbol.
 
 ## gate-context.md format (append-only)
 
@@ -166,29 +138,3 @@ Examples:
 [FINISH] completed 2026-06-12
   → README + CHANGELOG + PR to develop
 ```
-
-## Stale marker (from /j-flow-update)
-
-Mark downstream gates by appending ` [stale]`:
-- `[BUILD] completed 2026-06-12 [stale]`
-- `[QA] green 2026-06-12 [stale]`
-
-Stale gates block subsequent skills the same as missing gates.
-
-## Clarification markers
-
-**`[NEEDS CLARIFICATION: {question}]`** — marker for unresolved questions in `functional-spec.md`. A functional spec may be approved with markers present (progress is saved). However, the PLAN gate will block until all markers are resolved. Markers in a technical spec are not recognized — resolve them at the functional level before running `/j-flow-spec technical`.
-
-## AC format
-
-Acceptance Criteria in `functional-spec.md` use Given/When/Then structure (`### AC-N — {name}` heading, `**Given** / **When** / **Then:**` lines). Free-form ACs from pre-013 specs are accepted but degrade traceability in `/j-flow-check --consistency` and `/j-flow-qa`.
-
-## Slug validation (fail-closed)
-
-Every skill that accepts a `{slug}` argument (`/j-flow-start`, `/j-flow-check {slug}`, `/j-flow-reopen`, and any future one) must validate it **before** using it in any path or git command. This is a required step, not best-effort — fail closed, don't fall through to a fuzzy match against `.specs/`:
-
-1. Match against `^[a-z0-9]+(-[a-z0-9]+)*$` — kebab-case, no leading/trailing hyphen, and (by construction of the pattern) no `.`, `/`, `~`, whitespace, or shell metacharacters.
-2. If it doesn't match, stop immediately: `Invalid slug '{slug}'. Use kebab-case (e.g. user-profile, invoice-list).`
-3. Only after validation, use `{slug}` to build a path (`.specs/{slug}/...`) or a git ref (`feature/{slug}`) — and always double-quote it in any shell command (`"feature/$slug"`, never a bare interpolation), even though step 1 already excludes the characters that would make quoting matter.
-
-This applies to read-only skills too (`/j-flow-check {slug}`) — a slug is untrusted user input regardless of whether the resulting command writes anything.

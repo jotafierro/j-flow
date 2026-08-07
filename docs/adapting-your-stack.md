@@ -70,7 +70,7 @@ printed for you to merge rather than rewritten.
 | Gate workflow, `gate-context.md`, specs, tasks, backlog | No — stack-agnostic | n/a (works as-is for any stack) |
 | **Domain agents** (`j-flow-backend`, `j-flow-frontend`, `j-flow-mobile`, `j-flow-devops`, `j-flow-architect`, `j-flow-reviewer`, `j-flow-quality`) | Yes | ✅ Yes |
 | **Templates** (spec, technical-spec, tasks, review-guide, product, design, constitution, …) | Partly | ✅ Yes |
-| **References** (code-style, agent-scopes, layer-order, gate-rules) | Partly | ✅ Yes |
+| **References** (code-style, agent-scopes, layer-order, gate-core, gate-cascade, gate-symbols, spec-markers) | Partly | ✅ Yes |
 | `/j-flow-scaffold` monorepo generation | Yes | ❌ No — bring your own repo |
 | `/j-flow-qa` stage commands (`pnpm test`, `flutter test`, …) | Yes | ❌ No — see boundary below |
 

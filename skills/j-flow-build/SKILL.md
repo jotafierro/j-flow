@@ -1,6 +1,6 @@
 ---
 name: j-flow-build
-description: "Implement tasks from the approved plan. Dispatches domain agents by layer in sequence. --fix mode resolves QA or review findings. Usage: /j-flow-build [--fix]"
+description: "Implement tasks from the approved plan. Dispatches domain agents by layer, sequentially except ui+mobile which run in parallel when both have tasks. --fix mode resolves QA or review findings. Usage: /j-flow-build [--fix]"
 ---
 
 # j-flow-build
@@ -9,7 +9,7 @@ description: "Implement tasks from the approved plan. Dispatches domain agents b
 
 Before dispatching any agent, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer order to respect
 3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — to pick the right agent per layer
 4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints for agents to follow
@@ -65,6 +65,8 @@ For each layer with tasks — build only, no gate, no commit:
    - Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` for coding conventions
    - Instruction: "Before writing any code, walk the decision ladder for each piece: (1) does this need to exist at all? (2) does the codebase already have this pattern? (3) can stdlib handle it? (4) is there a native platform feature? (5) does an installed dependency already cover it? (6) can it be one line? Only then write the minimum working code. Implement exactly what the tasks require — no extra features or abstractions. Write unit tests in the same pass. Follow the technical spec patterns."
 5. Move to the next layer.
+
+**Exception — `ui` + `mobile` run in parallel, not sequentially, when both have tasks:** once `api` is committed (or was never in scope), and both `ui` and `mobile` have tasks, do NOT process them one after another via steps 1-5 above. Instead follow `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` §"Parallel Dispatch Rules" §"How to dispatch in parallel" — dispatch `j-flow-frontend` and `j-flow-mobile` as concurrent tool calls in the same response, wait for both, then commit both together. If only one of `ui`/`mobile` has tasks, or `api` isn't committed yet, fall back to the normal sequential loop above for whichever one applies.
 
 ### Combined Smoke-Check Gate
 
@@ -141,9 +143,9 @@ Append to `.specs/{slug}/gate-context.md`:
 ```
 (Only include layers that had tasks.)
 
-Advance the **build** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+Advance the **build** gate per `references/gate-core.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
 
-Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-qa`):
+Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-qa`):
 ```
 Build complete ✓
   Layers implemented: {list of layers}
@@ -174,7 +176,7 @@ For each failure or finding:
    - The affected file(s)
    - The relevant technical-spec.md section
    - Agent memory
-   - Instruction: "Fix only this specific issue. Do not change anything else. If the fix changes a value, error code, status code, redirect target, or any other behavior that tests could assert, grep the entire repo for test files (`*.spec.ts`, `*.e2e-spec.ts`, `*.test.tsx`, `*_test.dart`, `*.spec.ts` under apps/e2e) that reference the old value and update those assertions too."
+   - Instruction: "Fix only this specific issue. Do not change anything else. If the fix changes a value, error code, status code, redirect target, or any other behavior that tests could assert, grep the old value only under the scaffold's known test paths — `apps/*/src/**/*.spec.ts`, `apps/*/test/**/*.e2e-spec.ts`, `apps/*/src/**/*.test.tsx`, `apps/mobile/**/*_test.dart`, `apps/e2e/**/*.spec.ts` — not the whole repo, and update those assertions too."
 3. After fixing, verify the specific change looks correct. Record every file touched (the original affected file(s) plus any test files updated) into a running list across all fixes in this pass.
 
 ### Commit Fixes

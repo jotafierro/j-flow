@@ -9,17 +9,18 @@ description: "Generate task plan (tasks.json) and review guide (review-guide.md)
 
 **Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default.
 
-Before generating the task plan, read:
+Before generating the task plan, read (skip anything already in your session context from earlier this conversation):
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
-2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer definitions and execution order
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — to know which agent owns which layer
-4. `PRODUCT.md` — tech stack reference
-5. `DESIGN.md` — required when planning ui or mobile tasks
-6. `.specs/{slug}/functional-spec.md` — extract every AC
-7. `.specs/{slug}/technical-spec.md` — implementation patterns to plan against
-8. `.specs/{slug}/gate-context.md` — accumulated decisions
-9. Templates: `templates/tasks.json`, `templates/review-guide.md`, `templates/review-api.md`, `templates/review-api-graphql.md`, `templates/review-web.md`, `templates/review-mobile.md`, `templates/review-e2e.md`
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/spec-markers.md` — clarification markers, AC format
+3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer definitions and execution order
+4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — to know which agent owns which layer
+5. `PRODUCT.md` — tech stack reference
+6. `DESIGN.md` — required when planning ui or mobile tasks
+7. `.specs/{slug}/functional-spec.md` — extract every AC
+8. `.specs/{slug}/technical-spec.md` — implementation patterns to plan against
+9. `.specs/{slug}/gate-context.md` — accumulated decisions
+10. Templates: `templates/tasks.json`, `templates/review-guide.md`, `templates/review-api.md`, `templates/review-api-graphql.md`, `templates/review-web.md`, `templates/review-mobile.md`, `templates/review-e2e.md`
 
 ## Gate Check
 
@@ -109,7 +110,7 @@ For each layer with tasks in `tasks.json`, generate a file in `.specs/{slug}/rev
 
 Only generate layer files for layers with tasks. Infra layer has no review file.
 
-Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format.
+Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` for gate format.
 
 ### Step 5: Show and confirm
 
@@ -127,8 +128,8 @@ When approved:
    [TASK PLAN] approved {today's date}
      → {N} tasks across {N} layers, {N} ACs covered
    ```
-5. Advance the **task plan** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
-6. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build`):
+5. Advance the **task plan** gate per `references/gate-core.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+6. Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-build`):
    ```
    Task plan approved and saved ✓
 

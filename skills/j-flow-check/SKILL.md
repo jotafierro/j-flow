@@ -25,11 +25,11 @@ Read-only inspection of j-flow state. Never writes, edits, or commits — the re
 
 ## Required reading
 
-Always read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` (gate status interpretation and "Backlog symbols"). Then, by mode:
+Always read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` (gate status interpretation) and `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-symbols.md` ("Backlog symbols") — skip either if already in your session context from earlier this conversation. Then, by mode:
 
 - **status**: `.specs/README.md`; `.specs/{slug}/meta.md` and `.specs/{slug}/gate-context.md` for the target feature.
 - **`--repo`**: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md` (expected fields), `PRODUCT.md`, `DESIGN.md`, `.specs/README.md`, `.specs/.agents/*`.
-- **`--consistency`**: `.specs/{slug}/functional-spec.md`, `technical-spec.md`, `tasks.json`, `.specs/_system/` (all files; skip if absent), `.specs/{slug}/gate-context.md`.
+- **`--consistency`**: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/spec-markers.md` (clarification markers, AC format), `.specs/{slug}/functional-spec.md`, `technical-spec.md`, `tasks.json`, `.specs/_system/` (all files; skip if absent), `.specs/{slug}/gate-context.md`.
 
 ---
 
@@ -37,7 +37,7 @@ Always read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md
 
 ### Step 1: Find feature
 
-If a `{slug}` argument was given, validate it first per `references/gate-rules.md` §"Slug validation (fail-closed)" — fail closed before touching any path. Otherwise use the "How to Find Active Feature" algorithm from `references/gate-rules.md`.
+If a `{slug}` argument was given, validate it first per `references/gate-core.md` §"Slug validation (fail-closed)" — fail closed before touching any path. Otherwise use the "How to Find Active Feature" algorithm from `references/gate-core.md`.
 
 ### Step 2: Read files
 
@@ -92,7 +92,7 @@ Gate icons:
 - Review approved, no finish: suggest `/j-flow-finish`
 - All gates done: suggest `/j-flow-release [major|minor|patch]`
 
-(A bare `Next step:` line is allowed here — this is a read-only status command, per `references/gate-rules.md` §"Next-step dialogue".)
+(A bare `Next step:` line is allowed here — this is a read-only status command, per `references/gate-core.md` §"Next-step dialogue".)
 
 ### `--all` Flag
 
@@ -117,7 +117,7 @@ If `.specs/` is empty or only contains `.agents/`:
 
 ## Mode: `--repo` (repo health diagnostics)
 
-Surfaces drift between PRODUCT.md, agent memory, backlog, and feature folders across the whole repo. Runs 9 check groups, each producing a report row.
+Surfaces drift between PRODUCT.md, agent memory, backlog, and feature folders across the whole repo. Runs 6 check groups, each producing a report row.
 
 ### 1. Project files
 
@@ -158,32 +158,16 @@ Report:
 - Slugs in backlog with no corresponding folder
 - Folders with no entry in the backlog (orphans)
 
-### 6. Per-feature integrity
+### 6. Per-feature integrity & gate consistency
 
-For each feature folder under `.specs/`:
-- Verify `meta.md` exists. If not, report and skip the rest of this check for that folder.
-- Verify `meta.md` contains all expected fields from `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Report missing fields.
-- Verify `gate-context.md` exists (may be empty header for new features).
+One pass per feature folder under `.specs/` — read `meta.md` and `gate-context.md` once each and run every sub-check below against that single read, rather than re-scanning the same two files four separate times:
 
-### 7. Backlog symbol vs gate state
-
-For each feature in `.specs/README.md` with a status symbol (`[ ]`, `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]`):
-- Read the corresponding `meta.md` and compute the expected symbol per `references/gate-rules.md` §"Backlog symbols" (first matching condition wins)
-- Report any mismatch between the displayed symbol and the computed one
-
-### 8. Gate-context format
-
-For each feature folder's `gate-context.md`, verify every gate-status line matches the format from `references/gate-rules.md`:
-
-```
-[<GATE NAME>] <status> <YYYY-MM-DD>
-```
-
-Report any malformed lines.
-
-### 9. Stale markers
-
-Report every feature with at least one `[stale]` suffix in `gate-context.md`. These need re-runs before `/j-flow-finish`.
+- **meta.md exists?** If not, report and skip the remaining sub-checks for this folder.
+- **meta.md fields:** verify it contains all expected fields from `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Report missing fields.
+- **gate-context.md exists?** (may be empty header for new features).
+- **Gate-context format:** every gate-status line matches `[<GATE NAME>] <status> <YYYY-MM-DD>` per `references/gate-core.md`. Report malformed lines.
+- **Stale markers:** report if at least one line has a `[stale]` suffix — these need re-runs before `/j-flow-finish`.
+- **Backlog symbol vs gate state:** if this feature has a status symbol in `.specs/README.md` (`[ ]`, `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]`), compute the expected symbol from this same `meta.md` read per `references/gate-symbols.md` §"Backlog symbols" (first matching condition wins) and report any mismatch against the displayed symbol.
 
 ### `--repo` report format
 
@@ -209,18 +193,11 @@ j-flow-check --repo — repo health report
   ⚠ 02-design-system listed in backlog but no .specs/02-design-system/ folder
   ⚠ .specs/old-experiment/ exists but not listed in backlog
 
-▸ Per-feature integrity
+▸ Per-feature integrity & gate consistency
   ✓ 01-infra-base
   ✗ 03-auth: missing meta.md
   ⚠ 04-users: meta.md missing field 'build_status'
-
-▸ Backlog symbol vs gate state
   ⚠ 01-infra-base shows [✓] in backlog but finish_status is pending
-
-▸ Gate-context format
-  ✓ all gate-context.md files well-formed
-
-▸ Stale markers
   ⚠ 04-users has 2 stale gates: BUILD, QA
 
 Summary: 6 issues found. /j-flow-check --repo is read-only — run the relevant skills to fix:
@@ -235,7 +212,7 @@ In `--verbose` mode, also print `✓` rows that passed cleanly. If a check canno
 
 ## Mode: `--consistency` (AC↔task↔test cross-consistency)
 
-Cross-consistency for the active feature across functional-spec ↔ tasks ↔ tests ↔ system spec. Find the active feature first (algorithm in `references/gate-rules.md`). Runs 5 check groups; if a prerequisite is missing (e.g. `tasks.json` absent because `/j-flow-plan` hasn't run), report `(skipped: {reason})` for that check and continue.
+Cross-consistency for the active feature across functional-spec ↔ tasks ↔ tests ↔ system spec. Find the active feature first (algorithm in `references/gate-core.md`). Runs 5 check groups; if a prerequisite is missing (e.g. `tasks.json` absent because `/j-flow-plan` hasn't run), report `(skipped: {reason})` for that check and continue.
 
 ### Check 1: Unresolved clarification markers
 

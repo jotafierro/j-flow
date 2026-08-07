@@ -78,7 +78,7 @@ All other layer pairs have sequential dependencies and must not run in parallel.
 
 When `ui` and `mobile` both have tasks and `api` is committed:
 
-1. Dispatch `j-flow-frontend` (ui tasks) and `j-flow-mobile` (mobile tasks) as concurrent sub-agents via the `superpowers:dispatching-parallel-agents` skill.
+1. Dispatch `j-flow-frontend` (ui tasks) and `j-flow-mobile` (mobile tasks) as two independent agent-dispatch tool calls in the **same** response — the runtime executes independent tool calls concurrently, no third-party plugin required. Do not dispatch one, wait for its result, then dispatch the other; issue both dispatches together.
 2. Wait for both to complete before committing.
 3. Commit both layers together — `git add` only the files belonging to the `ui` and `mobile` tasks (from `tasks.json`), never `git add .`:
 

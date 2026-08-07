@@ -10,11 +10,12 @@ Does NOT revert commits — only gate status in `gate-context.md` is cleared.
 
 ## Required reading
 
-Before reopening any gate, read:
+Before reopening any gate, read (skip anything already in your session context from earlier this conversation):
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — cascade rules: reopening at phase X resets X and all downstream gates
-2. `.specs/{slug}/meta.md` — current gate states
-3. `.specs/{slug}/gate-context.md` — accumulated decisions (will be rewritten by this skill)
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — slug validation, how to find the active feature
+2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-cascade.md` — cascade rules: reopening at phase X resets X and all downstream gates
+3. `.specs/{slug}/meta.md` — current gate states
+4. `.specs/{slug}/gate-context.md` — accumulated decisions (will be rewritten by this skill)
 
 ## Usage
 
@@ -27,7 +28,7 @@ Before reopening any gate, read:
 
 ### Step 1: Find feature and show current state
 
-If a `{slug}` argument was given, validate it first per `references/gate-rules.md` §"Slug validation (fail-closed)" — fail closed before touching any path. Otherwise find the feature (see j-flow-shared: "How to Find Active Feature").
+If a `{slug}` argument was given, validate it first per `references/gate-core.md` §"Slug validation (fail-closed)" — fail closed before touching any path. Otherwise find the feature per `references/gate-core.md` §"How to Find Active Feature".
 Read `gate-context.md` and display the current gate summary (same format as /j-flow-check).
 
 ### Step 2: Ask which gate to reopen at
@@ -78,11 +79,11 @@ Example — reopen at "task plan" on a feature with all 6 gates:
 
 ### Step 5: Reset meta.md
 
-For each cleared gate, set its `{phase}_status:` field back to `pending` (phase→field map in `references/gate-rules.md` §"Resetting a gate"). Set `current_phase` to the reopened gate's phase. Then recompute this feature's `.specs/README.md` backlog symbol from the updated meta.md.
+For each cleared gate, set its `{phase}_status:` field back to `pending` (phase→field map in `references/gate-cascade.md` §"Resetting a gate"). Set `current_phase` to the reopened gate's phase. Then recompute this feature's `.specs/README.md` backlog symbol per `references/gate-symbols.md`.
 
 ### Step 6: Output
 
-Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: the command for the reopened gate, e.g. `/j-flow-build` when reopened at task plan):
+Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: the command for the reopened gate, e.g. `/j-flow-build` when reopened at task plan):
 ```
 Feature '{slug}' reopened at [TASK PLAN] ✓
 Gates cleared: BUILD, QA, REVIEW

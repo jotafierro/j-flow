@@ -16,7 +16,7 @@ Before auditing code, read in order:
 
 1. `.specs/.agents/j-flow-reviewer.md` — repo-specific review rules, known anti-patterns, security rules
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — design + implementation constraints to enforce
-3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate statuses
+3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate statuses
 4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer boundaries
 5. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — what each agent owns (to detect cross-boundary code)
 6. `DESIGN.md` — if review touches UI/mobile layers, verify token usage

@@ -11,7 +11,7 @@ description: "Audit code quality against approved technical specs. Only reachabl
 
 Before auditing, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — layer boundaries to check
 3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — agent ownership (to detect cross-boundary code)
 4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation rules to enforce
@@ -117,9 +117,9 @@ Append to `.specs/{slug}/gate-context.md`:
   → {N} findings resolved
 ```
 
-Advance the **review** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+Advance the **review** gate per `references/gate-core.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
 
-Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-finish`):
+Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-finish`):
 ```
 Review approved ✓
 
@@ -139,7 +139,7 @@ Append to `.specs/{slug}/gate-context.md`:
   → {N} critical findings — see review-findings.md
 ```
 
-Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build --fix`):
+Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-build --fix`):
 ```
 Review: changes requested
 {N} critical finding(s) need resolution.

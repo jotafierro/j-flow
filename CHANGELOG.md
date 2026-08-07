@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/j-flow-scaffold` now resolves and shows the actual version its first `@latest` CLI will install, and asks for one confirmation before running any of the five official-CLI invocations that follow.
 - Both `.github/workflows/ci.yml` (this repo's own, and the template `/j-flow-scaffold` generates) now declare `permissions: contents: read` and pin third-party actions by commit SHA (with a `# vN` comment) instead of a mutable version tag.
 - CI now also runs `claude plugin validate . --strict`.
+- `references/gate-rules.md` (8.7 KB, re-read up to ~10× per feature cycle) is split into `gate-core.md`, `gate-cascade.md`, `gate-symbols.md`, and `spec-markers.md` — each skill now reads only what its own gate/reopen/backlog/AC needs, with an explicit "skip if already in context" note on every Required-reading block.
+- `j-flow-scaffold/SKILL.md` (the largest file in the repo, ~18k tokens) now has its own `references/` directory: each `has_*` layer's generation instructions (api, web, admin, e2e, cli, mobile) and `packages/ui` moved to their own file, loaded only when that layer is selected; `--review` mode moved to `references/review-mode.md`.
+- `/j-flow-build`'s ui+mobile parallel dispatch (already documented in `agent-scopes.md`) is now actually wired into the Build Loop, and no longer depends on the third-party `superpowers:dispatching-parallel-agents` skill — it dispatches both agents as concurrent tool calls in the same turn, which the runtime already parallelizes natively.
+- `/j-flow-project`'s 14 questions and `/j-flow-spec`'s 6 questions are now asked in ~3 thematic blocks each instead of one at a time, with a one-at-a-time fallback for anything left unanswered in a block's reply.
+- `/j-flow-check --repo` consolidates what were 4 separate per-feature-folder scans (meta.md fields, gate-context format, stale markers, backlog-symbol match) into one pass per folder.
+- `/j-flow-build --fix`'s test-file grep for stale assertions is now scoped to the scaffold's known test paths instead of the whole repo.
 
 ## [2.2.0] - 2026-08-04
 

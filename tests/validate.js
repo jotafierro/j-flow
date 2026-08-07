@@ -171,7 +171,8 @@ for (const tpl of EXPECTED_AGENT_TEMPLATES) {
 
 // ── references ───────────────────────────────────────────────────────────────
 const EXPECTED_REFERENCES = [
-  'gate-rules.md', 'layer-order.md', 'code-style.md', 'agent-scopes.md', 'overrides.md',
+  'gate-core.md', 'gate-cascade.md', 'gate-symbols.md', 'spec-markers.md',
+  'layer-order.md', 'code-style.md', 'agent-scopes.md', 'overrides.md',
 ];
 
 console.log('\nshared references/');

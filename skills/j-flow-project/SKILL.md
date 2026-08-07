@@ -40,18 +40,29 @@ If `PRODUCT.md` already exists in the current directory, stop:
 - Show the content to the user and ask: "Does this product description look right? Reply 'yes' to use as-is, or tell me what to adjust."
 - Apply any requested changes before proceeding to Step 3.
 
-**If no `--from`:** ask the following questions ONE AT A TIME (wait for each answer before asking the next):
+**If no `--from`:** ask in two thematic blocks — present all questions in a block together, wait for one reply covering all of them. If the reply leaves any question in the block unanswered or too vague to use, ask ONLY that one individually (one at a time) before moving to the next block — don't re-ask questions already answered.
 
-1. What is the product name and tagline? (one sentence: what it does and for whom)
+**Block 1 — Identity & audience:**
+```
+Let's define the product. Answer what you can in one message (skip anything you're unsure of — I'll follow up):
+
+1. Product name and tagline? (one sentence: what it does and for whom)
 2. What problem does it solve? (1-3 sentences)
 3. Who is the primary user? (role, scale: personal / team / multi-tenant SaaS / public)
 4. Is there a secondary user? (admin, manager, support — or "none")
-5. What is the monetization model? (free / freemium / subscription / one-time / B2B SaaS)
-6. What are the must-have features for Phase 1 (MVP)? (bullet list)
-7. What are the Phase 2 value-add features? (bullet list, or "none yet")
-8. What are the Phase 3+ advanced features? (bullet list, or "none yet")
-9. What is explicitly out of scope for v1?
+```
+
+**Block 2 — Business model & roadmap:**
+```
+Now the business model and scope:
+
+5. Monetization model? (free / freemium / subscription / one-time / B2B SaaS)
+6. Must-have features for Phase 1 (MVP)? (bullet list)
+7. Phase 2 value-add features? (bullet list, or "none yet")
+8. Phase 3+ advanced features? (bullet list, or "none yet")
+9. What's explicitly out of scope for v1?
 10. What makes this product different? (one paragraph)
+```
 
 ### Step 2b: Determine stack layers
 
@@ -91,11 +102,14 @@ Iterate until approved. Then write to `PRODUCT.md` at the project root.
 - Apply any requested changes, then save to `DESIGN.md`.
 
 **Otherwise:**
-Ask these questions ONE AT A TIME:
+Ask as one block; if any part comes back unanswered or too vague, follow up on just that one:
+```
+Three quick design questions — answer what you can in one message:
 
 1. Brand personality? (e.g. "modern corporate", "playful", "minimal", "technical")
 2. Primary brand color? (hex value, or description like "deep blue")
 3. Typography preference? (e.g. "Inter for sans, JetBrains Mono for code" — or "suggest based on brand")
+```
 
 Then:
 - Generate a full color palette for both light mode and dark mode from the primary color (complementary shades for background, surface, on-surface, secondary, error, outline, etc.)
@@ -316,7 +330,7 @@ Build a truth map: `slug → { meta fields }` vs `slug → displayed symbol`.
 
 ### Step 2: Sync symbols
 
-Map each feature's actual state to the correct symbol per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` §"Backlog symbols" (first matching condition wins, top to bottom).
+Map each feature's actual state to the correct symbol per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-symbols.md` §"Backlog symbols" (first matching condition wins, top to bottom).
 
 For each feature where the actual symbol differs from the displayed symbol, update the `.specs/README.md` table row.
 

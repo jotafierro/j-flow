@@ -11,7 +11,7 @@ description: "Generate functional spec (default) via dialogue, or technical spec
 
 Before drafting any spec, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and approval rules
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format and approval rules
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — design constraints for specs (used by /j-flow-spec technical)
 3. `PRODUCT.md` — product vision and tech stack to anchor decisions
 4. `DESIGN.md` — design system tokens (REQUIRED when the spec includes any UI or mobile work)
@@ -98,32 +98,42 @@ Ask:
 
 ## Mode: Functional Spec (default `/j-flow-spec`)
 
-Generate the functional spec through a dialogue. Ask questions ONE AT A TIME — wait for each answer before asking the next.
+Generate the functional spec through a dialogue, in three blocks. Present each block's questions together and wait for one reply; if part of a block comes back unanswered or too vague to use, follow up on just that part (one at a time) before moving to the next block — never re-ask something already answered.
 
 ### Questions
 
-Before asking question 1, check if `.specs/_system/` exists and has any domain files.
+Before asking Block 1, check if `.specs/_system/` exists and has any domain files.
 If yes: read all domain files and keep them in context as the current behavioral baseline.
 If during the dialogue a user answer describes behavior already covered by an existing AC in `_system/`, surface it:
   "⚠ Similar behavior exists in `_system/{domain}.md`: '{existing AC}'. Confirm this is an intentional extension or modification."
 Do not block the spec — just surface the overlap so the user makes an informed choice.
 
-1. **What does this feature do?** (describe from the user's perspective in 1-2 sentences)
-2. **Who uses it?** (which user roles interact with this feature)
-3. **What triggers it?** (user action, event, cron schedule, etc.)
-4. **What are the acceptance criteria?**
-   Guide: "List conditions that must be true for this feature to be complete. Use Given/When/Then format for each:
-     - **Given** {precondition or system state}
-     - **When** {user action or system event}
-     - **Then:** {observable outcomes, one per line}
+**Block 1 — Shape of the feature:**
+```
+1. What does this feature do? (describe from the user's perspective in 1-2 sentences)
+2. Who uses it? (which user roles interact with this feature)
+3. What triggers it? (user action, event, cron schedule, etc.)
+```
+
+**Block 2 — Acceptance criteria** (kept on its own — this is the most involved answer, and rushing it degrades every downstream skill that traces ACs):
+```
+4. What are the acceptance criteria? List conditions that must be true for this feature to be complete. Use Given/When/Then format for each:
+     - Given {precondition or system state}
+     - When {user action or system event}
+     - Then: {observable outcomes, one per line}
    Each AC should be atomic — one observable outcome per criterion. Aim for 3–8 ACs.
    Example:
      AC-1 — User login
        Given the user is not authenticated
        When they submit valid credentials
-       Then: they receive a JWT token, they are redirected to the dashboard"
-5. **What is explicitly out of scope?** (what this feature does NOT do)
-6. **Any constraints?** (performance, security, compliance, UX)
+       Then: they receive a JWT token, they are redirected to the dashboard
+```
+
+**Block 3 — Boundaries:**
+```
+5. What is explicitly out of scope? (what this feature does NOT do)
+6. Any constraints? (performance, security, compliance, UX)
+```
 
 ### Handling partial answers
 
@@ -138,7 +148,7 @@ The spec can still be approved with markers present — this allows saving progr
 
 After collecting all answers, read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/functional-spec.md`. Substitute placeholders with the answers from the dialogue above. When substituting ACs: format each as `### AC-N — {short name}` with `Given / When / Then:` structure following the template exactly. If the user provided free-form ACs during the dialogue, convert them to GWT format before writing the draft — show the conversion alongside the original text if the interpretation may not be obvious. Show the full draft to the user.
 
-Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format requirements.
+Reference `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` for gate format requirements.
 
 Ask: "Does this spec look right? Reply 'approved' to proceed, or tell me what to change."
 
@@ -153,8 +163,8 @@ When the user replies 'approved' (or equivalent confirmation):
    [FUNCTIONAL SPEC] approved {today's date}
      → key decisions: {1-line summary of main scope decisions}
    ```
-3. Advance the **functional** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
-4. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-spec technical`):
+3. Advance the **functional** gate per `references/gate-core.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+4. Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-spec technical`):
    ```
    Functional spec approved and saved ✓
 
@@ -204,8 +214,8 @@ When approved:
      → architecture: {1-line summary of main architecture decisions}
      → patterns: {key patterns chosen, e.g. "repository pattern, JWT guards, Riverpod"}
    ```
-3. Advance the **technical** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
-4. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-plan`):
+3. Advance the **technical** gate per `references/gate-core.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+4. Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-plan`):
    ```
    Technical spec approved and saved ✓
 

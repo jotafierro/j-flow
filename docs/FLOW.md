@@ -194,9 +194,12 @@ When `/j-flow-review` returns changes-requested:
 
 ## Shared Patterns
 
-- Gate-context.md format, status values, cascade rules, gate-check algorithm, "How to Find Active Feature" → `skills/j-flow-shared/references/gate-rules.md`
+- Gate-context.md format, status values, gate-check algorithm, "How to Find Active Feature", slug validation → `skills/j-flow-shared/references/gate-core.md`
+- Reopen/update cascade rules, resetting a gate, stale markers → `skills/j-flow-shared/references/gate-cascade.md`
+- Backlog symbol lookup → `skills/j-flow-shared/references/gate-symbols.md`
+- Clarification markers, AC format → `skills/j-flow-shared/references/spec-markers.md`
 - CHANGELOG format → `skills/j-flow-shared/templates/changelog.md`
 - Canonical-source index (which file owns what) → `skills/j-flow-shared/SKILL.md`
 
 Templates at `skills/j-flow-shared/templates/` — referenced by skills at runtime via `${CLAUDE_PLUGIN_ROOT}`.
-References at `skills/j-flow-shared/references/` — gate-rules, layer-order, code-style, agent-scopes.
+References at `skills/j-flow-shared/references/` — gate-core, gate-cascade, gate-symbols, spec-markers, layer-order, code-style, agent-scopes, overrides.

@@ -14,14 +14,15 @@ This skill does not execute. It bundles shared assets that other j-flow skills r
 
 | Topic | File |
 |-------|------|
-| Gate format, status values, cascade rules | `references/gate-rules.md` |
-| How to find the active feature | `references/gate-rules.md` |
-| Gate check algorithm | `references/gate-rules.md` |
+| Gate format, status values, how to find the active feature, gate check algorithm, slug validation | `references/gate-core.md` |
+| Reopen/update cascade rules, resetting a gate, stale markers | `references/gate-cascade.md` |
+| Backlog symbol lookup | `references/gate-symbols.md` |
+| Clarification markers, AC format | `references/spec-markers.md` |
 | Build layer order, agent ownership map | `references/layer-order.md` |
 | Implementation + spec constraints | `references/code-style.md` |
 | Agent scopes (what each agent reads and writes) | `references/agent-scopes.md` |
 | meta.md schema | `templates/meta.md` |
-| gate-context.md seed and append format | `templates/gate-context.md` + `references/gate-rules.md` |
+| gate-context.md seed and append format | `templates/gate-context.md` + `references/gate-core.md` |
 | CHANGELOG seed | `templates/changelog.md` |
 | Feature artifacts: functional/technical spec, tasks, review guide, qa report, review findings, feature README | `templates/<artifact>.md` |
 | Project-level templates | `templates/product.md`, `templates/design.md`, `templates/specs-index.md` |

@@ -11,7 +11,7 @@ Initialize a new feature branch and spec folder.
 
 Before initializing a feature, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — for the initial `gate-context.md` format and meta.md field names
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — for the initial `gate-context.md` format and meta.md field names
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md` — the meta.md template (already used in the existing flow)
 3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/gate-context.md` — the gate-context.md seed
 4. `.specs/README.md` — the backlog, to verify the slug exists and isn't already started
@@ -33,7 +33,7 @@ Before initializing a feature, read:
 
 ### Step 1: Validate slug
 
-Validate per `references/gate-rules.md` §"Slug validation (fail-closed)" — fail closed on the kebab-case pattern before doing anything else. Then also check it must not already exist as a directory in `.specs/`; if it does: "Feature '{slug}' already exists. Use /j-flow-check to see its status."
+Validate per `references/gate-core.md` §"Slug validation (fail-closed)" — fail closed on the kebab-case pattern before doing anything else. Then also check it must not already exist as a directory in `.specs/`; if it does: "Feature '{slug}' already exists. Use /j-flow-check to see its status."
 
 ### Step 2: Verify agent memory exists
 
@@ -67,7 +67,7 @@ If all agent memory files are empty: "Agent memory is empty — agents will lear
 
 ### Step 6: Confirm
 
-Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-spec`):
+Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-spec`):
 ```
 Feature '{slug}' initialized ✓
   Branch: feature/{slug}

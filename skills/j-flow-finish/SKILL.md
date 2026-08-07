@@ -11,7 +11,7 @@ description: "Generate feature README, update CHANGELOG [Unreleased], consolidat
 
 Before finishing, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate cascade rules
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format
 2. `.specs/{slug}/gate-context.md` — all accumulated decisions to summarize in README
 3. `.specs/{slug}/functional-spec.md` — AC table for the README
 4. `.specs/{slug}/tasks.json` — files changed list
@@ -25,7 +25,7 @@ Before finishing, read:
 ## Gate Check
 
 Find the active feature. Read `.specs/{slug}/gate-context.md`.
-Require `[REVIEW] approved` (see `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` for gate format).
+Require `[REVIEW] approved` (see `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` for gate format).
 If missing or stale: "Gate [REVIEW] not approved. Run /j-flow-review first."
 
 ## Process
@@ -160,7 +160,7 @@ git commit -m "docs({slug}): feature README, changelog entry, agent memory, syst
 
 ### Step 4b: Update meta.md
 
-Update `.specs/{slug}/meta.md` for the **finish** gate per `references/gate-rules.md` §"Advancing a gate" (`finish_status: completed`, `finish_completed_at`, `current_phase: done`).
+Update `.specs/{slug}/meta.md` for the **finish** gate per `references/gate-core.md` §"Advancing a gate" (`finish_status: completed`, `finish_completed_at`, `current_phase: done`).
 
 ```bash
 git add .specs/{slug}/meta.md
@@ -179,7 +179,7 @@ gh pr create \
 
 If `gh` CLI is not available: print the URL for manual PR creation with recommended title and body.
 
-Recompute the feature's `.specs/README.md` backlog symbol from meta.md per `references/gate-rules.md` §"Backlog symbols" (finish → `[✓]`).
+Recompute the feature's `.specs/README.md` backlog symbol from meta.md per `references/gate-symbols.md` §"Backlog symbols" (finish → `[✓]`).
 
 ### Step 6: Output
 

@@ -9,9 +9,9 @@ description: "Run full QA gate across 7 stages: lint, unit tests, NestJS E2E, Fl
 
 **Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default. For dispatching **j-flow-quality**, follow the agent-override dispatch rule in `overrides.md` §"Agent-definition overrides (dispatch)" — session confirmation and tool-scope ceiling included, never widened.
 
-Before running QA, read:
+Before running QA, read (skip anything already in your session context from earlier this conversation):
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — gate format and red/green semantics
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format and red/green semantics
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — j-flow-quality scope and what to test
 3. `.specs/{slug}/review-guide.md` — environment setup and layer file index
 4. `.specs/{slug}/review/` — per-layer manual testing docs (if present)
@@ -109,8 +109,8 @@ If `review/` absent (pre-016 feature):
    [QA] green {today's date}
      → {N} tests passing, checklist {N}/{N}
    ```
-3. Advance the **qa** gate per `references/gate-rules.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
-4. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-review`):
+3. Advance the **qa** gate per `references/gate-core.md` §"Advancing a gate" — sets the meta.md fields and recomputes the `.specs/README.md` backlog symbol.
+4. Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-review`):
    ```
    QA gate green ✓
    All applicable stages passed.
@@ -131,7 +131,7 @@ If `review/` absent (pre-016 feature):
    [QA] red {today's date}
      → BLOCKED: {stage name} failed — see qa-report.md
    ```
-3. Print the completion message, then use the Next-step dialogue from `references/gate-rules.md` (next command: `/j-flow-build --fix`):
+3. Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-build --fix`):
    ```
    QA gate red ✗
    Stage failed: {stage name}

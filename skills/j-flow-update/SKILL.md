@@ -11,7 +11,7 @@ Update a feature's specs or task plan when requirements change mid-feature.
 
 Before updating any spec or plan, read:
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-rules.md` — stale marker rules
+1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-cascade.md` — stale marker rules
 2. `.specs/{slug}/meta.md` — current gate states
 3. `.specs/{slug}/gate-context.md` — accumulated decisions (will be marked stale)
 4. The artifact being updated: `functional-spec.md` / `technical-spec.md` / `tasks.json`
@@ -64,7 +64,7 @@ In `gate-context.md`, append ` [stale]` to each affected gate's status line:
 Before: `[BUILD] completed 2026-06-10`
 After:  `[BUILD] completed 2026-06-10 [stale]`
 
-Then, for the SAME downstream set, set each gate's `meta.md` `{phase}_status:` field to `stale` and recompute this feature's `.specs/README.md` backlog symbol. This keeps meta.md and gate-context.md in sync (otherwise `/j-flow-check` status and `--repo` disagree). See `references/gate-rules.md` §"Resetting a gate".
+Then, for the SAME downstream set, set each gate's `meta.md` `{phase}_status:` field to `stale` and recompute this feature's `.specs/README.md` backlog symbol. This keeps meta.md and gate-context.md in sync (otherwise `/j-flow-check` status and `--repo` disagree). See `references/gate-cascade.md` §"Resetting a gate".
 
 ### Step 5: Commit
 
