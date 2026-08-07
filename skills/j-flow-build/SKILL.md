@@ -1,6 +1,6 @@
 ---
 name: j-flow-build
-description: Implement tasks from the approved plan. Dispatches domain agents by layer in sequence. --fix mode resolves QA or review findings. Usage: /j-flow-build [--fix]
+description: "Implement tasks from the approved plan. Dispatches domain agents by layer in sequence. --fix mode resolves QA or review findings. Usage: /j-flow-build [--fix]"
 ---
 
 # j-flow-build

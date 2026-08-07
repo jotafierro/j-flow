@@ -1,6 +1,6 @@
 ---
 name: j-flow-reopen
-description: Reopen a feature to a prior gate. Clears gate-context.md from the chosen gate forward. Does NOT revert commits. Usage: /j-flow-reopen [slug]
+description: "Reopen a feature to a prior gate. Clears gate-context.md from the chosen gate forward. Does NOT revert commits. Usage: /j-flow-reopen [slug]"
 ---
 
 # j-flow-reopen

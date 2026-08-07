@@ -1,6 +1,6 @@
 ---
 name: j-flow-plan
-description: Generate task plan (tasks.json) and review guide (review-guide.md) from approved specs. Validates AC coverage before saving. Usage: /j-flow-plan
+description: "Generate task plan (tasks.json) and review guide (review-guide.md) from approved specs. Validates AC coverage before saving. Usage: /j-flow-plan"
 ---
 
 # j-flow-plan

@@ -14,20 +14,21 @@ const SCENARIOS_DIR = path.join(__dirname, 'scenarios');
 // Assertions actually evaluated by this runner. Others are reported as "skip".
 const FS_MATCHERS = new Set([
   'gate_context_contains',
-  'gate_context_not_contains',
   'file_exists',
   'file_not_exists',
 ]);
 
-const SKIP_MATCHERS = new Set([
-  'output_contains',
-  'no_files_written',
-  'no_commits_made',
-  'review_blocked',
-  'review_gate_blocked',
-  'writes_file',
-  'qa_report_gate',
-  'qa_report_contains',
+// key -> why it's skipped instead of evaluated.
+const SKIP_MATCHERS = new Map([
+  ['output_contains', 'requires live skill invocation'],
+  ['no_files_written', 'requires live skill invocation'],
+  ['no_commits_made', 'requires live skill invocation'],
+  ['review_blocked', 'requires live skill invocation'],
+  ['review_gate_blocked', 'requires live skill invocation'],
+  ['writes_file', 'requires live skill invocation'],
+  ['qa_report_gate', 'requires live skill invocation'],
+  ['qa_report_contains', 'requires live skill invocation'],
+  ['gate_context_not_contains', 'cannot distinguish pre- from post-execution state from a static fixture'],
 ]);
 
 let totalPass = 0;
@@ -57,42 +58,39 @@ function setupFixture(scenario) {
 function evaluateAssertion(assertion, fixture) {
   const [key, value] = Object.entries(assertion)[0];
 
-  if (SKIP_MATCHERS.has(key)) {
-    return { status: 'skip', key, reason: 'requires live skill invocation' };
-  }
+  try {
+    if (SKIP_MATCHERS.has(key)) {
+      return { status: 'skip', key, reason: SKIP_MATCHERS.get(key) };
+    }
 
-  if (key === 'gate_context_contains') {
-    const content = fs.readFileSync(path.join(fixture.specsDir, 'gate-context.md'), 'utf8');
-    const ok = content.includes(value);
-    // If the substring is not yet in the input gate-context, this assertion
-    // describes post-execution state we cannot verify without an LLM run.
-    return ok
-      ? { status: 'pass', key, value }
-      : { status: 'skip', key, value, reason: 'post-execution state' };
-  }
+    if (key === 'gate_context_contains') {
+      const gcPath = path.join(fixture.specsDir, 'gate-context.md');
+      if (!fs.existsSync(gcPath)) {
+        return { status: 'fail', key, value, detail: 'scenario context has no gate_context to check against' };
+      }
+      const content = fs.readFileSync(gcPath, 'utf8');
+      const ok = content.includes(value);
+      // If the substring is not yet in the input gate-context, this assertion
+      // describes post-execution state we cannot verify without an LLM run.
+      return ok
+        ? { status: 'pass', key, value }
+        : { status: 'skip', key, value, reason: 'post-execution state' };
+    }
 
-  if (key === 'gate_context_not_contains') {
-    const content = fs.readFileSync(path.join(fixture.specsDir, 'gate-context.md'), 'utf8');
-    const present = content.includes(value);
-    // We can only confidently pass this if the input still contains the string
-    // and the scenario expects it to be removed (i.e. it WOULD have been
-    // present but isn't). Otherwise we cannot tell pre- from post-state.
-    return present
-      ? { status: 'skip', key, value, reason: 'requires post-execution state diff' }
-      : { status: 'skip', key, value, reason: 'no input state to diff against' };
-  }
+    if (key === 'file_exists') {
+      const ok = fs.existsSync(path.join(fixture.tmp, value));
+      return { status: ok ? 'pass' : 'fail', key, value };
+    }
 
-  if (key === 'file_exists') {
-    const ok = fs.existsSync(path.join(fixture.tmp, value));
-    return { status: ok ? 'pass' : 'fail', key, value };
-  }
+    if (key === 'file_not_exists') {
+      const ok = !fs.existsSync(path.join(fixture.tmp, value));
+      return { status: ok ? 'pass' : 'fail', key, value };
+    }
 
-  if (key === 'file_not_exists') {
-    const ok = !fs.existsSync(path.join(fixture.tmp, value));
-    return { status: ok ? 'pass' : 'fail', key, value };
+    return { status: 'fail', key, value, detail: `unknown matcher: ${key}` };
+  } catch (e) {
+    return { status: 'fail', key, value, detail: e.message };
   }
-
-  return { status: 'fail', key, value, detail: `unknown matcher: ${key}` };
 }
 
 function runScenario(file) {
@@ -113,19 +111,21 @@ function runScenario(file) {
 
   const assertions = scenario.assertions || [];
   let pass = 0, fail = 0, skip = 0;
-  for (const a of assertions) {
-    const r = evaluateAssertion(a, fixture);
-    if (r.status === 'pass') { pass++; console.log(`  ✓ ${r.key}${r.value !== undefined ? `: ${r.value}` : ''}`); }
-    else if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.key}${r.value !== undefined ? `: ${r.value}` : ''} — ${r.detail || ''}`); }
-    else { skip++; console.log(`  ⊘ ${r.key} (skip: ${r.reason})`); }
+  try {
+    for (const a of assertions) {
+      const r = evaluateAssertion(a, fixture);
+      if (r.status === 'pass') { pass++; console.log(`  ✓ ${r.key}${r.value !== undefined ? `: ${r.value}` : ''}`); }
+      else if (r.status === 'fail') { fail++; console.error(`  ✗ ${r.key}${r.value !== undefined ? `: ${r.value}` : ''} — ${r.detail || ''}`); }
+      else { skip++; console.log(`  ⊘ ${r.key} (skip: ${r.reason})`); }
+    }
+  } finally {
+    // Clean fixture (best-effort), even if an assertion evaluation throws.
+    try { fs.rmSync(fixture.tmp, { recursive: true, force: true }); } catch (_) {}
   }
 
   totalPass += pass;
   totalFail += fail;
   totalSkip += skip;
-
-  // Clean fixture (best-effort).
-  try { fs.rmSync(fixture.tmp, { recursive: true, force: true }); } catch (_) {}
 }
 
 function main() {

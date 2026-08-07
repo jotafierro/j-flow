@@ -22,9 +22,9 @@
   "private": true,
   "scripts": {
     "validate": "node tests/validate.js",
-    "test": "node tests/validate.js && node tests/run-scenarios.js",
+    "test": "node tests/validate.js",
     "test:structure": "node tests/validate.js",
-    "test:scenarios": "node tests/run-scenarios.js"
+    "scenarios:lint": "node tests/run-scenarios.js"
   },
   "devDependencies": {
     "js-yaml": "^4.1.0"

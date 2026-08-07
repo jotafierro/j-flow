@@ -1,6 +1,6 @@
 ---
 name: j-flow-eject
-description: Copy a j-flow template, reference, agent definition, or agent memory file from the plugin into the target repo under `.specs/.overrides/` so it can be customized without forking. Usage: /j-flow-eject [asset-path]
+description: "Copy a j-flow template, reference, agent definition, or agent memory file from the plugin into the target repo under `.specs/.overrides/` so it can be customized without forking. Usage: /j-flow-eject [asset-path]"
 ---
 
 # j-flow-eject

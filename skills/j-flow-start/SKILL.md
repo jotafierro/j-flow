@@ -1,6 +1,6 @@
 ---
 name: j-flow-start
-description: Initialize a new feature. Creates git branch, .specs/{slug}/ directory, meta.md, and empty gate-context.md. Loads agent memory context. Usage: /j-flow-start {slug}
+description: "Initialize a new feature. Creates git branch, .specs/{slug}/ directory, meta.md, and empty gate-context.md. Loads agent memory context. Usage: /j-flow-start {slug}"
 ---
 
 # j-flow-start

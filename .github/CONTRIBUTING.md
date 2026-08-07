@@ -4,7 +4,8 @@ Thanks for your interest! j-flow is a solo-maintained Claude Code plugin, but is
 
 ## Before you open a PR
 
-- Run the structural validator: `node tests/validate.js` (and `node tests/run-scenarios.js` for the scenario suite).
+- Run `npm ci && npm test` — the structural validator that CI enforces (frontmatter, expected skills/agents/templates, layer-consistency mapping).
+- Optionally run `npm run scenarios:lint` — a lint over `tests/scenarios/*.yaml` fixtures, not a behavioral test suite. It cannot fail on assertions that require a live skill invocation (`output_contains`, `no_files_written`, etc.); those are reported as `skip`. See `tests/scenarios/README.md`.
 - Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
 - Keep changes focused, and update `CHANGELOG.md` under `[Unreleased]` when behavior changes.
 

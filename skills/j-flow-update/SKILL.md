@@ -1,6 +1,6 @@
 ---
 name: j-flow-update
-description: Update specs or task plan mid-feature due to changed requirements. Marks downstream gates as stale. Usage: /j-flow-update
+description: "Update specs or task plan mid-feature due to changed requirements. Marks downstream gates as stale. Usage: /j-flow-update"
 ---
 
 # j-flow-update

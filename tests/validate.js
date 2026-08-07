@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const yaml = require('js-yaml');
 
 const ROOT = path.resolve(__dirname, '..');
 let passed = 0;
@@ -21,6 +22,15 @@ function check(name, fn) {
 
 function assert(condition, msg) {
   if (!condition) throw new Error(msg);
+}
+
+// Parses the YAML frontmatter block between the first two `---` lines.
+// Returns null if the file has no frontmatter block; throws on invalid YAML
+// inside the block (surfaced by check() as a failed check, not a crash).
+function parseFrontmatter(content) {
+  const m = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!m) return null;
+  return yaml.load(m[1]);
 }
 
 // ── plugin.json ──────────────────────────────────────────────────────────────
@@ -47,6 +57,18 @@ const EXPECTED_SKILLS = [
 
 console.log('\nskills/');
 
+check('skills/ has no orphaned or undeclared directories', () => {
+  const actual = fs.readdirSync(path.join(ROOT, 'skills'))
+    .filter((f) => fs.statSync(path.join(ROOT, 'skills', f)).isDirectory());
+  const actualSet = new Set(actual);
+  const expectedSet = new Set(EXPECTED_SKILLS);
+  const missing = EXPECTED_SKILLS.filter((s) => !actualSet.has(s));
+  const orphaned = actual.filter((s) => !expectedSet.has(s));
+  assert(missing.length === 0, `EXPECTED_SKILLS lists directories that don't exist: ${missing.join(', ')}`);
+  assert(orphaned.length === 0,
+    `skills/ has directories not declared in EXPECTED_SKILLS: ${orphaned.join(', ')}`);
+});
+
 for (const skill of EXPECTED_SKILLS) {
   check(`${skill} directory exists`, () => {
     assert(fs.existsSync(path.join(ROOT, 'skills', skill)), `missing skills/${skill}/`);
@@ -57,12 +79,21 @@ for (const skill of EXPECTED_SKILLS) {
     assert(fs.existsSync(skillFile), `missing skills/${skill}/SKILL.md`);
   });
 
-  check(`${skill} has frontmatter`, () => {
+  check(`${skill} has valid frontmatter`, () => {
     const skillFile = path.join(ROOT, 'skills', skill, 'SKILL.md');
     const content = fs.readFileSync(skillFile, 'utf8');
-    assert(content.startsWith('---'), 'must start with --- frontmatter');
-    assert(content.includes('name:'), 'frontmatter missing name:');
-    assert(content.includes('description:'), 'frontmatter missing description:');
+    const fm = parseFrontmatter(content);
+    assert(fm, 'must start with a --- frontmatter block');
+    assert(typeof fm.name === 'string' && fm.name.length > 0, 'frontmatter missing name: key');
+    assert(typeof fm.description === 'string' && fm.description.length > 0,
+      'frontmatter missing description: key');
+  });
+
+  check(`${skill} frontmatter name matches directory name`, () => {
+    const skillFile = path.join(ROOT, 'skills', skill, 'SKILL.md');
+    const content = fs.readFileSync(skillFile, 'utf8');
+    const fm = parseFrontmatter(content) || {};
+    assert(fm.name === skill, `frontmatter name "${fm.name}" must equal directory name "${skill}"`);
   });
 }
 
@@ -74,17 +105,38 @@ const EXPECTED_AGENTS = [
 
 console.log('\nagents/');
 
+check('agents/ has no orphaned or undeclared files', () => {
+  const actual = fs.readdirSync(path.join(ROOT, 'agents'))
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => f.slice(0, -3));
+  const actualSet = new Set(actual);
+  const expectedSet = new Set(EXPECTED_AGENTS);
+  const missing = EXPECTED_AGENTS.filter((a) => !actualSet.has(a));
+  const orphaned = actual.filter((a) => !expectedSet.has(a));
+  assert(missing.length === 0, `EXPECTED_AGENTS lists files that don't exist: ${missing.join(', ')}`);
+  assert(orphaned.length === 0,
+    `agents/ has files not declared in EXPECTED_AGENTS: ${orphaned.join(', ')}`);
+});
+
 for (const agent of EXPECTED_AGENTS) {
   check(`${agent}.md exists`, () => {
     assert(fs.existsSync(path.join(ROOT, 'agents', `${agent}.md`)), `missing agents/${agent}.md`);
   });
 
-  check(`${agent} has frontmatter with required fields`, () => {
+  check(`${agent} has valid frontmatter with required fields`, () => {
     const content = fs.readFileSync(path.join(ROOT, 'agents', `${agent}.md`), 'utf8');
-    assert(content.startsWith('---'), 'must start with --- frontmatter');
-    assert(content.includes('name:'), 'missing name:');
-    assert(content.includes('description:'), 'missing description:');
-    assert(content.includes('tools:'), 'missing tools:');
+    const fm = parseFrontmatter(content);
+    assert(fm, 'must start with a --- frontmatter block');
+    assert(typeof fm.name === 'string' && fm.name.length > 0, 'frontmatter missing name: key');
+    assert(typeof fm.description === 'string' && fm.description.length > 0,
+      'frontmatter missing description: key');
+    assert(fm.tools !== undefined, 'frontmatter missing tools: key');
+  });
+
+  check(`${agent} frontmatter name matches file name`, () => {
+    const content = fs.readFileSync(path.join(ROOT, 'agents', `${agent}.md`), 'utf8');
+    const fm = parseFrontmatter(content) || {};
+    assert(fm.name === agent, `frontmatter name "${fm.name}" must equal file name "${agent}"`);
   });
 }
 
@@ -165,35 +217,57 @@ for (const skill of OVERRIDE_WIRED_SKILLS) {
 // design — that is what stops a half-wired layer from shipping green (plan 037 Phase 0).
 // When a layer is added: register it here AND in every surface, atomically.
 const STACK_LAYERS = {
-  web:    { agent: 'j-flow-frontend' },
-  api:    { agent: 'j-flow-backend' },
+  web: { agent: 'j-flow-frontend' },
+  api: { agent: 'j-flow-backend' },
   mobile: { agent: 'j-flow-mobile' },
-  admin:  { agent: 'j-flow-frontend' },   // reuses frontend — a mapping, not 1:1
-  e2e:    { agent: 'j-flow-quality' },    // harness layer — quality-owned, no new agent (plan 037)
-  cli:    { agent: 'j-flow-cli' },        // dedicated light agent, consumes 037's profile (plan 036)
+  admin: { agent: 'j-flow-frontend' },   // reuses frontend — a mapping, not 1:1
+  e2e: { agent: 'j-flow-quality' },    // harness layer — quality-owned, no new agent (plan 037)
+  cli: { agent: 'j-flow-cli' },        // dedicated light agent, consumes 037's profile (plan 036)
 };
 
 console.log('\nlayer consistency/');
 
-const scaffoldSkill = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/SKILL.md'), 'utf8');
-const productTpl = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/templates/product.md'), 'utf8');
-const validValuesLine = scaffoldSkill.split('\n').find((l) => l.includes('valid values')) || '';
+let scaffoldSkill = '';
+let productTpl = '';
+
+check('scaffold SKILL.md is readable for layer-consistency checks', () => {
+  scaffoldSkill = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/SKILL.md'), 'utf8');
+});
+
+check('product.md template is readable for layer-consistency checks', () => {
+  productTpl = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/templates/product.md'), 'utf8');
+});
+
+// Anchored on the stable "**Stack layers:**" marker, not the generic phrase "valid
+// values" — that phrase also appears at SKILL.md:1352 (an unrelated Storybook note).
+const stackLayersLine = scaffoldSkill.split('\n').find((l) => l.includes('**Stack layers:**')) || '';
+const validValuesMatch = stackLayersLine.match(/valid values:\s*([^)]*)\)/);
+const scaffoldEnumTokens = validValuesMatch
+  ? [...validValuesMatch[1].matchAll(/`([a-zA-Z0-9_-]+)`/g)].map((m) => m[1])
+  : [];
+
+// product.md's **Layers:** line documents its enum as "comma list of: a, b, c — ...".
 const layersEnumLine = productTpl.split('\n').find((l) => l.includes('**Layers:**')) || '';
+const layersListMatch = layersEnumLine.match(/comma list of:\s*(.*?)\s*—/);
+const productLayerTokens = layersListMatch
+  ? layersListMatch[1].split(',').map((s) => s.trim()).filter(Boolean)
+  : [];
 
 for (const [layer, { agent }] of Object.entries(STACK_LAYERS)) {
   check(`scaffold valid-values enum lists \`${layer}\``, () => {
-    assert(validValuesLine.includes('`' + layer + '`'),
-      `scaffold "valid values:" line must list \`${layer}\``);
+    assert(scaffoldEnumTokens.includes(layer),
+      `scaffold "Stack layers" valid-values must list \`${layer}\` (found: ${scaffoldEnumTokens.join(', ') || 'none'})`);
   });
 
   check(`scaffold derives has_${layer}`, () => {
-    assert(scaffoldSkill.includes('has_' + layer),
-      `scaffold must derive the has_${layer} flag`);
+    // Exact-token match: `has_api` must not match inside `has_api_client`.
+    const re = new RegExp('has_' + layer + '(?![a-zA-Z0-9_])');
+    assert(re.test(scaffoldSkill), `scaffold must derive the has_${layer} flag as an exact token`);
   });
 
   check(`product.md Layers enum lists ${layer}`, () => {
-    assert(layersEnumLine.includes(layer),
-      `product.md **Layers:** enum must list ${layer}`);
+    assert(productLayerTokens.includes(layer),
+      `product.md **Layers:** enum must list ${layer} (found: ${productLayerTokens.join(', ') || 'none'})`);
   });
 
   check(`${layer} maps to an owning agent (${agent})`, () => {

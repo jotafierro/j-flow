@@ -1,6 +1,6 @@
 ---
 name: j-flow-release
-description: Cut a release — semver bump, CHANGELOG, tag, GitHub Release. Usage: /j-flow-release [major|minor|patch]
+description: "Cut a release — semver bump, CHANGELOG, tag, GitHub Release. Usage: /j-flow-release [major|minor|patch]"
 ---
 
 # j-flow-release

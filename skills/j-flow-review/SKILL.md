@@ -1,6 +1,6 @@
 ---
 name: j-flow-review
-description: Audit code quality against approved technical specs. Only reachable if QA gate is green. Produces review-findings.md. Usage: /j-flow-review
+description: "Audit code quality against approved technical specs. Only reachable if QA gate is green. Produces review-findings.md. Usage: /j-flow-review"
 ---
 
 # j-flow-review

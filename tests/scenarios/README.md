@@ -10,11 +10,13 @@ The runner parses each YAML, builds a fixture file tree under a temp directory f
 
 Only file-system state derivable from the YAML's input `context:` block:
 
-- `gate_context_contains: <str>` — passes if the literal `gate_context` input contains the substring.
-- `gate_context_not_contains: <str>` — currently always skipped (cannot distinguish pre- from post-execution state without invoking the skill).
+- `gate_context_contains: <str>` — passes if the literal `gate_context` input contains the substring; fails if the scenario has no `gate_context` in its `context:` block to check against; skips if the substring is absent (it may only appear post-execution, which this runner can't simulate).
+- `gate_context_not_contains: <str>` — always skipped (cannot distinguish pre- from post-execution state without invoking the skill).
 - `file_exists: <path>`, `file_not_exists: <path>` — checked against the fixture tree.
 
 Everything else (string-on-output, no-files-written, qa_report_gate, etc.) requires invoking the real skill via Claude Code. Those assertions are reported as `skip` and counted but never fail.
+
+This runner is **not** run as part of `npm test` — it can't fail on live-invocation assertions, so a green run doesn't mean a skill behaves correctly. Run it explicitly via `npm run scenarios:lint` as a lint over the YAML fixtures themselves (do they parse, do their FS-checkable assertions hold), not as a behavioral test suite.
 
 ## Adding a new scenario
 

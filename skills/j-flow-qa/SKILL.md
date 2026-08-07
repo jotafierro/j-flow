@@ -1,6 +1,6 @@
 ---
 name: j-flow-qa
-description: Run full QA gate across 7 stages: lint, unit tests, NestJS E2E, Flutter integration, Playwright E2E, visual smoke check, manual checklist — layer-aware, skips stages for untouched layers. Blocks /j-flow-review if red. Usage: /j-flow-qa
+description: "Run full QA gate across 7 stages: lint, unit tests, NestJS E2E, Flutter integration, Playwright E2E, visual smoke check, manual checklist — layer-aware, skips stages for untouched layers. Blocks /j-flow-review if red. Usage: /j-flow-qa"
 ---
 
 # j-flow-qa

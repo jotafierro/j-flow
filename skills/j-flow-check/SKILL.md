@@ -1,7 +1,7 @@
 ---
 name: j-flow-check
 allowed-tools: Read Grep Glob Bash
-description: Read-only inspector. Default shows feature status and gate progress; --repo runs repo health diagnostics (drift, missing artifacts); --consistency runs AC↔task↔test cross-consistency for the active feature. Usage: /j-flow-check [--all | --repo | --consistency] [--verbose]
+description: "Read-only inspector. Default shows feature status and gate progress; --repo runs repo health diagnostics (drift, missing artifacts); --consistency runs AC↔task↔test cross-consistency for the active feature. Usage: /j-flow-check [--all | --repo | --consistency] [--verbose]"
 ---
 
 # j-flow-check

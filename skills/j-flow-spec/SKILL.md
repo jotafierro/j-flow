@@ -1,6 +1,6 @@
 ---
 name: j-flow-spec
-description: Generate functional spec (default) via dialogue, or technical spec (technical argument) via j-flow-architect agent, or explore scope without committing (--explore). Both spec modes produce approval gates. Usage: /j-flow-spec [technical|--explore]
+description: "Generate functional spec (default) via dialogue, or technical spec (technical argument) via j-flow-architect agent, or explore scope without committing (--explore). Both spec modes produce approval gates. Usage: /j-flow-spec [technical|--explore]"
 ---
 
 # j-flow-spec

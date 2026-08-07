@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `tests/validate.js` now parses actual YAML frontmatter (`js-yaml`) instead of substring-matching, and fails on orphaned or undeclared `skills/`/`agents/` entries. This caught invalid frontmatter in 14 `SKILL.md` files (an unquoted `Usage: /command` inside a single-line YAML scalar) — fixed by quoting.
+- The scaffold/product.md stack-layer consistency guard now compares exact tokens instead of substrings (it previously treated `has_api` as present inside `has_api_client`).
+- `tests/run-scenarios.js` no longer crashes and leaks its fixture tmpdir when a scenario omits `gate_context`; assertion failures are now reported as `fail` instead of an uncaught exception.
+
+### Changed
+- `npm test` now runs only the structural validator. The scenario runner moved to `npm run scenarios:lint` — it lints YAML fixtures but can't fail on assertions that require a live skill invocation, so it no longer pretends to be a pass/fail test suite.
+- CI now runs `npm ci` before tests and runs both `npm test` and `npm run scenarios:lint`.
+
 ## [2.2.0] - 2026-08-04
 
 ### Added

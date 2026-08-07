@@ -1,6 +1,6 @@
 ---
 name: j-flow-finish
-description: Generate feature README, update CHANGELOG [Unreleased], consolidate agent memory patterns, and create PR to develop. Usage: /j-flow-finish
+description: "Generate feature README, update CHANGELOG [Unreleased], consolidate agent memory patterns, and create PR to develop. Usage: /j-flow-finish"
 ---
 
 # j-flow-finish
