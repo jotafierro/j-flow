@@ -7,38 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`/j-flow-start {slug} --quick` — fast-track mode.** Sets `fast_track: true` in `meta.md`; every later gate collapses a redundant confirmation on the happy path (replying "approved" to a spec/plan/review gate now also continues to the next command; a non-blocking build/qa result advances without a separate "Continue? 1/2" prompt). `/j-flow-build`'s smoke-check defaults to `skip` on an empty reply in fast-track (logged distinctly from an explicit skip). Never collapses a blocking outcome — QA red, review changes-requested, or unresolved clarification markers always stop and ask regardless. `/j-flow-check` shows `Fast-track: on` when set.
+- `.github/ISSUE_TEMPLATE/` (bug report, feature request) and `.github/PULL_REQUEST_TEMPLATE.md`.
+- `package.json` now declares an explicit `files` array, so the npm tarball no longer depends on the `.gitignore` fallback.
+
+### Changed
+- **`references/gate-rules.md` (8.7 KB, re-read up to ~10× per feature cycle) split into `gate-core.md`, `gate-cascade.md`, `gate-symbols.md`, and `spec-markers.md`** — each skill now reads only what its own gate/reopen/backlog/AC needs, with an explicit "skip if already in context" note on every Required-reading block.
+- **`j-flow-scaffold/SKILL.md` (the largest file in the repo, ~18k tokens) now has its own `references/` directory**: each `has_*` layer's generation instructions (api, web, admin, e2e, cli, mobile) and `packages/ui` moved to their own file, loaded only when that layer is selected; `--review` mode moved to `references/review-mode.md`.
+- `/j-flow-build`'s ui+mobile parallel dispatch (already documented in `agent-scopes.md`) is now actually wired into the Build Loop, and no longer depends on the third-party `superpowers:dispatching-parallel-agents` skill — it dispatches both agents as concurrent tool calls in the same turn, which the runtime already parallelizes natively.
+- `/j-flow-project`'s 14 questions and `/j-flow-spec`'s 6 questions are now asked in ~3 thematic blocks each instead of one at a time, with a one-at-a-time fallback for anything left unanswered in a block's reply.
+- `/j-flow-check --repo` consolidates what were 4 separate per-feature-folder scans (meta.md fields, gate-context format, stale markers, backlog-symbol match) into one pass per folder.
+- `/j-flow-build --fix`'s test-file grep for stale assertions is now scoped to the scaffold's known test paths instead of the whole repo.
+- `npm test` now runs only the structural validator. The scenario runner moved to `npm run scenarios:lint` — it lints YAML fixtures but can't fail on assertions that require a live skill invocation, so it no longer pretends to be a pass/fail test suite.
+- `/j-flow-scaffold` now resolves and shows the actual version its first `@latest` CLI will install, and asks for one confirmation before running any of the five official-CLI invocations that follow.
+- `docs/FLOW.md` and `README.md` now mention the `cli` layer (Agent Map, `.specs/.agents/` tree, build sequence, project tree, Stack table) — previously undocumented despite shipping in v2.2.0.
+- `skills/j-flow-shared/SKILL.md`'s canonical-source table now lists `references/overrides.md`.
+- `.github/workflows/ci.yml` no longer triggers on a `develop` branch — this repo doesn't have one (that trigger was copied from the workflow this plugin generates for *target* repos, which do use `develop`).
+- The private `## Plans (development tracking)` section moved from the tracked `CLAUDE.md` to the gitignored `CLAUDE.local.md`; the tracked `CLAUDE.md` is now a short contributor-facing pointer to `CONTRIBUTING.md` and the canonical-source index.
+
 ### Fixed
 - `tests/validate.js` now parses actual YAML frontmatter (`js-yaml`) instead of substring-matching, and fails on orphaned or undeclared `skills/`/`agents/` entries. This caught invalid frontmatter in 14 `SKILL.md` files (an unquoted `Usage: /command` inside a single-line YAML scalar) — fixed by quoting.
 - The scaffold/product.md stack-layer consistency guard now compares exact tokens instead of substrings (it previously treated `has_api` as present inside `has_api_client`).
 - `tests/run-scenarios.js` no longer crashes and leaks its fixture tmpdir when a scenario omits `gate_context`; assertion failures are now reported as `fail` instead of an uncaught exception.
+- **`/j-flow-scaffold` no longer writes literal `changeme*` secrets into real `.env` files.** The Mongo root password and the two JWT secrets are now generated with `openssl rand -hex 32` at scaffold time; `changeme*` placeholders remain only in `.env.example`.
+- The scaffolded `docker-compose.yml` now binds Mongo, Redis, and Mailhog to `127.0.0.1` instead of all interfaces.
+- `/j-flow-scaffold`'s bootstrap commit and `/j-flow-build --fix`'s commit no longer use `git add -A` / `git add .` — both stage an explicit path list instead. The scaffold commit also refuses to proceed (loudly) if any `.env` it wrote isn't covered by `.gitignore`.
+- `/j-flow-release`'s Node/Flutter version-bump loops no longer interpolate a file path into a `node -e` script body, no longer scan the whole repo tree, and are now filename-safe (`find -print0` / `read -r -d ''`) instead of a bare `while read`.
+- `package-lock.json`'s version was frozen at `1.0.0` while everything else moved to `2.2.0`; synced.
 
-### Changed
-- `npm test` now runs only the structural validator. The scenario runner moved to `npm run scenarios:lint` — it lints YAML fixtures but can't fail on assertions that require a live skill invocation, so it no longer pretends to be a pass/fail test suite.
-- CI now runs `npm ci` before tests and runs both `npm test` and `npm run scenarios:lint`.
+### Security
 - **Agent-definition overrides no longer dispatch an unrestricted `general-purpose` agent.** An override is now gated by a one-time-per-session confirmation (path + content hash) and seeded with a tool-scope ceiling matching the plugin agent it replaces — `j-flow-reviewer` and `j-flow-architect` (no `Bash` in their declared scope) can no longer gain `Bash` by being overridden. This is a behavior change for anyone relying on an override to gain tools beyond the original agent's scope — that was the actual bug.
 - `/j-flow-eject` now rejects `..`, absolute, and home-relative (`~`) paths before the prefix check, and verifies the resolved source/destination stay contained under the expected plugin/`.specs/.overrides/` directories.
 - `/j-flow-check {slug}` and `/j-flow-reopen [slug]` now validate the slug (fail-closed, kebab-case) before touching any path — previously only `/j-flow-start` did.
 - `.specs/**` content forwarded into an agent dispatch (memory, specs, tasks) is now explicitly documented as observed project state, never instructions — `/j-flow-check --repo` adds a narrow heuristic check that flags memory files containing directives addressed at the agent itself (not ordinary imperative-sounding project notes).
 - `README.md` and `.github/SECURITY.md` now state that `.specs/.overrides/` is a trust surface equivalent to executable code.
-- **`/j-flow-scaffold` no longer writes literal `changeme*` secrets into real `.env` files.** The Mongo root password and the two JWT secrets are now generated with `openssl rand -hex 32` at scaffold time; `changeme*` placeholders remain only in `.env.example`.
-- The scaffolded `docker-compose.yml` now binds Mongo, Redis, and Mailhog to `127.0.0.1` instead of all interfaces.
-- `/j-flow-scaffold`'s bootstrap commit and `/j-flow-build --fix`'s commit no longer use `git add -A` / `git add .` — both stage an explicit path list instead. The scaffold commit also refuses to proceed (loudly) if any `.env` it wrote isn't covered by `.gitignore`.
-- `/j-flow-release`'s Node/Flutter version-bump loops no longer interpolate a file path into a `node -e` script body, no longer scan the whole repo tree, and are now filename-safe (`find -print0` / `read -r -d ''`) instead of a bare `while read`.
-- `/j-flow-scaffold` now resolves and shows the actual version its first `@latest` CLI will install, and asks for one confirmation before running any of the five official-CLI invocations that follow.
 - Both `.github/workflows/ci.yml` (this repo's own, and the template `/j-flow-scaffold` generates) now declare `permissions: contents: read` and pin third-party actions by commit SHA (with a `# vN` comment) instead of a mutable version tag.
 - CI now also runs `claude plugin validate . --strict`.
-- `references/gate-rules.md` (8.7 KB, re-read up to ~10× per feature cycle) is split into `gate-core.md`, `gate-cascade.md`, `gate-symbols.md`, and `spec-markers.md` — each skill now reads only what its own gate/reopen/backlog/AC needs, with an explicit "skip if already in context" note on every Required-reading block.
-- `j-flow-scaffold/SKILL.md` (the largest file in the repo, ~18k tokens) now has its own `references/` directory: each `has_*` layer's generation instructions (api, web, admin, e2e, cli, mobile) and `packages/ui` moved to their own file, loaded only when that layer is selected; `--review` mode moved to `references/review-mode.md`.
-- `/j-flow-build`'s ui+mobile parallel dispatch (already documented in `agent-scopes.md`) is now actually wired into the Build Loop, and no longer depends on the third-party `superpowers:dispatching-parallel-agents` skill — it dispatches both agents as concurrent tool calls in the same turn, which the runtime already parallelizes natively.
-- `/j-flow-project`'s 14 questions and `/j-flow-spec`'s 6 questions are now asked in ~3 thematic blocks each instead of one at a time, with a one-at-a-time fallback for anything left unanswered in a block's reply.
-- `/j-flow-check --repo` consolidates what were 4 separate per-feature-folder scans (meta.md fields, gate-context format, stale markers, backlog-symbol match) into one pass per folder.
-- `/j-flow-build --fix`'s test-file grep for stale assertions is now scoped to the scaffold's known test paths instead of the whole repo.
-- `package.json` now declares an explicit `files` array, so the npm tarball no longer depends on the `.gitignore` fallback.
-- `docs/FLOW.md` and `README.md` now mention the `cli` layer (Agent Map, `.specs/.agents/` tree, build sequence, project tree, Stack table) — previously undocumented despite shipping in v2.2.0.
-- `skills/j-flow-shared/SKILL.md`'s canonical-source table now lists `references/overrides.md`.
-- Added `.github/ISSUE_TEMPLATE/` (bug report, feature request) and `.github/PULL_REQUEST_TEMPLATE.md`.
-- `.github/workflows/ci.yml` no longer triggers on a `develop` branch — this repo doesn't have one (that trigger was copied from the workflow this plugin generates for *target* repos, which do use `develop`).
-- The private `## Plans (development tracking)` section moved from the tracked `CLAUDE.md` to the gitignored `CLAUDE.local.md`; the tracked `CLAUDE.md` is now a short contributor-facing pointer to `CONTRIBUTING.md` and the canonical-source index.
 
 ## [2.2.0] - 2026-08-04
 
