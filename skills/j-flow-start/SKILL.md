@@ -33,10 +33,7 @@ Before initializing a feature, read:
 
 ### Step 1: Validate slug
 
-- Pattern must match: `[a-z0-9][a-z0-9-]*[a-z0-9]` (or single word `[a-z0-9]+`)
-- Must not already exist as a directory in `.specs/`
-- If invalid: "Invalid slug '{slug}'. Use kebab-case (e.g. user-profile, invoice-list)."
-- If already exists: "Feature '{slug}' already exists. Use /j-flow-check to see its status."
+Validate per `references/gate-rules.md` §"Slug validation (fail-closed)" — fail closed on the kebab-case pattern before doing anything else. Then also check it must not already exist as a directory in `.specs/`; if it does: "Feature '{slug}' already exists. Use /j-flow-check to see its status."
 
 ### Step 2: Verify agent memory exists
 

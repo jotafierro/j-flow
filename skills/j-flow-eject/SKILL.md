@@ -31,9 +31,12 @@ Copy a single j-flow asset into the target repo's `.specs/.overrides/` tree so y
 
 If no argument: list ejectable assets by category and ask the user to pick one. Show each as a path.
 
-If argument provided: validate the path matches one of the four allowed prefixes (`templates/`, `templates/agents/`, `references/`, `agents/`). Reject anything else with: `Invalid path. Allowed prefixes: templates/, templates/agents/, references/, agents/`.
+If argument provided, validate in this order — fail closed, stop at the first violation:
 
-### Step 2: Verify source exists
+1. Reject if the argument contains `..` anywhere, starts with `/` or `~`, or contains a null byte. Stop with: `Invalid path. Must be a relative path under one of: templates/, templates/agents/, references/, agents/ — no '..', and no absolute or home-relative paths.` (A bare prefix check is not enough — `templates/../../../../etc/passwd` starts with `templates/` too.)
+2. Validate the (now traversal-free) path matches one of the four allowed prefixes (`templates/`, `templates/agents/`, `references/`, `agents/`). Reject anything else with: `Invalid path. Allowed prefixes: templates/, templates/agents/, references/, agents/`.
+
+### Step 2: Verify source exists and is contained
 
 Resolve the source path under `${CLAUDE_PLUGIN_ROOT}`:
 - `templates/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/<file>`
@@ -41,11 +44,13 @@ Resolve the source path under `${CLAUDE_PLUGIN_ROOT}`:
 - `references/<file>` → `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/<file>`
 - `agents/<file>` → `${CLAUDE_PLUGIN_ROOT}/agents/<file>`
 
+After resolving to an absolute path, verify it is still contained under the corresponding plugin directory above (`${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/`, `.../references/`, or `${CLAUDE_PLUGIN_ROOT}/agents/`) — reject if the resolved path falls outside it, even if Step 1's string check passed. This is defense in depth, not redundant: it also catches anything Step 1 missed.
+
 If the source file does not exist, stop with: `Source not found: <path>. Run /j-flow-eject without arguments to list available assets.`
 
-### Step 3: Compute the destination
+### Step 3: Compute the destination and verify it's contained
 
-Destination is `.specs/.overrides/<argument>` (mirroring the same prefix structure).
+Destination is `.specs/.overrides/<argument>` (mirroring the same prefix structure). Resolve it to an absolute path and verify it is contained under `.specs/.overrides/` in the target repo's root — reject with the Step 1 message if not.
 
 ### Step 4: Refuse to overwrite
 

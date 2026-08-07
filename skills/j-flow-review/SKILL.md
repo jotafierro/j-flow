@@ -7,7 +7,7 @@ description: "Audit code quality against approved technical specs. Only reachabl
 
 ## Required reading
 
-**Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default. Before dispatching **j-flow-reviewer**, if `.specs/.overrides/agents/j-flow-reviewer.md` exists, dispatch a general-purpose agent seeded with that file's content instead of the built-in subagent (task context and memory forwarded unchanged).
+**Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default. For dispatching **j-flow-reviewer**, follow the agent-override dispatch rule in `overrides.md` §"Agent-definition overrides (dispatch)" — session confirmation and tool-scope ceiling included, never widened.
 
 Before auditing, read:
 

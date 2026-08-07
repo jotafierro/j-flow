@@ -182,3 +182,13 @@ Stale gates block subsequent skills the same as missing gates.
 ## AC format
 
 Acceptance Criteria in `functional-spec.md` use Given/When/Then structure (`### AC-N — {name}` heading, `**Given** / **When** / **Then:**` lines). Free-form ACs from pre-013 specs are accepted but degrade traceability in `/j-flow-check --consistency` and `/j-flow-qa`.
+
+## Slug validation (fail-closed)
+
+Every skill that accepts a `{slug}` argument (`/j-flow-start`, `/j-flow-check {slug}`, `/j-flow-reopen`, and any future one) must validate it **before** using it in any path or git command. This is a required step, not best-effort — fail closed, don't fall through to a fuzzy match against `.specs/`:
+
+1. Match against `^[a-z0-9]+(-[a-z0-9]+)*$` — kebab-case, no leading/trailing hyphen, and (by construction of the pattern) no `.`, `/`, `~`, whitespace, or shell metacharacters.
+2. If it doesn't match, stop immediately: `Invalid slug '{slug}'. Use kebab-case (e.g. user-profile, invoice-list).`
+3. Only after validation, use `{slug}` to build a path (`.specs/{slug}/...`) or a git ref (`feature/{slug}`) — and always double-quote it in any shell command (`"feature/$slug"`, never a bare interpolation), even though step 1 already excludes the characters that would make quoting matter.
+
+This applies to read-only skills too (`/j-flow-check {slug}`) — a slug is untrusted user input regardless of whether the resulting command writes anything.

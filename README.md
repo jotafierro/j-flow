@@ -141,6 +141,7 @@ Key files generated in your target repo by j-flow:
 | `.specs/.agents/` | Per-agent memory files — accumulated learned patterns |
 | `.specs/{slug}/` | Per-feature folder: `meta.md`, `gate-context.md`, specs, tasks, README |
 | `.specs/_system/` | **Living system spec** — one file per domain (e.g. `auth.md`, `users.md`). Accumulates Acceptance Criteria from every finished feature. Auto-updated by `/j-flow-finish`. Read by `/j-flow-spec` as the behavioral baseline to avoid contradictions. |
+| `.specs/.overrides/` | Ejected plugin assets (`/j-flow-eject`), edited per target repo. **Trust surface equivalent to executable code** — an overridden agent definition fully controls that agent's behavior when dispatched (tool-scope-ceilinged, never widened; see `references/overrides.md`). Review a change here like you'd review a code change, not a doc change. |
 
 ## Validate plugin structure
 

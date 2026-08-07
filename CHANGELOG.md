@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `npm test` now runs only the structural validator. The scenario runner moved to `npm run scenarios:lint` — it lints YAML fixtures but can't fail on assertions that require a live skill invocation, so it no longer pretends to be a pass/fail test suite.
 - CI now runs `npm ci` before tests and runs both `npm test` and `npm run scenarios:lint`.
+- **Agent-definition overrides no longer dispatch an unrestricted `general-purpose` agent.** An override is now gated by a one-time-per-session confirmation (path + content hash) and seeded with a tool-scope ceiling matching the plugin agent it replaces — `j-flow-reviewer` and `j-flow-architect` (no `Bash` in their declared scope) can no longer gain `Bash` by being overridden. This is a behavior change for anyone relying on an override to gain tools beyond the original agent's scope — that was the actual bug.
+- `/j-flow-eject` now rejects `..`, absolute, and home-relative (`~`) paths before the prefix check, and verifies the resolved source/destination stay contained under the expected plugin/`.specs/.overrides/` directories.
+- `/j-flow-check {slug}` and `/j-flow-reopen [slug]` now validate the slug (fail-closed, kebab-case) before touching any path — previously only `/j-flow-start` did.
+- `.specs/**` content forwarded into an agent dispatch (memory, specs, tasks) is now explicitly documented as observed project state, never instructions — `/j-flow-check --repo` adds a narrow heuristic check that flags memory files containing directives addressed at the agent itself (not ordinary imperative-sounding project notes).
+- `README.md` and `.github/SECURITY.md` now state that `.specs/.overrides/` is a trust surface equivalent to executable code.
 
 ## [2.2.0] - 2026-08-04
 

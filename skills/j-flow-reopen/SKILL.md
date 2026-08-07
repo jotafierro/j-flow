@@ -27,7 +27,7 @@ Before reopening any gate, read:
 
 ### Step 1: Find feature and show current state
 
-Find the feature (see j-flow-shared: "How to Find Active Feature").
+If a `{slug}` argument was given, validate it first per `references/gate-rules.md` §"Slug validation (fail-closed)" — fail closed before touching any path. Otherwise find the feature (see j-flow-shared: "How to Find Active Feature").
 Read `gate-context.md` and display the current gate summary (same format as /j-flow-check).
 
 ### Step 2: Ask which gate to reopen at
