@@ -124,6 +124,7 @@ j-flow is **deliberately opinionated**: the build agents assume this exact stack
 | Backend | NestJS (TypeScript strict) |
 | Frontend | React + React Query + Zustand + Tailwind CSS (optional) or plain CSS |
 | Mobile | Flutter + Riverpod + GoRouter |
+| CLI | TypeScript + commander + tsup + vitest (optional, opt-in layer) |
 | Testing | Jest, `@nestjs/testing` + supertest, flutter_test, Playwright, Storybook, Widgetbook |
 | Infra | Docker Compose + GitHub Actions + Railway + Vercel |
 

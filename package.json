@@ -20,6 +20,15 @@
     "react"
   ],
   "private": true,
+  "files": [
+    "agents/",
+    "skills/",
+    "docs/",
+    ".claude-plugin/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "scripts": {
     "validate": "node tests/validate.js",
     "test": "node tests/validate.js",

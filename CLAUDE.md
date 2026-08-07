@@ -2,15 +2,8 @@
 
 Gate-based Spec-Driven Development workflow for MongoDB + NestJS + React + Flutter.
 
-## Plans (development tracking)
+## Contributing
 
-Plans live outside this repo, at `../plans/j-flow/` (sibling directory) — not inside j-flow itself, so `.gitignore` no longer needs a `plans/` entry. Execute plans directly from the plan file without any SDD scaffold or `.superpowers/` folders.
+Before opening a PR, see `.github/CONTRIBUTING.md`: run `npm ci && npm test` (the structural validator), follow Conventional Commits, and update `CHANGELOG.md` under `[Unreleased]` when behavior changes.
 
-- `../plans/j-flow/README.md` — status tracker; mark plan DONE with commit range when finished
-- `CHANGELOG.md [Unreleased]` — update manually during plan execution (don't wait for release)
-- Pattern: feat commit(s) → validate → `chore(changelog): add unreleased entries for plan NNN`
-- CHANGELOG is public-facing: do NOT append `(plan NNN)` to changelog entry text. The plan→commit mapping lives in the private plans tracker (`../plans/j-flow/README.md`), not the shipped CHANGELOG. The commit subject may still name the plan.
-
-## Release (this repo)
-
-See the `j-flow-release-repo` skill for the full checklist (version bump, changelog, tag, GitHub release).
+`skills/j-flow-shared/SKILL.md` is the canonical-source index — if you're changing gate mechanics, layer ownership, or agent scopes, that file points at the single file that owns each topic. Don't restate canonical rules inline in a skill; reference the source.

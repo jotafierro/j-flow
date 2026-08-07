@@ -33,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `/j-flow-project`'s 14 questions and `/j-flow-spec`'s 6 questions are now asked in ~3 thematic blocks each instead of one at a time, with a one-at-a-time fallback for anything left unanswered in a block's reply.
 - `/j-flow-check --repo` consolidates what were 4 separate per-feature-folder scans (meta.md fields, gate-context format, stale markers, backlog-symbol match) into one pass per folder.
 - `/j-flow-build --fix`'s test-file grep for stale assertions is now scoped to the scaffold's known test paths instead of the whole repo.
+- `package.json` now declares an explicit `files` array, so the npm tarball no longer depends on the `.gitignore` fallback.
+- `docs/FLOW.md` and `README.md` now mention the `cli` layer (Agent Map, `.specs/.agents/` tree, build sequence, project tree, Stack table) — previously undocumented despite shipping in v2.2.0.
+- `skills/j-flow-shared/SKILL.md`'s canonical-source table now lists `references/overrides.md`.
+- Added `.github/ISSUE_TEMPLATE/` (bug report, feature request) and `.github/PULL_REQUEST_TEMPLATE.md`.
+- `.github/workflows/ci.yml` no longer triggers on a `develop` branch — this repo doesn't have one (that trigger was copied from the workflow this plugin generates for *target* repos, which do use `develop`).
+- The private `## Plans (development tracking)` section moved from the tracked `CLAUDE.md` to the gitignored `CLAUDE.local.md`; the tracked `CLAUDE.md` is now a short contributor-facing pointer to `CONTRIBUTING.md` and the canonical-source index.
 
 ## [2.2.0] - 2026-08-04
 
