@@ -2,6 +2,7 @@ feature: {slug}
 branch: feature/{slug}
 created_at: {ISO 8601}
 stack: MongoDB + NestJS + React + Flutter
+fast_track: false
 
 functional_status: pending
 functional_approved_at:

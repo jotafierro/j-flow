@@ -82,7 +82,7 @@ b. Identify the review file for each touched layer:
    If a file does not exist (feature pre-016), fall back to extracting the relevant AC
    steps from `review-guide.md` for that layer.
 
-c. Print one combined checklist covering every touched layer:
+c. Check `.specs/{slug}/meta.md` for `fast_track: true`. Print one combined checklist covering every touched layer — the `Reply:` block's default option differs by mode:
 
 ```
 ── Build complete — {layer-1}, {layer-2}, ... ─────────────────────────
@@ -99,9 +99,11 @@ Services needed:
 Reply:
   ok          → commit all layers and continue
   fix: <desc> → fix the issue first, then re-show this checklist
-  skip        → commit without testing (not recommended — logged in gate-context)
+  skip        → commit without testing (not recommended — logged in gate-context)   ← default: press Enter, if fast_track: true
 ──────────────────────────────────────────────────────────────────────
 ```
+
+Normal mode: no default — require an explicit `ok`/`fix`/`skip` reply. **Fast-track mode** (`fast_track: true`): an empty reply (just Enter) means `skip`; state that explicitly in the printed block (`← default: press Enter` next to the `skip` line, as above) so it's never a silent default.
 
 d. Wait for user response before proceeding.
 e. If `ok`: proceed to Commit Stage, treating every layer's ACs as confirmed.
@@ -109,7 +111,7 @@ f. If `fix: <desc>`:
    - Identify which file(s) the issue affects, and from those files which layer owns it
    - Dispatch that layer's domain agent with: the specific issue description, affected files, relevant technical-spec.md section, agent memory
    - After fix, re-show the **full combined checklist** (return to step c) — not just the fixed layer's slice
-g. If `skip`: proceed to Commit Stage, treating every unconfirmed layer's ACs as skipped.
+g. If `skip` (explicit, or the fast-track empty-reply default): proceed to Commit Stage, treating every unconfirmed layer's ACs as skipped. Log fast-track's empty-reply skip distinctly from an explicit skip: `⚠ smoke check {layer} {date} — skipped (fast-track default)` vs. the existing `⚠ smoke check {layer} {date} — skipped by user`.
 
 ### Commit Stage
 
@@ -129,9 +131,13 @@ ACs: {ac-id-1}, {ac-id-2}"
    ```
      ✓ smoke check {layer} {today's date} — ACs confirmed: {ac-id-1}, {ac-id-2}
    ```
-4. If this layer's ACs were skipped (`skip` path): append to `.specs/{slug}/gate-context.md`:
+4. If this layer's ACs were skipped (`skip` path): append to `.specs/{slug}/gate-context.md` — distinguish an explicit skip from the fast-track empty-reply default (see "Combined Smoke-Check Gate" step c/g):
    ```
      ⚠ smoke check {layer} {today's date} — skipped by user
+   ```
+   or, for the fast-track default:
+   ```
+     ⚠ smoke check {layer} {today's date} — skipped (fast-track default)
    ```
 
 ### After All Layers

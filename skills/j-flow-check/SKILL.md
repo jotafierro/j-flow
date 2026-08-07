@@ -62,6 +62,7 @@ Extract the status word after the gate name (approved / green / completed / red 
 Feature: {slug}
 Branch:  feature/{slug}
 Created: {date}
+Fast-track: on   ← only if meta.md has fast_track: true; omit the line otherwise
 
 Gates:
   [✓] Functional spec    approved {date}

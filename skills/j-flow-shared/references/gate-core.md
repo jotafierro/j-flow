@@ -84,7 +84,17 @@ Enter 1 or 2:
 - Reply `1`: immediately invoke `{next command}`.
 - Reply `2`: stop. Do not invoke anything else. Wait for the user's next message.
 
-This applies to every phase-completion message that currently ends in a `Next step:` line (start, spec, plan, build, qa, review, reopen). It does not apply to the three documented auto-chains in `docs/FLOW.md` (`/j-flow-project` → `/j-flow-scaffold`, `/j-flow-project --update` → `/j-flow-scaffold --review`, `/j-flow-scaffold` → `/j-flow-recommend`), which keep running without asking.
+This applies to every phase-completion message that currently ends in a `Next step:` line (start, spec, plan, build, qa, review, reopen). It does not apply to the three documented auto-chains in `docs/FLOW.md` (`/j-flow-project` → `/j-flow-scaffold`, `/j-flow-project --update` → `/j-flow-scaffold --review`, `/j-flow-scaffold` → `/j-flow-recommend`), which keep running without asking — nor to fast-track features, below.
+
+### Fast-track: collapsing redundant confirmations
+
+Check `.specs/{slug}/meta.md` for `fast_track: true` (set by `/j-flow-start {slug} --quick`). When true, skip the separate Next-step dialogue above on the **happy path only** — never on a blocking outcome:
+
+- **Phases with their own approval dialogue** (functional spec, technical spec, task plan, review): a reply of `1` / "approved" to that dialogue means BOTH approve the gate AND continue — advance the gate, then immediately invoke the next command in the same turn. Do not show a second "Continue to next step?" prompt for the same transition. Print one line instead of the full dialogue: `→ fast-track: continuing to {next command}`.
+- **Phases with no approval dialogue of their own** (build, qa) whose outcome is non-blocking (build completed; QA green): immediately invoke the next command with the same one-line note — do not ask. (`/j-flow-finish` is unaffected either way — it already prints a bare `Run /j-flow-release when ready` suggestion rather than the Next-step dialogue, precisely because cutting a release is a repo-wide, harder-to-reverse action that should never auto-trigger.)
+- **Never** collapse a blocking outcome, fast-track or not: QA red, review `changes-requested`, unresolved `[NEEDS CLARIFICATION]` markers, or a "changes"/"reopen" reply to any approval dialogue always print the full block message and stop. Fast-track removes a redundant question on the path that was already going to continue — it never removes the check that would have stopped you.
+- The `/j-flow-build` smoke-check gate has its own fast-track behavior (defaults to `skip` instead of `ok`) — see `j-flow-build/SKILL.md` §"Combined Smoke-Check Gate".
+- `/j-flow-check` (any mode) is unaffected — it already never asks (see above).
 
 ## Advancing a gate
 

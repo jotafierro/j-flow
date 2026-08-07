@@ -95,7 +95,7 @@ At each `[GATE]` j-flow stops and asks — nothing advances until the gate is me
 | `/j-flow-project [--update] [--from FILE] [--from-design FILE]` | Define project — PRODUCT.md, DESIGN.md, agent memory; first run auto-triggers scaffold |
 | `/j-flow-scaffold [--review]` | Generate monorepo scaffold (React + Vite, NestJS, Flutter); `--review` is read-only |
 | `/j-flow-recommend` | Suggest plugins/tools for the workflow, then offer to start the next backlog feature |
-| `/j-flow-start {slug}` | Initialize feature — git branch, `.specs/{slug}/`, gate-context |
+| `/j-flow-start {slug} [--quick]` | Initialize feature — git branch, `.specs/{slug}/`, gate-context; `--quick` marks it fast-track (collapses redundant gate confirmations for small changes — never skips QA/Review or a blocking outcome) |
 | `/j-flow-spec [technical\|--explore]` | Functional spec via dialogue → approval gate; `technical` generates technical spec; `--explore` for lightweight scoping before committing |
 | `/j-flow-plan` | Task plan + review guide → approval gate |
 | `/j-flow-build` | Layered implementation by domain agent, unit tests per layer |

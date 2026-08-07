@@ -26,9 +26,12 @@
   └─ Recommended plugins/skills/tools for the workflow
   └─ ends with a 1/2 dialogue offering to start the next `[ ]` feature in .specs/README.md (→ /j-flow-start)
 
-/j-flow-start {slug}
+/j-flow-start {slug} [--quick]
   └─ feature/{slug} branch
   └─ .specs/{slug}/meta.md + gate-context.md
+  └─ --quick sets fast_track: true in meta.md — every later gate collapses its own
+     redundant confirmation (see references/gate-core.md §"Fast-track"). Never skips
+     QA/Review, and never suppresses a blocking outcome.
 
 /j-flow-spec --explore
   └─ scoping dialogue before committing — no files written, ends with summary + offer to start real spec

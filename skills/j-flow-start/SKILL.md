@@ -1,6 +1,6 @@
 ---
 name: j-flow-start
-description: "Initialize a new feature. Creates git branch, .specs/{slug}/ directory, meta.md, and empty gate-context.md. Loads agent memory context. Usage: /j-flow-start {slug}"
+description: "Initialize a new feature. Creates git branch, .specs/{slug}/ directory, meta.md, and empty gate-context.md. Loads agent memory context. --quick marks the feature fast-track (collapses redundant confirmations in later gates). Usage: /j-flow-start {slug} [--quick]"
 ---
 
 # j-flow-start
@@ -19,10 +19,13 @@ Before initializing a feature, read:
 ## Usage
 
 ```
-/j-flow-start {slug}
+/j-flow-start {slug}          # normal — every gate confirms separately
+/j-flow-start {slug} --quick  # fast-track — see references/gate-core.md §"Fast-track"
 ```
 
 `{slug}` must be kebab-case (e.g. `user-auth`, `invoice-list`, `dashboard-v2`).
+
+`--quick` is a one-way choice for the life of the feature: it sets `fast_track: true` in `meta.md`, which every later gate (spec, plan, build, qa, review, finish) reads to decide whether to collapse its own confirmations. Reserve it for small, well-understood changes — it removes redundant confirmations on the happy path, never a safety check. It never skips QA or Review, and it never suppresses a blocking outcome (QA red, review changes-requested, unresolved clarification markers) — those always stop and ask regardless.
 
 ## Prerequisites
 
@@ -53,7 +56,7 @@ If branch already exists: "Branch feature/{slug} already exists. Delete it first
 Create `.specs/{slug}/` with two files:
 
 **meta.md:**
-Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute placeholders: `{slug}` with the feature slug, `{today's date}` with today's date in ISO 8601. Write to `.specs/{slug}/meta.md`.
+Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/meta.md`. Substitute placeholders: `{slug}` with the feature slug, `{today's date}` with today's date in ISO 8601. Set `fast_track: true` if `--quick` was passed, otherwise leave the template's `fast_track: false` as-is. Write to `.specs/{slug}/meta.md`.
 
 **gate-context.md:**
 Read template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/gate-context.md`. Substitute `{slug}` with the feature slug. Write to `.specs/{slug}/gate-context.md`.
@@ -67,11 +70,12 @@ If all agent memory files are empty: "Agent memory is empty — agents will lear
 
 ### Step 6: Confirm
 
-Print the completion message, then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-spec`):
+Print the completion message (add a `Fast-track: on` line only if `--quick` was passed), then use the Next-step dialogue from `references/gate-core.md` (next command: `/j-flow-spec`):
 ```
 Feature '{slug}' initialized ✓
   Branch: feature/{slug}
   Spec folder: .specs/{slug}/
+  Fast-track: on   ← only if --quick was passed
 
 Continue to next step?
 
