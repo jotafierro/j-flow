@@ -9,13 +9,13 @@ Loaded during Step 4 only when `has_e2e`. Covers `apps/e2e` (Playwright).
 - **`has_e2e && !has_web`** (e2e-only, or e2e+api/mobile/cli) → NO `webServer`; Playwright drives an **external** target at `process.env.BASE_URL` (a deployed URL, a staging env, or another repo's server). This is the "e2e test project against an external target" case.
 
 ```bash
-cd apps && pnpm create playwright@latest e2e --quiet --browser=chromium --no-browsers
+cd apps && pnpm create playwright@1.17.139 e2e --quiet --browser=chromium --no-browsers
 cd ..
 ```
 
 `--gha` and `--install-deps` are boolean flags with no `=value` form (verified against `create-playwright --help`) — `--gha=false` errors. Omit both entirely; their default is already `false`. `--no-browsers` skips downloading all 3 browser binaries here since only chromium gets installed explicitly below.
 
-Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script. `pnpm create playwright@latest` pins its own `@playwright/test` version in devDependencies — rewrite that line to `"@playwright/test": "catalog:"` so it resolves from the `catalog.playwright` entry in `pnpm-workspace.yaml` (Step 2) instead of drifting independently from whatever `packages/ui` ends up with.
+Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script. `pnpm create playwright@1.17.139` pins its own `@playwright/test` version in devDependencies — rewrite that line to `"@playwright/test": "catalog:"` so it resolves from the `catalog["@playwright/test"]` entry in `pnpm-workspace.yaml` (Step 2) instead of drifting independently from whatever `packages/ui` ends up with. The catalog needs both the `playwright` and `@playwright/test` keys — pnpm resolves `catalog:` by exact package name, and these are two different npm packages (see Step 2/3's catalog block).
 
 **Create `apps/e2e/tsconfig.json`** — `create-playwright` doesn't generate one, so `apps/e2e` has no tsconfig at all today:
 ```json

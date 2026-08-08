@@ -6,7 +6,7 @@ Loaded during Step 4 only when `has_api`. Covers `apps/api` (NestJS). `packages/
 
 **apps/api (NestJS) — only if `has_api`:**
 ```bash
-cd apps && npx -y @nestjs/cli@latest new api --strict --package-manager pnpm --skip-git
+cd apps && npx -y @nestjs/cli@11.0.24 new api --strict --package-manager pnpm --skip-git
 cd ..
 ```
 

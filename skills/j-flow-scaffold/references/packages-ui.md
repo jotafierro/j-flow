@@ -59,7 +59,7 @@ Add `"lint": "oxlint"` to `packages/ui/package.json` scripts.
 Then run init (skips install — root `pnpm install` later resolves everything via workspace + the `.npmrc` hoist patterns we wrote in Step 2):
 
 ```bash
-cd packages/ui && npx -y storybook@latest init --yes --no-dev --skip-install --no-features
+cd packages/ui && npx -y storybook@10.5.7 init --yes --no-dev --skip-install --no-features
 cd ../..
 ```
 

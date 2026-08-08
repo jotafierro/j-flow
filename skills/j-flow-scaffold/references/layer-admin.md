@@ -5,6 +5,10 @@ If this reference is already in your session context from earlier in this scaffo
 Loaded during Step 4 only when `has_admin`. Covers `apps/admin`. Requires `packages/ui` and `packages/domain` to already exist on disk — read `references/packages-ui.md` first if not already loaded.
 
 **apps/admin — only if `has_admin`:**
+```bash
+cd apps && pnpm create vite@9.1.2 admin --template react-ts
+cd ..
+```
 
 Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST use `workspace:*` protocol (only include `@{project}/api-client` if `has_api`):
 ```json

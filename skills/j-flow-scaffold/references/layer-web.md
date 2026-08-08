@@ -6,7 +6,7 @@ Loaded during Step 4 only when `has_web`. Covers `apps/web` (React + Vite). Requ
 
 **apps/web (React + Vite) — only if `has_web`:**
 ```bash
-cd apps && pnpm create vite@latest web --template react-ts
+cd apps && pnpm create vite@9.1.2 web --template react-ts
 cd ..
 ```
 
@@ -28,7 +28,10 @@ Post-process `apps/web/package.json`:
 - Change `preview` script port to 3001: `vite preview --port 3001`
 - Add `"@{project}/config": "workspace:*"` to devDependencies (consumed by the tsconfig reconciliation below).
 
-**Post-process the Vite-generated tsconfigs** — `pnpm create vite` leaves `apps/web/tsconfig.app.json` and `apps/web/tsconfig.node.json` fully self-contained, disconnected from `packages/config`. Set `"extends": "@{project}/config/tsconfig.base.json"` in **both** files, and remove any `compilerOptions` key each now inherits from the base (`strict`, `moduleResolution`, `skipLibCheck`, `esModuleInterop`, `resolveJsonModule`, `isolatedModules`). Do **not** merge the two files into one — the browser/build split is intentional (`tsconfig.app.json` keeps `lib: DOM` + `jsx`; `tsconfig.node.json` keeps `types: node` and its own `module`/`moduleResolution` for build-time code like `vite.config.ts`, which stay local overrides, not inherited).
+**Post-process the Vite-generated tsconfigs** — `pnpm create vite` leaves `apps/web/tsconfig.app.json` and `apps/web/tsconfig.node.json` fully self-contained, disconnected from `packages/config`. Set `"extends": "@{project}/config/tsconfig.base.json"` in **both** files. Do **not** merge the two files into one — the browser/build split is intentional:
+
+- **`tsconfig.app.json`** inherits `moduleResolution: "bundler"` from the base as-is — remove any of `strict`, `moduleResolution`, `skipLibCheck`, `esModuleInterop`, `resolveJsonModule`, `isolatedModules` if the generated file happens to set them explicitly (recent `create-vite` output may not include all of them — remove whichever are actually present, it's fine if some aren't).
+- **`tsconfig.node.json`** builds for Node (`vite.config.ts`), not the bundler target — it needs `"module": "nodenext"` **and** `"moduleResolution": "nodenext"` set explicitly as local overrides, even if the CLI's generated file didn't spell out `moduleResolution` itself. **Verified by live build**: leaving `moduleResolution` unset here makes it inherit the base's `"bundler"` value, which TypeScript rejects outright when `module` is `"nodenext"` (`TS5109: Option 'moduleResolution' must be set to 'NodeNext'... when option 'module' is set to 'NodeNext'`) — `tsc -b` fails immediately, before Vite even runs. Still remove `skipLibCheck`/`strict`/etc. from this file the same as `tsconfig.app.json` if the CLI included them.
 
 **Post-process the Vite-generated `.oxlintrc.json`** — current Vite `react-ts` templates generate `.oxlintrc.json` (oxlint replaced ESLint in the official template; keep it, do not swap it for ESLint). It ships with its own inline rules, disconnected from `packages/config`. Replace its content with:
 ```json

@@ -211,7 +211,7 @@ Include these patterns (one per line):
 
 Note: `.DS_Store` is intentionally omitted — it belongs in the user's global `~/.gitignore_global`, not in project-level `.gitignore`.
 
-**`pnpm-workspace.yaml`** — add a `catalog` block only if `has_e2e` (the only layer that reliably needs a pinned Playwright version). Resolve the real current version at scaffold time (`npm view playwright version`) — same live resolution as any other `@latest` CLI, do not hardcode the number below (`1.62.1` is illustrative, current only as of this writing):
+**`pnpm-workspace.yaml`** — versions come from the pinned-tool-versions table (see below Step 3, before Step 4). `catalog` only if `has_e2e` (the only layer that reliably needs a pinned Playwright version) — and needs **both** `playwright` and `@playwright/test` keys: pnpm resolves `catalog:` by exact package name, and `apps/e2e` depends on `@playwright/test` while `packages/ui` (if it later adds `@storybook/addon-vitest` by hand) depends on plain `playwright` — two different npm packages that happen to need the same version. `overrides` and `allowBuilds` replace what used to live under `package.json > pnpm` — pnpm 11 no longer reads that field at all (`[WARN] The "pnpm" field in package.json is no longer read by pnpm`), and pnpm ≥10 doesn't run dependency install scripts unless explicitly allowed:
 ```yaml
 packages:
   - "apps/*"
@@ -219,8 +219,15 @@ packages:
 
 catalog:
   playwright: 1.62.1
+  "@playwright/test": 1.62.1
+
+overrides:
+  esbuild: "^0.25.0"
+
+allowBuilds:
+  esbuild: true
 ```
-Without `has_e2e`, omit the `catalog` block entirely — `packages/ui`'s own Playwright peer (if a project later adds `@storybook/addon-vitest` by hand) has nothing to sync against yet.
+Without `has_e2e`, omit the `catalog` block entirely. `overrides` and `allowBuilds` are unconditional — the `esbuild` override pins the version Storybook needs for compatibility (not a security advisory), not tied to any specific layer flag. Judge every future addition to `allowBuilds` on its own — it's explicitly allow-listing a third-party package's install script (arbitrary code) to run unsandboxed; don't add an entry by reflex just because pnpm asked.
 
 **`package.json`** (Turborepo root — name from PRODUCT.md, private, packageManager pnpm@11)
 ```json
@@ -229,11 +236,6 @@ Without `has_e2e`, omit the `catalog` block entirely — `packages/ui`'s own Pla
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@11.20.0",
-  "pnpm": {
-    "overrides": {
-      "esbuild": "^0.25.0"
-    }
-  },
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
@@ -242,7 +244,7 @@ Without `has_e2e`, omit the `catalog` block entirely — `packages/ui`'s own Pla
     "type-check": "turbo type-check"
   },
   "devDependencies": {
-    "turbo": "latest",
+    "turbo": "2.10.9",
     "typescript": "^5.4.0"
   },
   "engines": {
@@ -250,6 +252,7 @@ Without `has_e2e`, omit the `catalog` block entirely — `packages/ui`'s own Pla
   }
 }
 ```
+No `pnpm` field here — see the `overrides`/`allowBuilds` move to `pnpm-workspace.yaml` above. `turbo` is pinned (was `"latest"`) — same reasoning as every other tool in this skill (see Rules and the pinned-versions table): a build-graph tool silently jumping major versions on every fresh scaffold is exactly the kind of drift this plan (042) exists to stop.
 
 **`turbo.json`**
 ```json
@@ -348,11 +351,11 @@ jobs:
           - 27017:27017
 
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: "pnpm"
@@ -367,9 +370,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/checkout@v7
 
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+      - uses: subosito/flutter-action@v2.23.0
         with:
           flutter-version: "3.41.x"
           channel: "stable"
@@ -387,7 +390,7 @@ CI notes:
 - `hashFiles()` is invalid in a job-level `if` (only works in step contexts) — since the flutter job is only written to the file at all when `has_mobile`, no runtime conditional is needed.
 - `playwright install --with-deps chromium` must run in CI before `pnpm test`; the local binary installed during scaffold is not committed. Omit this step (and the `mongodb` service block) from the generated YAML when the corresponding layer is absent — don't leave a no-op step in.
 - `flutter-version: "3.41.x"` matches Dart `^3.11.5` from pubspec. Update this when bumping Flutter in the project.
-- Third-party actions (`actions/checkout`, `actions/setup-node`, `pnpm/action-setup`, `subosito/flutter-action`) are pinned by commit SHA with a `# vN` comment, not by mutable tag — resolve the SHA for a tag with `gh api repos/{owner}/{repo}/tags --jq '.[] | select(.name=="vN") | .commit.sha'` before bumping any of them.
+- Third-party actions (`actions/checkout`, `actions/setup-node`, `pnpm/action-setup`, `subosito/flutter-action`) are pinned by a plain major-version tag (`@vN`) — deliberate choice for readability and zero-friction bumping over commit-SHA pinning (this repo has no Dependabot config to automate SHA bumps, so a SHA pin would mean a manual `gh api` lookup on every update). Resolve the current major tag with `gh api repos/{owner}/{repo}/tags --jq '.[].name'` (look for a bare `vN` entry; `subosito/flutter-action` has none, so it's pinned to its latest full release tag instead, e.g. `v2.23.0`) before bumping any of them.
 
 **`.env.example`** — the Mongo block only if `has_api`:
 ```
@@ -484,17 +487,39 @@ export default tseslint.config({
 }
 ```
 
+### Pinned tool versions (last reviewed: 2026-08-08 · next review: 2027-02-08)
+
+Every official CLI this skill invokes, plus every tool version this skill's own templates hardcode, runs at a **pinned, known-good version** — not `@latest`. A moving target means this skill's own post-processing steps (written against one CLI's output shape) silently drift out of sync with what actually gets installed — the exact root cause of plans 039–041 (Vite switched its default lint tool, Storybook changed a flag, pnpm 11 changed its config format — all discovered by a real scaffold breaking, not by reading a changelog).
+
+| Tool | Pinned version | Installs into |
+|---|---|---|
+| `@nestjs/cli` | `11.0.24` | scaffold-time only (not a project dependency) |
+| `create-vite` | `9.1.2` | scaffold-time only (`apps/web`, `apps/admin`) |
+| `storybook` (init CLI) | `10.5.7` | scaffold-time only — the `storybook` *package* left in `packages/ui/package.json` devDependencies still uses a real semver range, unaffected |
+| `create-playwright` | `1.17.139` | scaffold-time only |
+| `pnpm` (`packageManager`) | `11.20.0` | project dependency — every `pnpm install` going forward |
+| `playwright` / `@playwright/test` (catalog) | `1.62.1` | project dependency |
+| `turbo` (root devDependency) | `2.10.9` | project dependency |
+
+**Review procedure (every 3–6 months, or immediately on a security advisory for any row above):**
+1. `npm view <package> version` for each row — diff against the pinned value.
+2. If any differ, scaffold a throwaway test repo with the new version(s) and run the full cycle live: `pnpm install`, `pnpm build`, `pnpm lint`, `pnpm test` — not just `npm test` in this repo, which only validates template text and cannot catch a runtime install/build break.
+3. Update this table + every pinned-version site in `references/layer-*.md`/`packages-ui.md` **together** — same commit, so the table is never the only thing that changed.
+4. Bump "last reviewed" / "next review" above. If nothing changed, still bump "next review" so the cadence doesn't silently stop.
+
 ### Step 4: Run official CLIs (one at a time, with clear progress messages)
 
 For each app, ONLY if its directory doesn't exist (idempotent) AND its layer is included (`has_api`/`has_web`/`has_admin`/`has_mobile`/`has_e2e` from Step 1). Skip a component's entire section — CLI run, post-processing, generated files — when its layer flag is false.
 
-**Before running the first `@latest` CLI in this step:** resolve and show what it will actually install — e.g. `npm view @nestjs/cli version` (or the equivalent for the first CLI this run actually needs) — and ask once:
+**Before running the first CLI in this step:** print what will be installed, from the pinned-versions table above — no confirmation needed, the versions are already fixed and known:
 ```
-This scaffold runs {N} official CLIs pinned to @latest (always the newest framework release, by design — see the Rules section). First one resolves to {package}@{resolved version}.
-
-Proceed with @latest for all of them? [y/n]
+This scaffold runs {N} official CLIs at pinned versions (last reviewed {date} — see the Rules section / pinned-versions table above Step 4).
 ```
-One confirmation covers every `@latest` CLI invocation for the rest of this run — don't ask again per-CLI. If declined, stop and let the user re-run with pinned versions of their choosing; this skill does not offer a pinned-version mode itself (see Rules — `@latest` is deliberate, not a default that can be silently overridden).
+**If today's date is past the table's "next review" date**, print instead:
+```
+Note: pinned tool versions were last reviewed {date}, more than 6 months ago. Scaffolding will proceed with the pinned versions as-is — this is not a blocker, just a reminder that a review is due (see the "Pinned tool versions" section above for the procedure).
+```
+and continue without asking — a stale pin is a maintenance reminder, not a reason to stop a scaffold in progress.
 
 **Growth (idempotent by layer-artifact, not just by directory):** on a re-run after a layer was added to `**Layers:**`, generate every artifact the newly-included layer needs that is still MISSING — its `apps/<layer>/` dir (as above), any package it newly unlocks (`packages/api-client` when `api` was just added; `packages/ui` when the first of `web`/`admin` was just added), its `docker-compose.yml` (when `api` was just added), and its CI job/step (print-and-merge, see `ci.yml`). Existing apps and packages are left untouched. This makes "start with one layer, add more later" purely additive — nothing that already exists moves or is rewritten.
 
@@ -789,7 +814,7 @@ Then invoke `/j-flow-recommend` (it ends with its own dialogue offering to start
 ## Rules
 
 - Always use official CLIs first (`@nestjs/cli`, `pnpm create vite`, `pnpm create playwright`, `flutter create`, `storybook init`) — never hand-roll their setup
-- Use `@latest` to always get the newest framework version — deliberate, not a placeholder for a version this skill forgot to pin. Show the resolved version and get one confirmation before the first `@latest` CLI runs (Step 4) rather than running five unpinned installs silently.
+- Official CLIs run at a **pinned, known-good version** — not `@latest`. Pins live in the "Pinned tool versions" table above Step 4 and are reviewed on a 3–6 month cadence (or immediately if a pinned tool ships a security advisory), each time verified by actually running the scaffold end-to-end (`pnpm install` + `pnpm build` + `pnpm test`, not just `npm test`'s static validator) before the new pin is committed. This is a direct lesson from plans 039–042: a moving target (`@latest`, or "resolve the real version live") means this skill's own post-processing steps — written against one CLI's output shape — silently drift out of sync with what actually gets installed.
 - Idempotent: never re-run a CLI if the target directory already has content
 - Review mode is read-only — never write any files when `--review` flag is present
 - Never run `pnpm install` or `flutter pub get` — those go in the README instructions for the user
