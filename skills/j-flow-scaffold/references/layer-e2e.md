@@ -15,7 +15,7 @@ cd ..
 
 `--gha` and `--install-deps` are boolean flags with no `=value` form (verified against `create-playwright --help`) — `--gha=false` errors. Omit both entirely; their default is already `false`. `--no-browsers` skips downloading all 3 browser binaries here since only chromium gets installed explicitly below.
 
-Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script.
+Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script. `pnpm create playwright@latest` pins its own `@playwright/test` version in devDependencies — rewrite that line to `"@playwright/test": "catalog:"` so it resolves from the `catalog.playwright` entry in `pnpm-workspace.yaml` (Step 2) instead of drifting independently from whatever `packages/ui` ends up with.
 
 **Create `apps/e2e/tsconfig.json`** — `create-playwright` doesn't generate one, so `apps/e2e` has no tsconfig at all today:
 ```json

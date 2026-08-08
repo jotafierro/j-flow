@@ -21,7 +21,7 @@ Generate:
     "dev": "tsup --watch",
     "start": "node dist/index.js",
     "test": "vitest run",
-    "lint": "eslint .",
+    "lint": "oxlint",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -54,7 +54,9 @@ export default defineConfig({
 
 3. **`{cli_root}/tsconfig.json`** — workspace: `{ "extends": "@{project}/config/tsconfig.base.json" }`, by name (matches the `workspace:*` dep added above); bare: a standalone strict config (target ES2022, module ESNext, `moduleResolution: bundler`, strict).
 
-4. **`{cli_root}/src/index.ts`** — a commander entrypoint with one sample command and a `-y` escape hatch:
+4. **`{cli_root}/.oxlintrc.json`** — workspace: `{ "extends": ["../config/oxlint.base.json"] }`; bare: `{}` (no `packages/config` to extend, same reasoning as its standalone tsconfig).
+
+5. **`{cli_root}/src/index.ts`** — a commander entrypoint with one sample command and a `-y` escape hatch:
 ```ts
 import { Command } from 'commander';
 import pc from 'picocolors';
@@ -73,6 +75,6 @@ program
 program.parseAsync();
 ```
 
-5. **`{cli_root}/src/hello.test.ts`** — a vitest unit test for a pure function (proves the test runner is wired). Keep the tested logic pure (parse/format), separate from the command action.
+6. **`{cli_root}/src/hello.test.ts`** — a vitest unit test for a pure function (proves the test runner is wired). Keep the tested logic pure (parse/format), separate from the command action.
 
 In a workspace, the root `pnpm build`/`test`/`lint`/`type-check` (turbo) pick up `apps/cli` automatically — no CI change needed (the always-on `test` job covers it). In `bare-single-package`, the scripts above are the project's own entrypoints.

@@ -211,20 +211,24 @@ Include these patterns (one per line):
 
 Note: `.DS_Store` is intentionally omitted — it belongs in the user's global `~/.gitignore_global`, not in project-level `.gitignore`.
 
-**`pnpm-workspace.yaml`**
+**`pnpm-workspace.yaml`** — add a `catalog` block only if `has_e2e` (the only layer that reliably needs a pinned Playwright version). Resolve the real current version at scaffold time (`npm view playwright version`) — same live resolution as any other `@latest` CLI, do not hardcode the number below (`1.62.1` is illustrative, current only as of this writing):
 ```yaml
 packages:
   - "apps/*"
   - "packages/*"
-```
 
-**`package.json`** (Turborepo root — name from PRODUCT.md, private, packageManager pnpm@9)
+catalog:
+  playwright: 1.62.1
+```
+Without `has_e2e`, omit the `catalog` block entirely — `packages/ui`'s own Playwright peer (if a project later adds `@storybook/addon-vitest` by hand) has nothing to sync against yet.
+
+**`package.json`** (Turborepo root — name from PRODUCT.md, private, packageManager pnpm@11)
 ```json
 {
   "name": "{project}",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@11.20.0",
   "pnpm": {
     "overrides": {
       "esbuild": "^0.25.0"
@@ -399,15 +403,14 @@ MONGO_INITDB_ROOT_PASSWORD=changeme
 
 **Workspace profiles only** (`minimal-workspace`/`full`). Skip Step 3 entirely for `flutter-only` (no `packages/*`). `packages/config` and `packages/domain` are always created in a workspace; `packages/api-client` (if `has_api`) and `packages/ui` (if `has_web`/`has_admin`) are deferred to their layers.
 
-**`packages/config/package.json`** — `exports` always lists `tsconfig.base.json` and `eslint.base.js`; add `./tsconfig.nest.json` only if `has_api`, and `./tsconfig.lib.json` only if the overlay below is actually generated (see condition there):
+**`packages/config/package.json`** — `exports` always lists `tsconfig.base.json`; add `./eslint.base.js` only if `has_api`, `./tsconfig.nest.json` only if `has_api`, and `./tsconfig.lib.json` only if the overlay below is actually generated (see condition there). `oxlint.base.json` is NOT listed here — oxlint configs `extends` each other by relative path, not by package name (see `references/layer-web.md`'s reconciliation step), so it needs no `exports` entry:
 ```json
 {
   "name": "@{project}/config",
   "version": "0.0.1",
   "private": true,
   "exports": {
-    "./tsconfig.base.json": "./tsconfig.base.json",
-    "./eslint.base.js": "./eslint.base.js"
+    "./tsconfig.base.json": "./tsconfig.base.json"
   }
 }
 ```
@@ -454,7 +457,7 @@ MONGO_INITDB_ROOT_PASSWORD=changeme
 
 Note: Do NOT add `baseUrl` to any tsconfig (root, packages/config, or apps/*). `baseUrl` is deprecated in TypeScript 5+ when using `moduleResolution: "bundler"`. If path aliases are needed, use `paths` directly without `baseUrl`. If a CLI (e.g. NestJS) generates a tsconfig with `baseUrl: "."`, remove it before post-processing is complete.
 
-**`packages/config/eslint.base.js`**
+**`packages/config/eslint.base.js`** — only if `has_api`. This is consumed exclusively by `apps/api` (see `references/layer-api.md` — the NestJS CLI's own generated ESLint config extends it, it does NOT switch to oxlint). No other layer in the workspace uses ESLint; generating this file unconditionally used to leave it orphaned in any project without a backend:
 ```javascript
 // @ts-check
 import tseslint from 'typescript-eslint';
@@ -466,6 +469,19 @@ export default tseslint.config({
     '@typescript-eslint/no-explicit-any': 'warn',
   },
 });
+```
+
+**`packages/config/oxlint.base.json`** — generated for any workspace profile (`packages/domain` alone guarantees at least one consumer; `web`/`admin`/`ui`/`api-client`/`cli` add more when present). Equivalent ruleset to `eslint.base.js` above (`no-explicit-any` as warn) plus the two React rules already added by hand in real scaffolds (`me`, `horus`) — now centralized instead of copy-pasted per app:
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "rules": {
+    "typescript/no-explicit-any": "warn",
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
 ```
 
 ### Step 4: Run official CLIs (one at a time, with clear progress messages)
@@ -494,7 +510,7 @@ One confirmation covers every `@latest` CLI invocation for the rest of this run 
 
 **packages/domain:**
 
-**`packages/domain/package.json`**
+**`packages/domain/package.json`** — no official CLI opinion here, so `lint` is added directly:
 ```json
 {
   "name": "@{project}/domain",
@@ -503,6 +519,9 @@ One confirmation covers every `@latest` CLI invocation for the rest of this run 
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "oxlint"
   },
   "devDependencies": {
     "@{project}/config": "workspace:*",
@@ -518,6 +537,11 @@ One confirmation covers every `@latest` CLI invocation for the rest of this run 
   "compilerOptions": { "noEmit": true },
   "include": ["src"]
 }
+```
+
+**`packages/domain/.oxlintrc.json`**:
+```json
+{ "extends": ["../config/oxlint.base.json"] }
 ```
 
 **`packages/domain/src/index.ts`**
@@ -537,6 +561,9 @@ Note: Only base primitives live here at scaffold time. Domain types (KarmaScore,
   "version": "0.0.1",
   "private": true,
   "main": "src/index.ts",
+  "scripts": {
+    "lint": "oxlint"
+  },
   "dependencies": {
     "@{project}/domain": "workspace:*"
   },
@@ -554,6 +581,11 @@ Note: Only base primitives live here at scaffold time. Domain types (KarmaScore,
   "compilerOptions": { "noEmit": true },
   "include": ["src"]
 }
+```
+
+**`packages/api-client/.oxlintrc.json`**:
+```json
+{ "extends": ["../config/oxlint.base.json"] }
 ```
 
 **`packages/api-client/src/index.ts`**

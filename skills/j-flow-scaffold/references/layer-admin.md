@@ -20,6 +20,8 @@ If `styling: 'tailwind'`: same devDependencies (`tailwindcss`, `@tailwindcss/vit
 
 Same tsconfig reconciliation as apps/web (see `layer-web.md`'s "Post-process the Vite-generated tsconfigs" step) applies here: set `"extends": "@{project}/config/tsconfig.base.json"` in both `apps/admin/tsconfig.app.json` and `apps/admin/tsconfig.node.json`, strip the now-inherited options, and add `"@{project}/config": "workspace:*"` to `apps/admin` devDependencies.
 
+Same `.oxlintrc.json` reconciliation as apps/web (see `layer-web.md`'s "Post-process the Vite-generated `.oxlintrc.json`" step) applies here too: `{ "extends": ["../../packages/config/oxlint.base.json"] }`, keeping the generated `"lint": "oxlint"` script as-is.
+
 Apply the same welcome-screen replacements as apps/web (both `styling` variants), except the title text in `App.tsx` must be `{Project Name} — admin`.
 
 Write `apps/admin/.env.example`:

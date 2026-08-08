@@ -10,6 +10,8 @@ cd apps && npx -y @nestjs/cli@latest new api --strict --package-manager pnpm --s
 cd ..
 ```
 
+`apps/api` keeps the `eslint.config.mjs` the NestJS CLI generates as-is — do NOT migrate it to oxlint, and do NOT delete it in favor of `packages/config/oxlint.base.json`. This is deliberate, not a gap: NestJS's official CLI has not adopted oxlint, and its generated config already carries the type-aware rules (`no-floating-promises`, `no-unsafe-member-access` — see below) and the Prettier integration this layer depends on. `packages/config/eslint.base.js` (generated only when `has_api`) exists for this layer to extend if its ruleset needs centralizing later — extending it is optional, keeping Nest's own config untouched is not a violation of the "reconcile with packages/config" pattern used elsewhere in this skill.
+
 Post-process `apps/api/package.json`:
 - Rename to `@{project}/api`
 - Add deps: `@nestjs/config` (REQUIRED — without it `.env` is never loaded), `@nestjs/mongoose`, `mongoose`, `@nestjs/jwt`, `@nestjs/passport`, `passport`, `passport-jwt`, `@types/passport-jwt`, `class-validator`, `class-transformer`

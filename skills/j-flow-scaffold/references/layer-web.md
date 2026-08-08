@@ -30,6 +30,12 @@ Post-process `apps/web/package.json`:
 
 **Post-process the Vite-generated tsconfigs** — `pnpm create vite` leaves `apps/web/tsconfig.app.json` and `apps/web/tsconfig.node.json` fully self-contained, disconnected from `packages/config`. Set `"extends": "@{project}/config/tsconfig.base.json"` in **both** files, and remove any `compilerOptions` key each now inherits from the base (`strict`, `moduleResolution`, `skipLibCheck`, `esModuleInterop`, `resolveJsonModule`, `isolatedModules`). Do **not** merge the two files into one — the browser/build split is intentional (`tsconfig.app.json` keeps `lib: DOM` + `jsx`; `tsconfig.node.json` keeps `types: node` and its own `module`/`moduleResolution` for build-time code like `vite.config.ts`, which stay local overrides, not inherited).
 
+**Post-process the Vite-generated `.oxlintrc.json`** — current Vite `react-ts` templates generate `.oxlintrc.json` (oxlint replaced ESLint in the official template; keep it, do not swap it for ESLint). It ships with its own inline rules, disconnected from `packages/config`. Replace its content with:
+```json
+{ "extends": ["../../packages/config/oxlint.base.json"] }
+```
+merged with any project-specific rule already present in the generated file (today: none — Vite's default `.oxlintrc.json` only carries the two React rules `oxlint.base.json` already centralizes). Keep the `"lint": "oxlint"` script exactly as the CLI generated it.
+
 Edit `apps/web/src/vite-env.d.ts` to add:
 ```typescript
 /// <reference types="vite/client" />
