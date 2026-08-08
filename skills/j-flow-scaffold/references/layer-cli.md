@@ -30,6 +30,7 @@ Generate:
     "@{project}/domain": "workspace:*"
   },
   "devDependencies": {
+    "@{project}/config": "workspace:*",
     "tsup": "^8.0.0",
     "vitest": "^2.0.0",
     "typescript": "^5.4.0",
@@ -37,6 +38,7 @@ Generate:
   }
 }
 ```
+(In `bare-single-package`, omit `@{project}/config` too — same rule as the other `workspace:*` deps: no packages, nothing to reference by name. Its `tsconfig.json` below stays standalone.)
 
 2. **`{cli_root}/tsup.config.ts`** — bundles `src/index.ts` to a self-contained bin with a shebang banner (do NOT put the shebang in `src/`):
 ```ts
@@ -50,7 +52,7 @@ export default defineConfig({
 });
 ```
 
-3. **`{cli_root}/tsconfig.json`** — workspace: `{ "extends": "../../packages/config/tsconfig.base.json" }`; bare: a standalone strict config (target ES2022, module ESNext, `moduleResolution: bundler`, strict).
+3. **`{cli_root}/tsconfig.json`** — workspace: `{ "extends": "@{project}/config/tsconfig.base.json" }`, by name (matches the `workspace:*` dep added above); bare: a standalone strict config (target ES2022, module ESNext, `moduleResolution: bundler`, strict).
 
 4. **`{cli_root}/src/index.ts`** — a commander entrypoint with one sample command and a `-y` escape hatch:
 ```ts

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **`packages/config`'s `tsconfig.base.json` was not actually inheritable.** It mixed policy (`strict`, `isolatedModules`) with emission flags (`declaration`, `declarationMap`, `sourceMap`) and NestJS-only flags (`experimentalDecorators`, `emitDecoratorMetadata`), so a plain Vite app extending it failed to compile (`declaration: true` makes every inferred type require a portable name — TS2883). The base is now policy-only; emission and decorator flags moved to two conditional overlays, `tsconfig.lib.json` (only if a package publishes `.d.ts` — none do by default today) and `tsconfig.nest.json` (only if `has_api`).
+- `layer-web.md`, `layer-admin.md`, `layer-api.md`, `layer-e2e.md`, and `packages-ui.md` now reconcile the tsconfig their official CLI (Vite/NestJS/Storybook/`create-playwright`) generates back onto `packages/config`'s base — previously none of them did, so `apps/web`, `apps/admin`, `apps/api`, `apps/e2e`, and `packages/ui` never actually inherited the shared config despite `SKILL.md` documenting that as the intended design. `apps/e2e` and `packages/ui` gain their first `tsconfig.json` (neither had one).
+
+### Changed
+- All internal `tsconfig.json` `extends` (`packages/domain`, `packages/api-client`, `apps/cli`, and the new reconciliation steps above) now consume `packages/config` **by name** (`@{project}/config/tsconfig.base.json` + `"@{project}/config": "workspace:*"`) instead of a relative path or an indirect bounce through the root `tsconfig.json` — consistent with the `workspace:*`-for-internal-deps rule j-flow itself generates for consumers.
+- `tests/validate.js` adds a static guard: every scaffold reference that generates a tsconfig must document a reconciliation step pointing at `packages/config`'s base (163 checks total, up from 157).
+
 ## [2.3.0] - 2026-08-07
 
 ### Added

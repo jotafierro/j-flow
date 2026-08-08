@@ -15,7 +15,21 @@ cd ..
 
 `--gha` and `--install-deps` are boolean flags with no `=value` form (verified against `create-playwright --help`) — `--gha=false` errors. Omit both entirely; their default is already `false`. `--no-browsers` skips downloading all 3 browser binaries here since only chromium gets installed explicitly below.
 
-Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`.
+Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script.
+
+**Create `apps/e2e/tsconfig.json`** — `create-playwright` doesn't generate one, so `apps/e2e` has no tsconfig at all today:
+```json
+{
+  "extends": "@{project}/config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["tests", "playwright.config.ts"]
+}
+```
+`DOM` is required even though specs run in Node — `page.evaluate()` callbacks are serialized and executed inside the browser, so they reference `window`/`document`/`HTMLElement`.
 
 **Configure `apps/e2e/playwright.config.ts`** — `baseURL` always reads `process.env.BASE_URL` with a localhost fallback; the `webServer` block is emitted **only when `has_web`**:
 

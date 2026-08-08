@@ -18,6 +18,8 @@ Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST u
 
 If `styling: 'tailwind'`: same devDependencies (`tailwindcss`, `@tailwindcss/vite`) and the same `apps/admin/vite.config.ts` plugin registration as apps/web.
 
+Same tsconfig reconciliation as apps/web (see `layer-web.md`'s "Post-process the Vite-generated tsconfigs" step) applies here: set `"extends": "@{project}/config/tsconfig.base.json"` in both `apps/admin/tsconfig.app.json` and `apps/admin/tsconfig.node.json`, strip the now-inherited options, and add `"@{project}/config": "workspace:*"` to `apps/admin` devDependencies.
+
 Apply the same welcome-screen replacements as apps/web (both `styling` variants), except the title text in `App.tsx` must be `{Project Name} — admin`.
 
 Write `apps/admin/.env.example`:

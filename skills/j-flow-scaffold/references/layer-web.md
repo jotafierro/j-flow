@@ -26,6 +26,9 @@ Post-process `apps/web/package.json`:
 - Add scripts: `lint`, `type-check: tsc --noEmit`, `test: vitest`
 - Change `dev` script port to 3001: `vite --port 3001`
 - Change `preview` script port to 3001: `vite preview --port 3001`
+- Add `"@{project}/config": "workspace:*"` to devDependencies (consumed by the tsconfig reconciliation below).
+
+**Post-process the Vite-generated tsconfigs** — `pnpm create vite` leaves `apps/web/tsconfig.app.json` and `apps/web/tsconfig.node.json` fully self-contained, disconnected from `packages/config`. Set `"extends": "@{project}/config/tsconfig.base.json"` in **both** files, and remove any `compilerOptions` key each now inherits from the base (`strict`, `moduleResolution`, `skipLibCheck`, `esModuleInterop`, `resolveJsonModule`, `isolatedModules`). Do **not** merge the two files into one — the browser/build split is intentional (`tsconfig.app.json` keeps `lib: DOM` + `jsx`; `tsconfig.node.json` keeps `types: node` and its own `module`/`moduleResolution` for build-time code like `vite.config.ts`, which stay local overrides, not inherited).
 
 Edit `apps/web/src/vite-env.d.ts` to add:
 ```typescript

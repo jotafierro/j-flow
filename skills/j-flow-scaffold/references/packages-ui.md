@@ -27,6 +27,7 @@ Create `packages/ui/package.json` first. Storybook 10.x folded `addon-essentials
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@{project}/config": "workspace:*",
     "typescript": "^5.4.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -39,6 +40,15 @@ Create `packages/ui/package.json` first. Storybook 10.x folded `addon-essentials
 ```
 
 Do NOT add `@storybook/react`, `@storybook/blocks`, `@storybook/addon-essentials`, or `@storybook/addon-interactions` — they no longer exist as standalone packages in v10.
+
+**Create `packages/ui/tsconfig.json`** — `storybook init` doesn't generate one, so without this step `packages/ui` never engages `packages/config` at all:
+```json
+{
+  "extends": "@{project}/config/tsconfig.base.json",
+  "compilerOptions": { "jsx": "react-jsx", "noEmit": true },
+  "include": ["src"]
+}
+```
 
 Then run init (skips install — root `pnpm install` later resolves everything via workspace + the `.npmrc` hoist patterns we wrote in Step 2):
 

@@ -277,6 +277,40 @@ for (const [layer, { agent }] of Object.entries(STACK_LAYERS)) {
   });
 }
 
+// ── tsconfig base inheritance (plan 039) ──────────────────────────────────────
+// Static guard: assert each scaffold reference that generates a tsconfig has a
+// documented reconciliation step engaging packages/config, so the "CLI drops
+// its own disconnected tsconfig, nobody wires it back" defect can't regress
+// silently. This does NOT run a scaffold or check a generated repo's actual
+// inheritance chain — there is no fixture for that in this repo (see plan 039,
+// Cambio D) — it only checks the plugin's own template text, same style as
+// the `scaffold derives has_${layer}` check above.
+const TSCONFIG_RECONCILIATION = {
+  'skills/j-flow-scaffold/references/layer-web.md': '@{project}/config/tsconfig.base.json',
+  'skills/j-flow-scaffold/references/layer-api.md': '@{project}/config/tsconfig.nest.json',
+  'skills/j-flow-scaffold/references/layer-e2e.md': '@{project}/config/tsconfig.base.json',
+  'skills/j-flow-scaffold/references/layer-cli.md': '@{project}/config/tsconfig.base.json',
+  'skills/j-flow-scaffold/references/packages-ui.md': '@{project}/config/tsconfig.base.json',
+};
+
+console.log('\ntsconfig base inheritance/');
+
+for (const [file, needle] of Object.entries(TSCONFIG_RECONCILIATION)) {
+  check(`${file} engages packages/config's tsconfig base`, () => {
+    const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    assert(content.includes(needle), `expected to find "${needle}" in ${file}`);
+  });
+}
+
+// layer-admin.md defers to layer-web.md's reconciliation step by cross-reference
+// instead of repeating the extends snippet — assert the cross-reference and the
+// workspace dep it still needs to declare locally.
+check('layer-admin.md cross-references layer-web.md\'s tsconfig reconciliation', () => {
+  const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/references/layer-admin.md'), 'utf8');
+  assert(content.includes('layer-web.md'), 'layer-admin.md must point to layer-web.md\'s reconciliation step');
+  assert(content.includes('@{project}/config'), 'layer-admin.md must declare the @{project}/config workspace dep');
+});
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);

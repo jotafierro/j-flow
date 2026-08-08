@@ -42,17 +42,34 @@ Post-process `apps/api/package.json`:
     ```
   - **If `api_style: 'graphql'`**: do NOT add `setGlobalPrefix` — GraphQL operates at `/graphql`; the health endpoint keeps its own path outside the prefix. Add `schema.gql` to `apps/api/.gitignore` (auto-generated at runtime).
 - Apply `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })` in both modes — validates DTOs (REST) and `@InputType()` classes (GraphQL)
+- Add `"@{project}/config": "workspace:*"` to devDependencies.
 
-Post-process `apps/api/tsconfig.json`: add `"types": ["node", "jest"]` to `compilerOptions`. NestJS CLI does not include it, causing the VS Code TS language server to report ts(2593) (`describe`/`it`/`expect` not found) in spec files under `src/`. The CLI (`tsc`) resolves `@types` automatically, but the editor language server needs explicit declaration:
+Post-process `apps/api/tsconfig.json`:
+1. Add `"types": ["node", "jest"]` to `compilerOptions`. NestJS CLI does not include it, causing the VS Code TS language server to report ts(2593) (`describe`/`it`/`expect` not found) in spec files under `src/`. The CLI (`tsc`) resolves `@types` automatically, but the editor language server needs explicit declaration.
+2. Set `"extends": "@{project}/config/tsconfig.nest.json"` (the overlay that carries `experimentalDecorators`/`emitDecoratorMetadata` — see `SKILL.md`'s packages/config step). Remove the `compilerOptions` keys this now inherits from the base or the nest overlay: `esModuleInterop`, `isolatedModules`, `skipLibCheck`, `forceConsistentCasingInFileNames`, `experimentalDecorators`, `emitDecoratorMetadata`, and the four individual strict sub-flags NestJS's CLI lists explicitly (`strictNullChecks`, `noImplicitAny`, `strictBindCallApply`, `noFallthroughCasesInSwitch` — the base's `strict: true` is a superset of these).
+3. Keep everything else **local** to this file — it emits an app, not a shared policy: `module`/`moduleResolution` (`nodenext`, Nest's own resolution, distinct from the base's `bundler`), `target`, `outDir`, `incremental`, `sourceMap`, `declaration`, `removeComments`, `resolvePackageJsonExports`, `allowSyntheticDefaultImports`, `types`.
+
 ```json
 {
+  "extends": "@{project}/config/tsconfig.nest.json",
   "compilerOptions": {
-    "types": ["node", "jest"],
-    ...rest of NestJS-generated compilerOptions unchanged...
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "declaration": true,
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true,
+    "types": ["node", "jest"]
   }
 }
 ```
-Merge — do not replace the full file. Only add the `types` entry.
+Merge against the CLI's actual output — do not hand-write the whole file from this snippet; it illustrates which keys survive, not a literal replacement.
+
+Note: `strict: true` (from the base) is a superset of the four sub-flags NestJS lists individually — it also turns on `strictPropertyInitialization`, which the scaffold's own generated health module doesn't trip, but a real project's entities/DTOs might. That's an intentional tightening, not a bug — leave it; don't narrow the base back down to Nest's four flags to silence a future error in code this plan doesn't generate.
 
 Generate health module files:
 

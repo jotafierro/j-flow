@@ -399,7 +399,7 @@ MONGO_INITDB_ROOT_PASSWORD=changeme
 
 **Workspace profiles only** (`minimal-workspace`/`full`). Skip Step 3 entirely for `flutter-only` (no `packages/*`). `packages/config` and `packages/domain` are always created in a workspace; `packages/api-client` (if `has_api`) and `packages/ui` (if `has_web`/`has_admin`) are deferred to their layers.
 
-**`packages/config/package.json`**
+**`packages/config/package.json`** — `exports` always lists `tsconfig.base.json` and `eslint.base.js`; add `./tsconfig.nest.json` only if `has_api`, and `./tsconfig.lib.json` only if the overlay below is actually generated (see condition there):
 ```json
 {
   "name": "@{project}/config",
@@ -412,7 +412,7 @@ MONGO_INITDB_ROOT_PASSWORD=changeme
 }
 ```
 
-**`packages/config/tsconfig.base.json`**
+**`packages/config/tsconfig.base.json`** — policy only. No emission flags, no framework-specific flags — every TS consumer in the workspace, including a plain Vite app that does `noEmit`, can extend this without error:
 ```json
 {
   "compilerOptions": {
@@ -424,9 +424,27 @@ MONGO_INITDB_ROOT_PASSWORD=changeme
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
+```
+
+**`packages/config/tsconfig.nest.json`** — only if `has_api`. Adds the two decorator flags NestJS needs; nothing else in the workspace should carry them:
+```json
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "forceConsistentCasingInFileNames": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+
+**`packages/config/tsconfig.lib.json`** — only if some generated package actually publishes `.d.ts` (i.e. its own `package.json` sets `"declaration": true` or ships a `types`/`exports["./package.json"].types` field for outside consumption). None of this scaffold's default packages do — `domain`, `api-client`, and `ui` are all `noEmit` and consumed by source via `exports`. In a fresh scaffold this file is therefore **not generated**; it exists so a future package that does need to publish types has somewhere to extend from instead of reinventing emission flags:
+```json
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true
@@ -487,12 +505,20 @@ One confirmation covers every `@latest` CLI invocation for the rest of this run 
     ".": "./src/index.ts"
   },
   "devDependencies": {
+    "@{project}/config": "workspace:*",
     "typescript": "^5.4.0"
   }
 }
 ```
 
-**`packages/domain/tsconfig.json`** — extends root
+**`packages/domain/tsconfig.json`** — extends the base directly, by name (not the root, not a relative path):
+```json
+{
+  "extends": "@{project}/config/tsconfig.base.json",
+  "compilerOptions": { "noEmit": true },
+  "include": ["src"]
+}
+```
 
 **`packages/domain/src/index.ts`**
 ```typescript
@@ -504,7 +530,7 @@ Note: Only base primitives live here at scaffold time. Domain types (KarmaScore,
 
 **packages/api-client — only if `has_api`:**
 
-**`packages/api-client/package.json`** — name `@{project}/api-client`, with workspace dep:
+**`packages/api-client/package.json`** — name `@{project}/api-client`, with workspace deps:
 ```json
 {
   "name": "@{project}/api-client",
@@ -513,11 +539,22 @@ Note: Only base primitives live here at scaffold time. Domain types (KarmaScore,
   "main": "src/index.ts",
   "dependencies": {
     "@{project}/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@{project}/config": "workspace:*",
+    "typescript": "^5.4.0"
   }
 }
 ```
 
-**`packages/api-client/tsconfig.json`** — extends root
+**`packages/api-client/tsconfig.json`** — extends the base directly, by name:
+```json
+{
+  "extends": "@{project}/config/tsconfig.base.json",
+  "compilerOptions": { "noEmit": true },
+  "include": ["src"]
+}
+```
 
 **`packages/api-client/src/index.ts`**
 ```typescript
