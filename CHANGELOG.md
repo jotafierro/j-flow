@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- `js-yaml` (dev dependency, used by the structural validator and the scenario linter) upgraded from 4.x to 5.x, clearing a high-severity advisory. The relevant fix (CVE-2026-59870, quadratic CPU consumption on `!!omap` resolution) was never backported to the 4.x line, so `npm audit fix` could not resolve it — only the major bump does. `npm audit` now reports zero vulnerabilities.
+- `.github/dependabot.yml` added, covering both `github-actions` and `npm` on a monthly cadence. GitHub Actions in `ci.yml` are pinned by plain major tag rather than by commit SHA, a tradeoff that only holds up with something delivering the updates; nothing was.
+- The `@anthropic-ai/claude-code` install in CI is pinned to an explicit version instead of resolving to whatever is latest at run time, consistent with how every other tool version in this project is handled.
+
 ### Fixed
+- **Two places still promised `@latest` scaffolding after versions were pinned.** `/j-flow-scaffold`'s frontmatter `description` (which sits in context in every session) advertised "always latest framework versions", and the `01-infra-base` functional-spec template listed "always use `@latest` flags" as the mitigation for CLI version drift — when pinning is now the mitigation and `@latest` is the risk. The template is copied into each new project, so that one propagated the stale guidance to consumers.
 - **`packages/config`'s `tsconfig.base.json` was not actually inheritable.** It mixed policy (`strict`, `isolatedModules`) with emission flags (`declaration`, `declarationMap`, `sourceMap`) and NestJS-only flags (`experimentalDecorators`, `emitDecoratorMetadata`), so a plain Vite app extending it failed to compile (`declaration: true` makes every inferred type require a portable name — TS2883). The base is now policy-only; emission and decorator flags moved to two conditional overlays, `tsconfig.lib.json` (only if a package publishes `.d.ts` — none do by default today) and `tsconfig.nest.json` (only if `has_api`).
 - `layer-web.md`, `layer-admin.md`, `layer-api.md`, `layer-e2e.md`, and `packages-ui.md` now reconcile the tsconfig their official CLI (Vite/NestJS/Storybook/`create-playwright`) generates back onto `packages/config`'s base — previously none of them did, so `apps/web`, `apps/admin`, `apps/api`, `apps/e2e`, and `packages/ui` never actually inherited the shared config despite `SKILL.md` documenting that as the intended design. `apps/e2e` and `packages/ui` gain their first `tsconfig.json` (neither had one).
 
