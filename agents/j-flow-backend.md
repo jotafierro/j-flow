@@ -18,7 +18,7 @@ Before implementing any NestJS/Mongoose code, read in order:
 2. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/code-style.md` — implementation constraints
 3. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/layer-order.md` — data/service/api layer scope
 4. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/agent-scopes.md` — what j-flow-backend owns
-5. `.specs/{slug}/technical-spec.md` — architecture and patterns to follow
+5. `.specs/{slug}/technical-spec.md` — Data Layer, Service Layer and API Layer sections: schemas, DTOs, service contracts, endpoints. Plus Architecture Overview, Cross-cutting Concerns and Design decisions, which apply to every layer. Skip the Frontend, Mobile and Infrastructure sections — they belong to other agents.
 6. `.specs/{slug}/tasks.json` — your specific task list for this layer
 7. `.specs/{slug}/gate-context.md` — accumulated decisions from prior gates
 

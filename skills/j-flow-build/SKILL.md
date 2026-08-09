@@ -16,7 +16,7 @@ Before dispatching any agent, read:
 5. `PRODUCT.md` — tech stack reference
 6. `DESIGN.md` — REQUIRED to forward to j-flow-frontend and j-flow-mobile dispatches
 7. `.specs/{slug}/tasks.json` — the tasks per layer
-8. `.specs/{slug}/technical-spec.md` — patterns to enforce
+8. `.specs/{slug}/technical-spec.md` — Architecture Overview and Design decisions only. That is what orchestrating needs; each dispatched agent reads its own layer's section (Step 3 below), so reading them all here would just duplicate that in a second context.
 9. `.specs/{slug}/gate-context.md` — accumulated decisions
 
 **Override resolution (applies to every asset-load and agent dispatch in this skill):** follow `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md`. For any `${CLAUDE_PLUGIN_ROOT}/…` reference above, if a matching file exists under `.specs/.overrides/references/`, read that instead. For **agent dispatch**: before dispatching `{agent}`, follow the agent-override dispatch rule in `overrides.md` §"Agent-definition overrides (dispatch)" — session confirmation and tool-scope ceiling included, never widened. Task context, `DESIGN.md` forwarding, and agent memory (`.specs/.agents/{agent}.md`) are still layered on exactly as below.

@@ -362,6 +362,31 @@ check('no skill other than j-flow-finish reads gate-log.md', () => {
   assert(offenders.length === 0, `gate-log.md should only be read by j-flow-finish; also referenced by: ${offenders.join(', ')}`);
 });
 
+// ── technical-spec section scoping (plan 044) ────────────────────────────────
+// technical-spec.md is the largest per-feature artifact (~16k tokens on a real
+// large feature). A builder agent only needs its own layer's sections, and most
+// already said so — but j-flow-backend had drifted to reading the whole file,
+// which is how the convention silently decays. Assert that every agent reading
+// it names sections, with one documented exception.
+//
+// j-flow-reviewer is exempt on purpose: it audits architecture across layer
+// boundaries, so the whole spec is its job. Do not "fix" it.
+const WHOLE_SPEC_READERS = ['j-flow-reviewer.md'];
+
+console.log('\ntechnical-spec section scoping/');
+
+for (const file of fs.readdirSync(path.join(ROOT, 'agents'))) {
+  const content = fs.readFileSync(path.join(ROOT, 'agents', file), 'utf8');
+  if (!content.includes('technical-spec.md')) continue;
+  if (WHOLE_SPEC_READERS.includes(file)) continue;
+  check(`agents/${file} scopes technical-spec.md to its layer's sections`, () => {
+    assert(
+      /technical-spec\.md`? — [^\n]*section/i.test(content),
+      `${file} reads technical-spec.md without naming which sections; scope it to its layer (or add it to WHOLE_SPEC_READERS with a reason)`,
+    );
+  });
+}
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);
