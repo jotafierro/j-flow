@@ -19,7 +19,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          # 22, not this project's declared minimum (engines: node >=18), because the
+          # manifest-validation step installs @anthropic-ai/claude-code, which requires
+          # node >=22 — on 20 npm installs it anyway but warns EBADENGINE. Testing on the
+          # minimum buys nothing here: the 163 checks are static string and YAML assertions
+          # with no version-sensitive behavior.
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
