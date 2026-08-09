@@ -1,0 +1,30 @@
+version: 2
+
+# Two ecosystems, both intentional:
+#
+# - github-actions: this repo pins actions by plain major tag (actions/checkout@v7 etc.)
+#   rather than by commit SHA. That choice traded SHA-pinning's immutability for
+#   low-friction updates, and it only holds up if something actually delivers the
+#   updates — this is that something.
+#
+# - npm: the repo has three dependencies, but a high-severity advisory in one of them
+#   (js-yaml) went unnoticed until a manual audit. Monthly is enough at this size;
+#   weekly would be noise.
+#
+# Scope: this repo's own CI only. The ci.yml that /j-flow-scaffold generates for target
+# repos is a separate product decision, not this repo's hygiene.
+
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: chore

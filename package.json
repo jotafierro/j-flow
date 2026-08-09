@@ -36,7 +36,7 @@
     "scenarios:lint": "node tests/run-scenarios.js"
   },
   "devDependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^5.2.3"
   },
   "engines": {
     "node": ">=18"

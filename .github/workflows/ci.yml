@@ -33,5 +33,7 @@ jobs:
 
       - name: Validate plugin manifest
         run: |
-          npm install -g @anthropic-ai/claude-code
+          # Pinned like every other tool version in this repo (see the scaffold's
+          # "Pinned tool versions" table for the rationale). Dependabot bumps it.
+          npm install -g @anthropic-ai/claude-code@2.1.226
           claude plugin validate . --strict
