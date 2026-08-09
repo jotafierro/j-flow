@@ -124,6 +124,6 @@ Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-check/references/mode-repo.md` and fol
 Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-check/references/mode-consistency.md` and follow it completely. Not loaded on the default path.
 ## Rules
 
-- Never write a file. No edits, no commits (enforced by `allowed-tools`).
+- Never write a file. No edits (technically enforced — `allowed-tools` grants no `Write` or `Edit`), and no commits (a rule, not a sandbox: `Bash` is granted for read-only git inspection, so not committing is on you to honor).
 - Never run test suites, build commands, or repo commands like `pnpm install` / `docker compose up`.
 - Output is the entire deliverable. No background actions.
