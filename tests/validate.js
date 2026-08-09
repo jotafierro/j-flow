@@ -387,6 +387,35 @@ for (const file of fs.readdirSync(path.join(ROOT, 'agents'))) {
   });
 }
 
+// ── skill-local references wiring (plan 044) ─────────────────────────────────
+// Skills with their own references/ directory (scaffold, project, check) load them
+// conditionally so a run only pays for what it uses. Two ways that breaks silently:
+// a reference is added but never loaded (dead weight the model never reads), or a
+// SKILL.md points at a file that doesn't exist (the run dead-ends mid-flow).
+// Bidirectional, same shape as the skills/agents orphan guard.
+console.log('\nskill-local references/');
+
+for (const skill of fs.readdirSync(path.join(ROOT, 'skills'))) {
+  const refDir = path.join(ROOT, 'skills', skill, 'references');
+  const skillFile = path.join(ROOT, 'skills', skill, 'SKILL.md');
+  if (!fs.existsSync(refDir) || !fs.existsSync(skillFile)) continue;
+
+  const body = fs.readFileSync(skillFile, 'utf8');
+  const onDisk = fs.readdirSync(refDir).filter((f) => f.endsWith('.md'));
+
+  check(`${skill}: every references/ file is loaded by SKILL.md`, () => {
+    const orphans = onDisk.filter((f) => !body.includes(`references/${f}`));
+    assert(orphans.length === 0, `never loaded by ${skill}/SKILL.md: ${orphans.join(', ')}`);
+  });
+
+  check(`${skill}: every references/ file SKILL.md loads exists`, () => {
+    const named = [...body.matchAll(new RegExp(`skills/${skill}/references/([\\w.-]+\\.md)`, 'g'))]
+      .map((m) => m[1]);
+    const dangling = [...new Set(named)].filter((f) => !onDisk.includes(f));
+    assert(dangling.length === 0, `referenced by ${skill}/SKILL.md but missing on disk: ${dangling.join(', ')}`);
+  });
+}
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);
