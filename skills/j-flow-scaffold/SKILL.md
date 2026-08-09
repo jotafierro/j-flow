@@ -1,6 +1,6 @@
 ---
 name: j-flow-scaffold
-description: "Scaffolds the monorepo using official CLIs (nest new, pnpm create vite, flutter create, npx storybook init) — always latest framework versions. Generates health endpoint, README, CHANGELOG entry, and review-guide for manual verification. Manual approval gate before marking 01-infra-base as done. Auto-triggered by /j-flow-project. Usage: /j-flow-scaffold [--review]"
+description: "Scaffolds the monorepo using official CLIs (nest new, pnpm create vite, flutter create, npx storybook init) at pinned, known-good versions. Generates health endpoint, README, CHANGELOG entry, and review-guide for manual verification. Manual approval gate before marking 01-infra-base as done. Auto-triggered by /j-flow-project. Usage: /j-flow-scaffold [--review]"
 ---
 
 # /j-flow-scaffold

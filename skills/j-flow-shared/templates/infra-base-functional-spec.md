@@ -76,4 +76,4 @@ None — this is the foundation feature.
 
 ## Risks
 
-- CLI version drift: always use `@latest` flags; pin flutter-version in CI to match pubspec
+- CLI version drift: scaffolding CLIs run at pinned, known-good versions (never `@latest`) so post-processing steps stay in sync with what the CLI actually generates; pin flutter-version in CI to match pubspec
