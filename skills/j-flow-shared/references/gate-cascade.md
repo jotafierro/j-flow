@@ -22,7 +22,7 @@ Reopening at phase X resets X and all downstream gates back to `pending`. Commit
 
 When a gate is cleared (`/j-flow-reopen`) or invalidated (`/j-flow-update`), update ALL THREE stores for each affected gate, in this order:
 
-1. **gate-context.md** — reopen: remove the gate's entry (truncate after the last kept gate). update: append ` [stale]` to the gate's status line.
+1. **gate-context.md** — reopen: remove the gate's block (blocks are in canonical gate order and there is exactly one per gate, so this is a truncation after the last kept gate) and **append each removed block verbatim to `gate-log.md`** — reopening discards gate state, not the record that it existed. update: append ` [stale]` to the gate's status line; the block stays in `gate-context.md` (it is still the current block for that gate — see `gate-core.md` §"gate-context.md format" for why stale and superseded are different things).
 2. **meta.md** — set the gate's `{phase}_status:` field: reopen → `pending`; update → `stale`. On reopen, also set `current_phase` to the earliest reopened phase.
 3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per `gate-symbols.md` §"Backlog symbols".
 
@@ -35,3 +35,5 @@ Mark downstream gates by appending ` [stale]`:
 - `[QA] green 2026-06-12 [stale]`
 
 Stale gates block subsequent skills the same as missing gates.
+
+A stale block stays in `gate-context.md` — it is still the current block for its gate, just invalidated. When the phase is re-approved, the advance procedure supersedes it: the stale block moves to `gate-log.md` and the fresh one takes its place (`gate-core.md` §"Advancing a gate"). So a feature revised four times has one `[TECHNICAL SPEC]` block in `gate-context.md` and three superseded ones in `gate-log.md`, not four blocks in one file.

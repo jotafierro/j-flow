@@ -142,7 +142,7 @@ for (const agent of EXPECTED_AGENTS) {
 
 // ── templates ────────────────────────────────────────────────────────────────
 const EXPECTED_TEMPLATES = [
-  'meta.md', 'gate-context.md', 'functional-spec.md', 'technical-spec.md',
+  'meta.md', 'gate-context.md', 'gate-log.md', 'functional-spec.md', 'technical-spec.md',
   'tasks.json', 'review-guide.md', 'qa-report.md', 'review-findings.md',
   'feature-readme.md', 'product.md', 'design.md', 'specs-index.md', 'changelog.md',
   'system-domain.md', 'constitution.md',
@@ -309,6 +309,57 @@ check('layer-admin.md cross-references layer-web.md\'s tsconfig reconciliation',
   const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/references/layer-admin.md'), 'utf8');
   assert(content.includes('layer-web.md'), 'layer-admin.md must point to layer-web.md\'s reconciliation step');
   assert(content.includes('@{project}/config'), 'layer-admin.md must declare the @{project}/config workspace dep');
+});
+
+// ── gate-context / gate-log split (plan 044) ─────────────────────────────────
+// Static guard on the plugin's own text. gate-context.md went from append-only
+// history to one-block-per-gate current state, with superseded blocks moving to
+// gate-log.md. Three ways that can silently regress: the canonical advance
+// procedure forgets the supersede step (accumulation comes back), a template
+// still advertises the old invariant (a fresh feature is seeded with a header
+// contradicting the rule), or /j-flow-finish stops reading the log (the audit
+// trail becomes write-only). Each is asserted below.
+console.log('\ngate-context / gate-log split/');
+
+check('gate-core.md advance procedure documents the supersede step', () => {
+  const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/references/gate-core.md'), 'utf8');
+  assert(content.includes('gate-log.md'), 'gate-core.md must name gate-log.md');
+  assert(/one block per gate/i.test(content), 'gate-core.md must state the one-block-per-gate rule');
+  assert(/supersed/i.test(content), 'gate-core.md must describe superseding an existing block');
+});
+
+check('gate-cascade.md reset preserves removed blocks in gate-log.md', () => {
+  const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/references/gate-cascade.md'), 'utf8');
+  assert(content.includes('gate-log.md'), 'reopen must append removed blocks to gate-log.md');
+});
+
+check('templates/gate-context.md no longer claims append-only', () => {
+  const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/templates/gate-context.md'), 'utf8');
+  assert(!/append-only/i.test(content), 'gate-context.md template must not advertise the retired append-only invariant');
+  assert(content.includes('gate-log.md'), 'gate-context.md template must point at gate-log.md');
+});
+
+check('templates/gate-log.md is the append-only one', () => {
+  const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/templates/gate-log.md'), 'utf8');
+  assert(/append-only/i.test(content), 'gate-log.md template must state it is append-only');
+});
+
+check('j-flow-finish reads gate-log.md and tolerates its absence', () => {
+  const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-finish/SKILL.md'), 'utf8');
+  assert(content.includes('gate-log.md'), 'j-flow-finish must read gate-log.md');
+  assert(/skip if absent/i.test(content), 'j-flow-finish must state gate-log.md is optional');
+});
+
+// Only /j-flow-finish should read the log — every other reader would reintroduce
+// the cost the split removes.
+check('no skill other than j-flow-finish reads gate-log.md', () => {
+  const offenders = fs.readdirSync(path.join(ROOT, 'skills'))
+    .filter((d) => d !== 'j-flow-finish' && d !== 'j-flow-shared')
+    .filter((d) => {
+      const p = path.join(ROOT, 'skills', d, 'SKILL.md');
+      return fs.existsSync(p) && fs.readFileSync(p, 'utf8').includes('gate-log.md');
+    });
+  assert(offenders.length === 0, `gate-log.md should only be read by j-flow-finish; also referenced by: ${offenders.join(', ')}`);
 });
 
 // ── summary ──────────────────────────────────────────────────────────────────

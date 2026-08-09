@@ -12,15 +12,16 @@ description: "Generate feature README, update CHANGELOG [Unreleased], consolidat
 Before finishing, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format
-2. `.specs/{slug}/gate-context.md` — all accumulated decisions to summarize in README
-3. `.specs/{slug}/functional-spec.md` — AC table for the README
-4. `.specs/{slug}/tasks.json` — files changed list
-5. `CHANGELOG.md` — current [Unreleased] section
-6. `.specs/.agents/*.md` — agent memory files to update with new learnings
-7. `.specs/_system/` — system behavior files for the domains this feature touches (read to confirm no regression; not required to exist yet)
-8. Template: `templates/feature-readme.md` — README format
-9. Template: `templates/system-domain.md` — system domain file format
-10. Template: `templates/feature-doc.md` — product feature doc format
+2. `.specs/{slug}/gate-context.md` — current gate state (one block per gate) to summarize in README
+3. `.specs/{slug}/gate-log.md` — superseded and reopened blocks, for the README's decision history. **Skip if absent** — that means no gate was ever revised or reopened, which is the common case. This is the only skill that reads the log.
+4. `.specs/{slug}/functional-spec.md` — AC table for the README
+5. `.specs/{slug}/tasks.json` — files changed list
+6. `CHANGELOG.md` — current [Unreleased] section
+7. `.specs/.agents/*.md` — agent memory files to update with new learnings
+8. `.specs/_system/` — system behavior files for the domains this feature touches (read to confirm no regression; not required to exist yet)
+9. Template: `templates/feature-readme.md` — README format
+10. Template: `templates/system-domain.md` — system domain file format
+11. Template: `templates/feature-doc.md` — product feature doc format
 
 ## Gate Check
 

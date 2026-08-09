@@ -100,7 +100,7 @@ Check `.specs/{slug}/meta.md` for `fast_track: true` (set by `/j-flow-start {slu
 
 When a phase completes and its gate is approved, update ALL THREE stores. This is the single canonical procedure — skills reference it rather than inlining the mechanics.
 
-1. **gate-context.md** — append the phase's `[{GATE NAME}] {status} {date}` section (format below) with the phase's own summary lines.
+1. **gate-context.md** — write the phase's `[{GATE NAME}] {status} {date}` block (format below) with the phase's own summary lines. The file holds **exactly one block per gate — the current one**. If a block for this gate already exists (a re-approval after `/j-flow-update` or a revision), first move that existing block verbatim to `gate-log.md`, then write the new block in its place. Otherwise just insert it in canonical gate order.
 2. **meta.md** — set the fields for the phase (table below).
 3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per `gate-symbols.md` §"Backlog symbols".
 
@@ -114,15 +114,30 @@ When a phase completes and its gate is approved, update ALL THREE stores. This i
 | review     | `review_status: approved`, `review_approved_at: {date}` | `finish` |
 | finish     | `finish_status: completed`, `finish_completed_at: {date}` | `done` |
 
-## gate-context.md format (append-only)
+## gate-context.md format (one block per gate)
 
-Each phase appends ONE section. Never rewrite existing sections.
+`gate-context.md` holds **current gate state**, not history: exactly one block per gate, in canonical gate order (functional → technical → task plan → build → qa → review → finish). Superseded blocks move to `gate-log.md`; nothing is ever discarded.
 
 ```
 [{GATE NAME}] {status} {YYYY-MM-DD}
   → {summary line 1}
   → {summary line 2}
 ```
+
+Two markers that look similar and are not:
+
+- **`[stale]`** (appended by `/j-flow-update`) marks a block that is still the **current** one for its gate but has been invalidated by an upstream change. It stays in `gate-context.md`.
+- **Superseded** means a newer approval of the **same** gate replaced this block. It leaves `gate-context.md` for `gate-log.md`.
+
+A gate can be stale, then re-approved — at which point the stale block is superseded and moves to the log. See `gate-cascade.md` for both mechanics.
+
+### gate-log.md (append-only history)
+
+Every block that leaves `gate-context.md` — superseded by a re-approval, or removed by `/j-flow-reopen` — is appended here **verbatim, unmodified**, newest last. This file is strictly append-only: never rewrite or prune it. It is the audit trail that `gate-context.md` used to carry.
+
+Read by `/j-flow-finish` only, for the feature README's decision history. Every other skill reads `gate-context.md` and does not need the log.
+
+**Created lazily**: `/j-flow-start` does not create it — it appears the first time a block is superseded or reopened. **A missing `gate-log.md` means "no superseded blocks yet" and is never an error.** This is also what makes features that predate this format work unchanged: their accumulated `gate-context.md` is left exactly as-is, and the one-block-per-gate rule takes effect from the next gate write onward. There is no migration.
 
 Examples:
 ```
