@@ -68,7 +68,7 @@ Always show numbered options. Never auto-approve.
 
 ## Next-step dialogue (display whenever a phase finishes and a next command exists)
 
-Never print `Next step: {command}` as a bare suggestion — **except** the read-only inspector `/j-flow-check` (all modes: status, `--repo`, `--consistency`), which runs no gate and may print a bare next-step pointer since there is nothing to confirm. For every phase-completion message, ask instead:
+Never print `Next step: {command}` as a bare suggestion. The one exception is `/j-flow-check` (all modes) — it runs no gate, so there is nothing to confirm. Everywhere else, ask:
 
 ```
 {completion message}
@@ -91,7 +91,7 @@ This applies to every phase-completion message that currently ends in a `Next st
 Check `.specs/{slug}/meta.md` for `fast_track: true` (set by `/j-flow-start {slug} --quick`). When true, skip the separate Next-step dialogue above on the **happy path only** — never on a blocking outcome:
 
 - **Phases with their own approval dialogue** (functional spec, technical spec, task plan, review): a reply of `1` / "approved" to that dialogue means BOTH approve the gate AND continue — advance the gate, then immediately invoke the next command in the same turn. Do not show a second "Continue to next step?" prompt for the same transition. Print one line instead of the full dialogue: `→ fast-track: continuing to {next command}`.
-- **Phases with no approval dialogue of their own** (build, qa) whose outcome is non-blocking (build completed; QA green): immediately invoke the next command with the same one-line note — do not ask. (`/j-flow-finish` is unaffected either way — it already prints a bare `Run /j-flow-release when ready` suggestion rather than the Next-step dialogue, precisely because cutting a release is a repo-wide, harder-to-reverse action that should never auto-trigger.)
+- **Phases with no approval dialogue of their own** (build, qa) whose outcome is non-blocking (build completed; QA green): immediately invoke the next command with the same one-line note — do not ask. (`/j-flow-finish` is unaffected either way: it prints a bare `Run /j-flow-release when ready` rather than the Next-step dialogue, because a release is repo-wide and hard to reverse and must never auto-trigger.)
 - **Never** collapse a blocking outcome, fast-track or not: QA red, review `changes-requested`, unresolved `[NEEDS CLARIFICATION]` markers, or a "changes"/"reopen" reply to any approval dialogue always print the full block message and stop. Fast-track removes a redundant question on the path that was already going to continue — it never removes the check that would have stopped you.
 - The `/j-flow-build` smoke-check gate has its own fast-track behavior (defaults to `skip` instead of `ok`) — see `j-flow-build/SKILL.md` §"Combined Smoke-Check Gate".
 - `/j-flow-check` (any mode) is unaffected — it already never asks (see above).
@@ -100,7 +100,7 @@ Check `.specs/{slug}/meta.md` for `fast_track: true` (set by `/j-flow-start {slu
 
 When a phase completes and its gate is approved, update ALL THREE stores. This is the single canonical procedure — skills reference it rather than inlining the mechanics.
 
-1. **gate-context.md** — write the phase's `[{GATE NAME}] {status} {date}` block (format below) with the phase's own summary lines. The file holds **exactly one block per gate — the current one**. If a block for this gate already exists (a re-approval after `/j-flow-update` or a revision), first move that existing block verbatim to `gate-log.md`, then write the new block in its place. Otherwise just insert it in canonical gate order.
+1. **gate-context.md** — write the phase's `[{GATE NAME}] {status} {date}` block (format below). Exactly one block per gate: if one already exists (re-approval or revision), move it verbatim to `gate-log.md` first, then write the new one in its place; otherwise insert it in gate order.
 2. **meta.md** — set the fields for the phase (table below).
 3. **.specs/README.md** — recompute the feature's backlog symbol from the updated meta.md per `gate-symbols.md` §"Backlog symbols".
 
@@ -114,52 +114,25 @@ When a phase completes and its gate is approved, update ALL THREE stores. This i
 | review     | `review_status: approved`, `review_approved_at: {date}` | `finish` |
 | finish     | `finish_status: completed`, `finish_completed_at: {date}` | `done` |
 
-## gate-context.md format (one block per gate)
+## gate-context.md format
 
-`gate-context.md` holds **current gate state**, not history: exactly one block per gate, in canonical gate order (functional → technical → task plan → build → qa → review → finish). Superseded blocks move to `gate-log.md`; nothing is ever discarded.
+Current gate state, not history: **one block per gate**, in gate order (functional → technical → task plan → build → qa → review → finish).
 
-```
-[{GATE NAME}] {status} {YYYY-MM-DD}
-  → {summary line 1}
-  → {summary line 2}
-```
-
-Two markers that look similar and are not:
-
-- **`[stale]`** (appended by `/j-flow-update`) marks a block that is still the **current** one for its gate but has been invalidated by an upstream change. It stays in `gate-context.md`.
-- **Superseded** means a newer approval of the **same** gate replaced this block. It leaves `gate-context.md` for `gate-log.md`.
-
-A gate can be stale, then re-approved — at which point the stale block is superseded and moves to the log. See `gate-cascade.md` for both mechanics.
-
-### gate-log.md (append-only history)
-
-Every block that leaves `gate-context.md` — superseded by a re-approval, or removed by `/j-flow-reopen` — is appended here **verbatim, unmodified**, newest last. This file is strictly append-only: never rewrite or prune it. It is the audit trail that `gate-context.md` used to carry.
-
-Read by `/j-flow-finish` only, for the feature README's decision history. Every other skill reads `gate-context.md` and does not need the log.
-
-**Created lazily**: `/j-flow-start` does not create it — it appears the first time a block is superseded or reopened. **A missing `gate-log.md` means "no superseded blocks yet" and is never an error.** This is also what makes features that predate this format work unchanged: their accumulated `gate-context.md` is left exactly as-is, and the one-block-per-gate rule takes effect from the next gate write onward. There is no migration.
-
-Examples:
 ```
 [FUNCTIONAL SPEC] approved 2026-06-12
   → key decisions: invoice CRUD with email notification
 
-[TECHNICAL SPEC] approved 2026-06-12
+[TECHNICAL SPEC] approved 2026-06-12 [stale]
   → architecture: NestJS module + Mongoose schema + React Query hooks
   → patterns: repository pattern, zod DTOs
-
-[TASK PLAN] approved 2026-06-12
-  → N tasks across N layers, N ACs covered
-
-[BUILD] completed 2026-06-12
-  → layers: data ✓ service ✓ api ✓ ui ✓ mobile ✓ infra ✓
-
-[QA] green 2026-06-12
-  → 47 tests passing, checklist 8/8
-
-[REVIEW] approved 2026-06-12
-  → 2 findings resolved
-
-[FINISH] completed 2026-06-12
-  → README + CHANGELOG + PR to develop
 ```
+
+What each gate summarizes: functional → key decisions · technical → architecture + patterns · task plan → N tasks across N layers, N ACs covered · build → layers done · qa → tests passing + checklist · review → findings resolved · finish → README + CHANGELOG + PR.
+
+**`[stale]` vs superseded** — different things, both kept. `[stale]` (from `/j-flow-update`) marks a gate's *current* block as invalidated upstream; it stays. Superseded means a newer approval of the same gate replaced it; it leaves for `gate-log.md`. A stale block that is later re-approved is superseded at that point.
+
+### gate-log.md
+
+Append-only, newest last: every block that leaves `gate-context.md` — superseded, or removed by `/j-flow-reopen` — lands here verbatim. Never rewrite or prune it; it is the audit trail `gate-context.md` used to carry. Read by `/j-flow-finish` only.
+
+Created lazily, and **a missing `gate-log.md` means "nothing superseded yet", never an error**. That is also why features predating this format need no migration: their accumulated `gate-context.md` stays as-is and the one-block-per-gate rule applies from the next gate write.
