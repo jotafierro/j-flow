@@ -740,7 +740,8 @@ When user replies 'approved':
 ```
 # Gate Context — 01-infra-base
 
-> Append-only. Each phase adds one block. Subsequent skills read this file first.
+> Current gate state: exactly one block per gate, in gate order. Subsequent skills read this file first.
+> Superseded and reopened blocks move to `gate-log.md` — nothing is discarded.
 
 [FUNCTIONAL SPEC] approved {date}
   → key decisions: monorepo scaffold via CLIs

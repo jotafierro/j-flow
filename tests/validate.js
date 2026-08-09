@@ -350,11 +350,17 @@ check('j-flow-finish reads gate-log.md and tolerates its absence', () => {
   assert(/skip if absent/i.test(content), 'j-flow-finish must state gate-log.md is optional');
 });
 
-// Only /j-flow-finish should read the log — every other reader would reintroduce
-// the cost the split removes.
+// Only /j-flow-finish should read the log — any other reader reintroduces the cost
+// the split removes. Two skills may name the file without reading it:
+//   j-flow-finish   — the one legitimate reader.
+//   j-flow-scaffold — emits a gate-context.md header that points at gate-log.md for
+//                     the project it generates. That is file content it writes, not
+//                     a file it reads.
+const GATE_LOG_ALLOWED = ['j-flow-finish', 'j-flow-scaffold', 'j-flow-shared'];
+
 check('no skill other than j-flow-finish reads gate-log.md', () => {
   const offenders = fs.readdirSync(path.join(ROOT, 'skills'))
-    .filter((d) => d !== 'j-flow-finish' && d !== 'j-flow-shared')
+    .filter((d) => !GATE_LOG_ALLOWED.includes(d))
     .filter((d) => {
       const p = path.join(ROOT, 'skills', d, 'SKILL.md');
       return fs.existsSync(p) && fs.readFileSync(p, 'utf8').includes('gate-log.md');
@@ -415,6 +421,61 @@ for (const skill of fs.readdirSync(path.join(ROOT, 'skills'))) {
     assert(dangling.length === 0, `referenced by ${skill}/SKILL.md but missing on disk: ${dangling.join(', ')}`);
   });
 }
+
+// ── narrative docs vs gate mechanics (plan 044 follow-up) ────────────────────
+// The guards above cover gate-core.md, the templates, and j-flow-finish. Nothing
+// covered the *narrative* docs, and that is exactly where plan 044 left drift:
+// README.md (twice) and docs/FLOW.md still described gate-context.md as
+// append-only after the invariant moved to gate-log.md. `npm test` passed the
+// whole time, because no check reads prose.
+//
+// Heuristic, deliberately: flag "append-only" sitting within ~200 characters of
+// "gate-context" with no mention of "gate-log" anywhere in that window. That is
+// the shape all three real regressions had, and the window is wide enough that
+// legitimate text describing the split (which always names both files nearby)
+// passes. It will not catch every possible paraphrase — a sentence that conveys
+// permanence without the words "append-only" slips through. It catches the
+// mistake we actually made.
+console.log('\nnarrative docs vs gate mechanics/');
+
+const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+  const full = path.join(dir, e.name);
+  if (e.isDirectory()) return walk(full);
+  return e.isFile() && e.name.endsWith('.md') ? [full] : [];
+});
+
+const NARRATIVE = [
+  path.join(ROOT, 'README.md'),
+  ...walk(path.join(ROOT, 'docs')),
+  ...walk(path.join(ROOT, 'skills')),
+  ...walk(path.join(ROOT, 'agents')),
+].filter((f) => fs.existsSync(f));
+
+check('no doc describes gate-context.md as append-only', () => {
+  const offenders = [];
+  for (const file of NARRATIVE) {
+    const text = fs.readFileSync(file, 'utf8');
+    for (const m of text.matchAll(/append[- ]only/gi)) {
+      const from = Math.max(0, m.index - 200);
+      const window = text.slice(from, m.index + 200);
+      if (!/gate-context/i.test(window)) continue;   // not about gate-context at all
+      if (/gate[- ]log/i.test(window)) continue;     // describes the split correctly ("gate-log.md" or a "Gate Log" heading)
+      const line = text.slice(0, m.index).split('\n').length;
+      offenders.push(`${path.relative(ROOT, file)}:${line}`);
+    }
+  }
+  assert(
+    offenders.length === 0,
+    `gate-context.md is not append-only since plan 044 — gate-log.md is. Fix: ${offenders.join(', ')}`,
+  );
+});
+
+// Counterpart: the mechanism must stay documented for a reader arriving cold.
+// Without this, deleting the explanation would silently satisfy the check above.
+check('docs/FLOW.md documents gate-log.md', () => {
+  const flow = fs.readFileSync(path.join(ROOT, 'docs/FLOW.md'), 'utf8');
+  assert(flow.includes('gate-log.md'), 'docs/FLOW.md must list gate-log.md among a feature\'s files');
+});
 
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
