@@ -13,7 +13,7 @@
 
 AI coding assistants are fast but undisciplined: they implement features you never asked for, skip the spec, and leave no trail from requirement → code → test. On a real full-stack project that drift compounds fast.
 
-j-flow puts **blocking gates** between every phase of a feature. You can't plan until the spec is approved. You can't review until QA is green. You can't finish until review passes. The workflow's state lives in an append-only `gate-context.md`, so neither you nor the model can quietly skip a step — every acceptance criterion stays traceable to a task, a test, and a commit.
+j-flow puts **blocking gates** between every phase of a feature. You can't plan until the spec is approved. You can't review until QA is green. You can't finish until review passes. The workflow's state lives on disk in `gate-context.md`, with every superseded decision kept in `gate-log.md`, so neither you nor the model can quietly skip a step — every acceptance criterion stays traceable to a task, a test, and a commit.
 
 ## How it works
 
@@ -33,7 +33,7 @@ flowchart LR
 
 - **spec / plan / review** gates are approved by *you* — an explicit yes/no dialogue.
 - **qa** is approved by *tests*: all 7 stages must pass (lint, unit, NestJS E2E, Flutter integration, Playwright E2E, visual smoke, manual checklist). Red bounces you back to `build --fix`.
-- Each feature's gate state is recorded in `.specs/{slug}/gate-context.md` — append-only, the single source of truth that `/j-flow-check` reads. The model reads it too, so it can't advance a gate that isn't actually met.
+- Each feature's gate state is recorded in `.specs/{slug}/gate-context.md` — one block per gate, the single source of truth that `/j-flow-check` reads. The model reads it too, so it can't advance a gate that isn't actually met. When a gate is re-approved, the block it replaces moves to an append-only `gate-log.md`, so revising a spec never erases the record of what was decided before.
 
 ## Install
 

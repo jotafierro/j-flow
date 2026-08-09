@@ -172,7 +172,8 @@ When `/j-flow-review` returns changes-requested:
 │   │   └── j-flow-reviewer.md
 │   └── {slug}/
 │       ├── meta.md                 ← slug, branch, stack, gate checklist
-│       ├── gate-context.md         ← accumulated gate statuses (append-only)
+│       ├── gate-context.md         ← current gate status, one block per gate
+│       ├── gate-log.md             ← superseded/reopened blocks, append-only (read by /j-flow-finish; absent until first revision)
 │       ├── review/                 ← per-layer manual test docs (plan 016); checklist rows flip to [x] on layer/QA approval
 │       ├── functional-spec.md      ← /j-flow-spec output
 │       ├── technical-spec.md       ← /j-flow-spec technical output
