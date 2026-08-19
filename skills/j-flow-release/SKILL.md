@@ -22,7 +22,7 @@ Default if no argument provided: `minor`.
 ### Prerequisites
 
 Verify before proceeding:
-1. Branch: `git branch --show-current` → should be `develop`
+1. Branch: `git branch --show-current` → should be `{base_branch}` (`develop` in `team` mode, `main` in `solo`), resolved per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/workflow-modes.md`
 2. `CHANGELOG.md` has non-empty content under `## [Unreleased]`
 3. Clean working tree: `git status --short`
 
@@ -106,7 +106,9 @@ gh release create v{new_version} \
   --notes "$(sed -n '/^## \[{new_version}\]/,/^## \[/p' CHANGELOG.md | grep -v '^## \[' | sed '/^$/d' | head -200)"
 ```
 
-### Step 6: Create PR to main (if on develop)
+### Step 6: Create PR to main
+
+**`team` only.** From `develop` to `main`:
 
 ```bash
 gh pr create \
@@ -115,6 +117,8 @@ gh pr create \
   --base main \
   --head develop
 ```
+
+**In `solo` mode, skip this step entirely** and print: "Solo mode — no release PR; tag `v{new_version}` is the version record." There is no second branch to promote from: the release was cut on `main`, and the tag pushed in Step 4 is what records the version.
 
 ### Step 7: Output
 

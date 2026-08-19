@@ -30,7 +30,7 @@ Before initializing a feature, read:
 ## Prerequisites
 
 - `/j-flow-project` has been run (`.specs/.agents/` directory exists)
-- You are on the `develop` branch (or main if no develop exists)
+- You are on the repo's base branch — `develop` in `team` mode, `main` in `solo` mode. Resolve it per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/workflow-modes.md` (absent `.specs/config.md` means `team`, which falls back to `main` when there is no `develop`).
 
 ## Process
 

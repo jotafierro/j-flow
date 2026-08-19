@@ -84,8 +84,8 @@ At each `[GATE]` j-flow stops and asks — nothing advances until the gate is me
 /j-flow-build             # implement by layer (data → service → api → ui → mobile → infra)
 /j-flow-qa                # run QA gate (7 stages, layer-aware — skips stages for untouched layers)
 /j-flow-review            # code quality audit vs specs
-/j-flow-finish            # README + CHANGELOG + PR to develop
-/j-flow-release minor     # semver bump + tag + PR to main
+/j-flow-finish            # README + CHANGELOG + integrate (PR, or local merge in solo mode)
+/j-flow-release minor     # semver bump + tag + PR to main (team mode)
 ```
 
 ## Skills
@@ -102,8 +102,8 @@ At each `[GATE]` j-flow stops and asks — nothing advances until the gate is me
 | `/j-flow-build --fix` | Resolve QA or review findings |
 | `/j-flow-qa` | QA gate — 7 stages, layer-aware (skips stages for untouched layers) — blocks review if red |
 | `/j-flow-review` | Code quality audit vs technical spec |
-| `/j-flow-finish` | Feature README + CHANGELOG \[Unreleased\] + PR to develop |
-| `/j-flow-release [major\|minor\|patch]` | Semver bump + git tag + PR to main |
+| `/j-flow-finish` | Feature README + CHANGELOG \[Unreleased\] + integrate the branch (PR, or local merge in `solo` mode) |
+| `/j-flow-release [major\|minor\|patch]` | Semver bump + git tag + PR to main (`team` mode) |
 | `/j-flow-reopen` | Reopen feature to a prior gate |
 | `/j-flow-update` | Update specs mid-feature, mark downstream gates stale |
 | `/j-flow-check` | Current feature phase + gate status |

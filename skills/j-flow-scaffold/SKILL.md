@@ -172,7 +172,7 @@ Use `default_theme` and the extracted color tokens in all subsequent steps that 
 Check current branch: `git branch --show-current`.
 
 - If already on `feature/01-infra-base` (re-running after an interruption), stay on it.
-- Otherwise: `git checkout -b feature/01-infra-base`. This branches off `develop` when `/j-flow-project` created it (Step 9b of that skill); if `develop` doesn't exist (repo pre-dates that flow), it branches off whatever is current and print: "No `develop` branch found — branching `feature/01-infra-base` from `{current branch}`."
+- Otherwise: `git checkout -b feature/01-infra-base`, branching off `{base_branch}` — resolve it per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/workflow-modes.md` (`develop` in `team` mode, `main` in `solo`). In `team` mode, if `develop` doesn't exist (repo pre-dates that flow), branch off whatever is current and print: "No `develop` branch found — branching `feature/01-infra-base` from `{current branch}`." Do not print that warning in `solo` mode, where the absence of `develop` is the point.
 - If `feature/01-infra-base` already exists as a branch (not checked out), check it out instead of erroring.
 
 All file writes and the Step 9 approval commit happen on this branch.
@@ -756,7 +756,7 @@ When all checklist items in review-guide.md pass, reply 'approved' to:
   · Mark gates [FUNCTIONAL SPEC], [TECHNICAL SPEC], [TASK PLAN], [BUILD], [QA], [REVIEW] as completed/approved/green
   · Generate .specs/01-infra-base/README.md
   · Update .specs/README.md to mark 01-infra-base as [✓]
-  · Commit, then merge feature/01-infra-base into develop
+  · Commit, then merge feature/01-infra-base into the base branch
   · Trigger /j-flow-recommend
 
 Reply 'approved' when ready, or describe issues to fix.
@@ -812,13 +812,13 @@ When user replies 'approved':
    ```
    Adjust the path list to whatever this run actually generated (per the scaffold profile and enabled layers) — the point is naming every generated top-level path explicitly, never a wildcard that could also match an uncovered `.env`.
 
-7. Merge into `develop` and drop the feature branch (no PR — this is the bootstrap feature, nothing to review remotely):
+7. Merge into `{base_branch}` and drop the feature branch (no PR in either mode — this is the bootstrap feature, nothing to review remotely):
 ```bash
-git checkout develop 2>/dev/null || git checkout main
+git checkout {base_branch}
 git merge --no-ff feature/01-infra-base -m "merge: 01-infra-base scaffold"
 git branch -d feature/01-infra-base
 ```
-If neither `develop` nor `main` exists as a fallback (shouldn't happen post `/j-flow-project`), stay on `feature/01-infra-base` and warn the user to merge manually.
+`{base_branch}` resolves per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/workflow-modes.md`: `develop` in `team` mode (falling back to `main` if it doesn't exist), `main` in `solo`. If the resolved branch doesn't exist at all (shouldn't happen post `/j-flow-project`), stay on `feature/01-infra-base` and warn the user to merge manually.
 
 8. Offer initial release. Read the root `package.json` `version` field (scaffold seeds it at `0.1.0`). Ask:
 ```

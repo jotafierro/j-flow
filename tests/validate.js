@@ -145,7 +145,7 @@ const EXPECTED_TEMPLATES = [
   'meta.md', 'gate-context.md', 'gate-log.md', 'functional-spec.md', 'technical-spec.md',
   'tasks.json', 'review-guide.md', 'qa-report.md', 'review-findings.md',
   'feature-readme.md', 'product.md', 'design.md', 'specs-index.md', 'changelog.md',
-  'system-domain.md', 'constitution.md',
+  'system-domain.md', 'constitution.md', 'config.md',
 ];
 
 console.log('\nshared templates/');
@@ -173,6 +173,7 @@ for (const tpl of EXPECTED_AGENT_TEMPLATES) {
 const EXPECTED_REFERENCES = [
   'gate-core.md', 'gate-cascade.md', 'gate-symbols.md', 'spec-markers.md',
   'layer-order.md', 'code-style.md', 'agent-scopes.md', 'overrides.md',
+  'workflow-modes.md',
 ];
 
 console.log('\nshared references/');
@@ -569,6 +570,65 @@ check('every package with a lint script declares oxlint', () => {
     }
   }
   assert(offenders.length === 0, `pnpm's isolated node_modules makes this "oxlint: command not found":\n    ${offenders.join('\n    ')}`);
+});
+
+// ── workflow modes (plan 045) ────────────────────────────────────────────────
+// The base branch and the PR step are now resolved from .specs/config.md rather
+// than hardcoded to develop. The failure mode is omission, not design: one
+// skill left pointing at `develop` sends a solo project's merge at a branch
+// that does not exist. workflow-modes.md is the single place allowed to name
+// the concrete branches; everywhere else must defer to it.
+console.log('\nworkflow modes/');
+
+const WORKFLOW_MODES_REF = 'skills/j-flow-shared/references/workflow-modes.md';
+
+check('workflow-modes.md is the canonical source and is indexed', () => {
+  assert(fs.existsSync(path.join(ROOT, WORKFLOW_MODES_REF)), `${WORKFLOW_MODES_REF} must exist`);
+  const body = fs.readFileSync(path.join(ROOT, WORKFLOW_MODES_REF), 'utf8');
+  assert(/\bsolo\b/.test(body) && /\bteam\b/.test(body), 'it must define both modes');
+  assert(body.includes('.specs/config.md'), 'it must name the config file it governs');
+  // The "absent means team" rule is what keeps every pre-existing project working.
+  assert(/assume `team`|defaults? to `?team/i.test(body), 'it must state the absent-config default');
+});
+
+check('no skill hardcodes the develop branch in a git command', () => {
+  const offenders = [];
+  for (const file of walk(path.join(ROOT, 'skills'))) {
+    const rel = path.relative(ROOT, file);
+    if (rel === WORKFLOW_MODES_REF) continue;
+    const content = fs.readFileSync(file, 'utf8');
+    for (const pattern of [/--base develop/g, /git checkout develop/g, /--head develop\b/g]) {
+      for (const m of content.match(pattern) || []) {
+        // A `team`-scoped block may still spell develop out; require the file to
+        // at least defer to the canonical reference so the branch is conditional.
+        if (!content.includes('workflow-modes.md')) offenders.push(`${rel}: ${m}`);
+      }
+    }
+  }
+  assert(offenders.length === 0, `hardcoded develop with no reference to workflow-modes.md:\n    ${offenders.join('\n    ')}`);
+});
+
+check('finish and release resolve the base branch from the canonical reference', () => {
+  for (const rel of ['skills/j-flow-finish/SKILL.md', 'skills/j-flow-release/SKILL.md', 'skills/j-flow-start/SKILL.md']) {
+    const content = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    assert(content.includes('workflow-modes.md'), `${rel} must resolve the base branch via workflow-modes.md`);
+  }
+});
+
+check('j-flow-finish keeps both integration paths', () => {
+  const content = fs.readFileSync(path.join(ROOT, 'skills/j-flow-finish/SKILL.md'), 'utf8');
+  assert(content.includes('gh pr create'), 'team mode must still open a PR');
+  assert(/git merge --no-ff/.test(content), 'solo mode must merge locally with --no-ff');
+});
+
+// Counterpart to the guard above: dropping the config seed would leave the mode
+// undeclarable while every check above still passed.
+check('/j-flow-project seeds and backfills .specs/config.md', () => {
+  const init = fs.readFileSync(path.join(ROOT, 'skills/j-flow-project/references/mode-init.md'), 'utf8');
+  const update = fs.readFileSync(path.join(ROOT, 'skills/j-flow-project/references/mode-update.md'), 'utf8');
+  assert(init.includes('templates/config.md'), 'init mode must write .specs/config.md from the template');
+  assert(update.includes('.specs/config.md'), 'update mode must backfill .specs/config.md');
+  assert(fs.existsSync(path.join(ROOT, 'skills/j-flow-shared/templates/config.md')), 'the config template must exist');
 });
 
 // ── summary ──────────────────────────────────────────────────────────────────

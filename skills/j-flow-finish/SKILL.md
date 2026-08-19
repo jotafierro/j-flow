@@ -1,6 +1,6 @@
 ---
 name: j-flow-finish
-description: "Generate feature README, update CHANGELOG [Unreleased], consolidate agent memory patterns, and create PR to develop. Usage: /j-flow-finish"
+description: "Generate feature README, update CHANGELOG [Unreleased], consolidate agent memory patterns, and integrate the feature branch (PR in team mode, local merge in solo). Usage: /j-flow-finish"
 ---
 
 # j-flow-finish
@@ -168,17 +168,37 @@ git add .specs/{slug}/meta.md
 git commit -m "chore({slug}): mark feature done in meta"
 ```
 
-### Step 5: Create PR to develop
+### Step 5: Integrate the feature branch
 
+Resolve `workflow_mode` and `{base_branch}` per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/workflow-modes.md`. Run Step 4b's commit **before** this step in either mode — `meta.md` must be committed on the feature branch, not after it is gone.
+
+**`team` — open a Pull Request:**
 ```bash
 gh pr create \
   --title "feat: {slug}" \
   --body "$(cat .specs/{slug}/README.md)" \
-  --base develop \
+  --base {base_branch} \
   --head feature/{slug}
 ```
 
 If `gh` CLI is not available: print the URL for manual PR creation with recommended title and body.
+
+**`solo` — merge locally, no PR:**
+```bash
+git checkout {base_branch}
+git merge --no-ff "feature/{slug}" -m "merge: {slug}"
+git branch -d "feature/{slug}"
+```
+
+`--no-ff` is deliberate: it keeps the feature's shape in history, which is what makes the spec→commits trail auditable without a PR to document it.
+
+Then check `git remote` — if it is empty, print "No git remote configured — merged locally, nothing to push." and continue. Otherwise:
+```bash
+git push origin {base_branch}
+git push origin --delete "feature/{slug}"   # only if the remote branch exists
+```
+
+There is no review step being skipped here: `/j-flow-review` already gated this feature and QA is green, which is why `/j-flow-finish` was allowed to run at all. See `workflow-modes.md` §"What the mode does NOT change".
 
 Recompute the feature's `.specs/README.md` backlog symbol from meta.md per `references/gate-symbols.md` §"Backlog symbols" (finish → `[✓]`).
 
@@ -193,7 +213,8 @@ Feature '{slug}' finished ✓
   Architecture doc: docs/architecture/{slug}.md
   Feature doc: docs/features/{slug}.md
   Feature catalog: docs/features/README.md
-  PR: {url}
+  PR: {url}                        (team mode)
+  Merged: feature/{slug} → {base_branch}   (solo mode)
 
 CHANGELOG.md has new [Unreleased] entries.
 Run /j-flow-release [major|minor|patch] when ready to cut a release.

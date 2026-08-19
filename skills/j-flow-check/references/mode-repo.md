@@ -10,6 +10,8 @@ Surfaces drift between PRODUCT.md, agent memory, backlog, and feature folders ac
 
 For each expected project-level file, report present / missing: `PRODUCT.md`, `DESIGN.md`, `CHANGELOG.md`, `.specs/README.md`, `.specs/.agents/` directory.
 
+`.specs/config.md` is reported the same way but its absence is **never an error** — it means `team`, the documented default (see `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/workflow-modes.md`). Report it as `— absent (defaults to team)`, not `✗ missing`.
+
 ### 2. Agent memory
 
 Read `PRODUCT.md`'s `**Layers:**` line to derive `stack_layers` (default: web, api, mobile, admin, e2e if absent). `e2e` adds no agent — the Playwright harness is owned by `j-flow-quality`, which is always expected regardless of layers.
@@ -44,6 +46,16 @@ Read `.specs/README.md` and extract every feature slug listed (lines matching `\
 Report:
 - Slugs in backlog with no corresponding folder
 - Folders with no entry in the backlog (orphans)
+
+### 5b. Workflow mode vs branch layout
+
+Resolve `workflow_mode` per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/workflow-modes.md` and report it in the header. Then check the branch layout matches, since a mismatch is silent until a `/j-flow-finish` tries to merge into a branch that isn't there:
+
+- `solo` but `git show-ref --verify --quiet refs/heads/develop` succeeds → `⚠ Workflow mode is solo but a develop branch exists — nothing merges into it.`
+- `team` but no `develop` branch → `⚠ Workflow mode is team but there is no develop branch — features will fall back to main.`
+- Otherwise → `✓`.
+
+Report only; never create or delete a branch. `/j-flow-check` is read-only in every mode.
 
 ### 6. Per-feature integrity & gate consistency
 

@@ -34,6 +34,18 @@ Re-read `PRODUCT.md`'s `**Layers:**` line into `stack_layers`, then re-run Init 
 
 This closes the growth gap: the full "add a layer later" flow is **edit `**Layers:**` in `PRODUCT.md` → `/j-flow-project --update`** — Step 2b backfills the agent memory and the auto-invoked `/j-flow-scaffold --review` (see Step 4) reports the new app/package/CI artifacts to generate. No file is ever created by hand.
 
+### Step 2c: Backfill .specs/config.md
+
+If `.specs/config.md` does not exist, create it from
+`${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/config.md` with `**Workflow mode:** team`
+— the documented default for any project that predates the file, so an existing repo keeps
+behaving exactly as it did. Print: `.specs/config.md created (Workflow mode: team) — edit it to switch to solo.`
+
+If the file already exists, **leave it completely untouched**, including a field whose value
+you would not have chosen. It is hand-edited policy, not generated state; `--update` fills
+gaps and never overwrites. If a field is missing from an existing file, add just that field
+at its default and say so.
+
 ### Step 3: Show summary and prompt
 
 Show:

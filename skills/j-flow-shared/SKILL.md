@@ -22,11 +22,13 @@ This skill does not execute. It bundles shared assets that other j-flow skills r
 | Implementation + spec constraints | `references/code-style.md` |
 | Agent scopes (what each agent reads and writes) | `references/agent-scopes.md` |
 | Override resolution — how ejected assets under `.specs/.overrides/` take precedence over plugin defaults | `references/overrides.md` |
+| Workflow modes (`solo`/`team`), base-branch resolution | `references/workflow-modes.md` |
 | meta.md schema | `templates/meta.md` |
 | gate-context.md seed and append format | `templates/gate-context.md` + `references/gate-core.md` |
 | CHANGELOG seed | `templates/changelog.md` |
 | Feature artifacts: functional/technical spec, tasks, review guide, qa report, review findings, feature README | `templates/<artifact>.md` |
 | Project-level templates | `templates/product.md`, `templates/design.md`, `templates/specs-index.md` |
+| Project workflow config (seed) | `templates/config.md` |
 | Agent memory templates | `templates/agents/j-flow-*.md` |
 
 ## How to reference

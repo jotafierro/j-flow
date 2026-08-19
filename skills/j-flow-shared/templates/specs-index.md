@@ -14,7 +14,7 @@
 | `[B]` | Build completed |
 | `[Q]` | QA green |
 | `[R]` | Review approved |
-| `[✓]` | Finished (PR merged) |
+| `[✓]` | Finished (merged) |
 
 ---
 
