@@ -15,7 +15,11 @@ cd ..
 
 `--gha` and `--install-deps` are boolean flags with no `=value` form (verified against `create-playwright --help`) — `--gha=false` errors. Omit both entirely; their default is already `false`. `--no-browsers` skips downloading all 3 browser binaries here since only chromium gets installed explicitly below.
 
-Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script. `pnpm create playwright@1.17.139` pins its own `@playwright/test` version in devDependencies — rewrite that line to `"@playwright/test": "catalog:"` so it resolves from the `catalog["@playwright/test"]` entry in `pnpm-workspace.yaml` (Step 2) instead of drifting independently from whatever `packages/ui` ends up with. The catalog needs both the `playwright` and `@playwright/test` keys — pnpm resolves `catalog:` by exact package name, and these are two different npm packages (see Step 2/3's catalog block).
+Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script.
+
+**Ensure `"@playwright/test": "catalog:"` is in devDependencies — create it if absent, don't assume the CLI wrote it.** It resolves from the `catalog["@playwright/test"]` entry in `pnpm-workspace.yaml` (Step 2) instead of drifting independently from whatever `packages/ui` ends up with. The catalog needs both the `playwright` and `@playwright/test` keys — pnpm resolves `catalog:` by exact package name, and these are two different npm packages (see Step 2's catalog block).
+
+Create-if-missing rather than rewrite-the-line, because at the pinned version the CLI often does not get as far as declaring it. Verified live (2026-08-17) with this exact invocation: `create-playwright@1.17.139` writes `devEngines.packageManager.version: "^11.20.0"` into the `package.json` it generates, then runs `pnpm add --save-dev @playwright/test` against it and pnpm rejects its own generated file — `Invalid package manager specification in package.json (pnpm@^11.20.0); expected a semver version` — so the CLI aborts leaving only a stub `package.json`. Also strip that `devEngines` block during this post-processing step: the workspace already declares `packageManager` at the root, and leaving a range there keeps breaking every later pnpm command in this package.
 
 **Create `apps/e2e/tsconfig.json`** — `create-playwright` doesn't generate one, so `apps/e2e` has no tsconfig at all today:
 ```json

@@ -28,6 +28,24 @@ Post-process `apps/web/package.json`:
 - Change `preview` script port to 3001: `vite preview --port 3001`
 - Add `"@{project}/config": "workspace:*"` to devDependencies (consumed by the tsconfig reconciliation below).
 
+**Reconcile the Vite-generated dependency versions to the catalog** — `pnpm create vite` writes its own pinned ranges, which drift independently from every other package in the workspace. Rewrite each of these lines in the generated `apps/web/package.json` to `"catalog:"`, leaving the rest of its dependencies untouched:
+
+| Line as `create-vite@9.1.2` generates it | Rewrite to |
+|---|---|
+| `"react": "^19.2.8"` | `"react": "catalog:"` |
+| `"react-dom": "^19.2.8"` | `"react-dom": "catalog:"` |
+| `"@types/react": "^19.2.17"` | `"@types/react": "catalog:"` |
+| `"@types/react-dom": "^19.2.3"` | `"@types/react-dom": "catalog:"` |
+| `"typescript": "~6.0.2"` | `"typescript": "catalog:"` |
+| `"oxlint": "^1.75.0"` | `"oxlint": "catalog:"` |
+| `"@types/node": "^24.13.3"` | `"@types/node": "catalog:"` — only if the catalog carries that key (see its condition in `SKILL.md` Step 2); otherwise leave the generated range |
+
+Leave `vite` and `@vitejs/plugin-react` exactly as generated — they are deliberately not cataloged (see `SKILL.md` Step 2).
+
+Two of these rewrites are load-bearing, not cosmetic:
+- **`react`/`react-dom`** must resolve to the same copy as `packages/ui`, whose components this app renders. Two resolved React copies across the package boundary produce "invalid hook call" at runtime, and pnpm's isolated `node_modules` makes that easy to hit whenever the two declare different ranges.
+- **`typescript`** is a deliberate downgrade from the `~6.0.2` the CLI pins to the catalog's `^5.9.0`, because `apps/api` cannot build under TypeScript 6 (measured — see `SKILL.md` Step 2). Verified live (2026-08-17): this template type-checks and `tsc -b && vite build` succeeds on 5.9.3. If `!has_api`, the downgrade is still applied — one catalog value for the whole workspace is worth more than tracking a per-layer exception.
+
 **Post-process the Vite-generated tsconfigs** — `pnpm create vite` leaves `apps/web/tsconfig.app.json` and `apps/web/tsconfig.node.json` fully self-contained, disconnected from `packages/config`. Set `"extends": "@{project}/config/tsconfig.base.json"` in **both** files. Do **not** merge the two files into one — the browser/build split is intentional:
 
 - **`tsconfig.app.json`** inherits `moduleResolution: "bundler"` from the base as-is — remove any of `strict`, `moduleResolution`, `skipLibCheck`, `esModuleInterop`, `resolveJsonModule`, `isolatedModules` if the generated file happens to set them explicitly (recent `create-vite` output may not include all of them — remove whichever are actually present, it's fine if some aren't).

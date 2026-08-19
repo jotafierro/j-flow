@@ -77,3 +77,4 @@ None — this is the foundation feature.
 ## Risks
 
 - CLI version drift: scaffolding CLIs run at pinned, known-good versions (never `@latest`) so post-processing steps stay in sync with what the CLI actually generates; pin flutter-version in CI to match pubspec
+- Dependency version drift across packages: every dependency shared by two or more workspace packages is declared once in `pnpm-workspace.yaml`'s `catalog` and referenced as `catalog:`, including the versions the official CLIs generate — so a shared version is one edit, not one per package, and the workspace cannot resolve two majors of the same dependency

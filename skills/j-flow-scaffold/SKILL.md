@@ -211,13 +211,26 @@ Include these patterns (one per line):
 
 Note: `.DS_Store` is intentionally omitted — it belongs in the user's global `~/.gitignore_global`, not in project-level `.gitignore`.
 
-**`pnpm-workspace.yaml`** — versions come from the pinned-tool-versions table (see below Step 3, before Step 4). `catalog` only if `has_e2e` (the only layer that reliably needs a pinned Playwright version) — and needs **both** `playwright` and `@playwright/test` keys: pnpm resolves `catalog:` by exact package name, and `apps/e2e` depends on `@playwright/test` while `packages/ui` (if it later adds `@storybook/addon-vitest` by hand) depends on plain `playwright` — two different npm packages that happen to need the same version. `overrides` and `allowBuilds` replace what used to live under `package.json > pnpm` — pnpm 11 no longer reads that field at all (`[WARN] The "pnpm" field in package.json is no longer read by pnpm`), and pnpm ≥10 doesn't run dependency install scripts unless explicitly allowed:
+**`pnpm-workspace.yaml`** — versions come from the pinned-tool-versions table (see below Step 3, before Step 4). `overrides` and `allowBuilds` replace what used to live under `package.json > pnpm` — pnpm 11 no longer reads that field at all (`[WARN] The "pnpm" field in package.json is no longer read by pnpm`), and pnpm ≥10 doesn't run dependency install scripts unless explicitly allowed:
 ```yaml
 packages:
   - "apps/*"
   - "packages/*"
 
 catalog:
+  # Always in a workspace — the root plus packages/domain guarantee two consumers.
+  typescript: ^5.9.0
+  oxlint: ^1.78.0
+  # Only when ≥2 of web / admin / api / cli are included.
+  "@types/node": ^24.13.3
+  # Only if has_web or has_admin (packages/ui plus the app itself).
+  react: ^19.2.8
+  react-dom: ^19.2.8
+  "@types/react": ^19.2.17
+  "@types/react-dom": ^19.2.3
+  # Only when ≥2 of web / admin / cli are included.
+  vitest: ^4.1.10
+  # Only if has_e2e.
   playwright: 1.62.1
   "@playwright/test": 1.62.1
 
@@ -227,7 +240,20 @@ overrides:
 allowBuilds:
   esbuild: true
 ```
-Without `has_e2e`, omit the `catalog` block entirely. `overrides` and `allowBuilds` are unconditional — the `esbuild` override pins the version Storybook needs for compatibility (not a security advisory), not tied to any specific layer flag. Judge every future addition to `allowBuilds` on its own — it's explicitly allow-listing a third-party package's install script (arbitrary code) to run unsandboxed; don't add an entry by reflex just because pnpm asked.
+
+**The catalog is the default version policy, not a Playwright special case.** A dependency belongs in the `catalog` **if and only if two or more packages in the generated workspace declare it**; a single-consumer dependency (`turbo`, `tsup`, `commander`, `storybook`, `@storybook/react-vite`) keeps its literal range, because a one-entry catalog is indirection with nothing to unify. Each package then declares `"<dep>": "catalog:"` instead of a range, so bumping a shared version is one line here rather than one edit per package — the failure mode this prevents is a workspace that installs two majors of the same dependency because someone updated four `package.json` files and missed the fifth.
+
+Emit only the entries whose condition holds, and apply the matching rule when post-processing a CLI's output: **rewrite a generated dependency to `catalog:` only if that key is actually in the catalog you emitted.** A `catalog:` reference with no entry behind it fails the install outright with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND`, so every conditional branch must fail safe in that direction.
+
+`playwright` and `@playwright/test` need **both** keys: pnpm resolves `catalog:` by exact package name, and `apps/e2e` depends on `@playwright/test` while `packages/ui` (if it later adds `@storybook/addon-vitest` by hand) depends on plain `playwright` — two different npm packages that happen to need the same version.
+
+**`typescript` stays on 5.x deliberately, and the constraint is `apps/api`.** `create-vite@9.1.2` pins `~6.0.2` and `@nestjs/cli@11.0.24` pins `^5.7.3`; the catalog unifies both on `^5.9.0`. Verified live (2026-08-17): the Vite `react-ts` template type-checks and builds cleanly under 5.9.3, but a freshly generated NestJS 11 project **fails `nest build` under 6.0.2** with `TS5011` (`rootDir` must be explicit) and `TS5101` (`baseUrl` deprecated) — both raised against `tsconfig.build.json` as the Nest CLI itself generates it. Do not raise this entry to 6.x until the Nest CLI emits a TS6-clean tsconfig; re-check it during the pinned-versions review.
+
+Skip the `catalog` block entirely for `bare-single-package` and `flutter-only` — neither emits a `pnpm-workspace.yaml` at all, so there is no catalog to reference and every dependency stays literal.
+
+Deliberately **not** cataloged, so nobody adds them back by reflex: `vite` and `@vitejs/plugin-react`. Both are build-time only and live in separately built packages (`packages/ui` builds Storybook, `apps/web` builds the app) with no shared runtime instance to keep identical — unlike `react`/`react-dom`, where two resolved copies across `packages/ui` and its consuming app produce the "invalid hook call" failure the catalog exists to prevent. Cataloging them would couple Storybook's builder to whatever `create-vite` picked, for no correctness gain.
+
+`overrides` and `allowBuilds` are unconditional — the `esbuild` override pins the version Storybook needs for compatibility (not a security advisory), not tied to any specific layer flag. Judge every future addition to `allowBuilds` on its own — it's explicitly allow-listing a third-party package's install script (arbitrary code) to run unsandboxed; don't add an entry by reflex just because pnpm asked.
 
 **`package.json`** (Turborepo root — name from PRODUCT.md, private, packageManager pnpm@11)
 ```json
@@ -245,7 +271,7 @@ Without `has_e2e`, omit the `catalog` block entirely. `overrides` and `allowBuil
   },
   "devDependencies": {
     "turbo": "2.10.9",
-    "typescript": "^5.4.0"
+    "typescript": "catalog:"
   },
   "engines": {
     "node": ">=20"
@@ -499,6 +525,7 @@ Every official CLI this skill invokes, plus every tool version this skill's own 
 | `create-playwright` | `1.17.139` | scaffold-time only |
 | `pnpm` (`packageManager`) | `11.20.0` | project dependency — every `pnpm install` going forward |
 | `playwright` / `@playwright/test` (catalog) | `1.62.1` | project dependency |
+| shared deps (catalog) | see the `catalog` block in Step 2 | project dependencies — `typescript`, `oxlint`, `@types/node`, `react`, `react-dom`, `@types/react`, `@types/react-dom`, `vitest` |
 | `turbo` (root devDependency) | `2.10.9` | project dependency |
 
 **Review procedure (every 3–6 months, or immediately on a security advisory for any row above):**
@@ -506,6 +533,7 @@ Every official CLI this skill invokes, plus every tool version this skill's own 
 2. If any differ, scaffold a throwaway test repo with the new version(s) and run the full cycle live: `pnpm install`, `pnpm build`, `pnpm lint`, `pnpm test` — not just `npm test` in this repo, which only validates template text and cannot catch a runtime install/build break.
 3. Update this table + every pinned-version site in `references/layer-*.md`/`packages-ui.md` **together** — same commit, so the table is never the only thing that changed.
 4. Bump "last reviewed" / "next review" above. If nothing changed, still bump "next review" so the cadence doesn't silently stop.
+5. For the catalog row specifically, re-test the one entry that is held back on purpose: `typescript` sits at `^5.9.0` because NestJS 11's generated project does not build under TypeScript 6 (see the catalog block in Step 2 for the measured errors). Generate a throwaway Nest app at the pinned CLI version, raise its `typescript` to the current major, and run `nest build` — if it passes, the catalog can move up and `apps/web` stops being downgraded from what `create-vite` ships.
 
 ### Step 4: Run official CLIs (one at a time, with clear progress messages)
 
@@ -550,10 +578,13 @@ and continue without asking — a stale pin is a maintenance reminder, not a rea
   },
   "devDependencies": {
     "@{project}/config": "workspace:*",
-    "typescript": "^5.4.0"
+    "typescript": "catalog:",
+    "oxlint": "catalog:"
   }
 }
 ```
+
+`oxlint` must be declared here, not assumed. Every package carrying a `"lint": "oxlint"` script needs its own declaration: pnpm's isolated `node_modules` only puts a package's **own** dependencies on its `.bin` PATH, so a `lint` script with no `oxlint` dependency dies with `sh: oxlint: command not found` (verified live, 2026-08-17). `apps/web` and `apps/admin` are the only ones that work by accident — `create-vite` declares `oxlint` in the `package.json` it generates.
 
 **`packages/domain/tsconfig.json`** — extends the base directly, by name (not the root, not a relative path):
 ```json
@@ -594,7 +625,8 @@ Note: Only base primitives live here at scaffold time. Domain types (KarmaScore,
   },
   "devDependencies": {
     "@{project}/config": "workspace:*",
-    "typescript": "^5.4.0"
+    "typescript": "catalog:",
+    "oxlint": "catalog:"
   }
 }
 ```

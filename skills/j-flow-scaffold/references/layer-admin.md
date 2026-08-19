@@ -22,6 +22,8 @@ Same as apps/web but on port 3002, name `@{project}/admin`. Internal deps MUST u
 
 If `styling: 'tailwind'`: same devDependencies (`tailwindcss`, `@tailwindcss/vite`) and the same `apps/admin/vite.config.ts` plugin registration as apps/web.
 
+Same catalog reconciliation as apps/web (see `layer-web.md`'s "Reconcile the Vite-generated dependency versions to the catalog" step) applies here: rewrite `react`, `react-dom`, `@types/react`, `@types/react-dom`, `typescript` and `oxlint` in the generated `apps/admin/package.json` to `"catalog:"`, plus `@types/node` if the catalog carries that key. Leave `vite` and `@vitejs/plugin-react` as generated.
+
 Same tsconfig reconciliation as apps/web (see `layer-web.md`'s "Post-process the Vite-generated tsconfigs" step) applies here: set `"extends": "@{project}/config/tsconfig.base.json"` in both `apps/admin/tsconfig.app.json` and `apps/admin/tsconfig.node.json`, strip the now-inherited options, and add `"@{project}/config": "workspace:*"` to `apps/admin` devDependencies.
 
 Same `.oxlintrc.json` reconciliation as apps/web (see `layer-web.md`'s "Post-process the Vite-generated `.oxlintrc.json`" step) applies here too: `{ "extends": ["../../packages/config/oxlint.base.json"] }`, keeping the generated `"lint": "oxlint"` script as-is.
@@ -71,6 +73,6 @@ Add `apps/web/src/setup-tests.ts`:
 import '@testing-library/jest-dom';
 ```
 
-Add devDeps to `apps/web/package.json`: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitest/ui` (use real version ranges).
+Add devDeps to `apps/web/package.json`: `"vitest": "catalog:"` (literal range instead when the catalog's `vitest` condition doesn't hold — see `SKILL.md` Step 2), plus `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitest/ui` at real version ranges. Verified live (2026-08-17): `vitest@4.1.10` runs this jsdom + Testing Library setup, so the catalog's `^4.1.10` needs no special casing here.
 
 If apps/admin was generated, add the same smoke test files there too. The test title text must be `'{Project Name} — admin'` to match the admin App.tsx.

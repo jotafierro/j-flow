@@ -477,6 +477,100 @@ check('docs/FLOW.md documents gate-log.md', () => {
   assert(flow.includes('gate-log.md'), 'docs/FLOW.md must list gate-log.md among a feature\'s files');
 });
 
+// ── pnpm catalog policy (plan 047) ───────────────────────────────────────────
+// The catalog is the single place a shared dependency's version is declared, so
+// every consuming package references it as "catalog:". Two ways that silently
+// regresses, each guarded below:
+//   1. someone re-adds a literal range for a cataloged dep in a generated
+//      package.json — the workspace quietly installs two versions again, which
+//      for react/react-dom means "invalid hook call" at runtime;
+//   2. someone writes "catalog:" for a key the catalog doesn't carry — the
+//      consumer's install dies with ERR_PNPM_CATALOG_ENTRY_NOT_FOUND.
+// Both are assertions on the scaffold's own template text, not on a scaffolded
+// repo: this validator never runs a scaffold.
+console.log('\npnpm catalog policy/');
+
+const SCAFFOLD_DIR = 'skills/j-flow-scaffold';
+
+// Scaffold files that emit or reference package.json content.
+function scaffoldTemplateFiles() {
+  const files = [path.join(SCAFFOLD_DIR, 'SKILL.md')];
+  const refDir = path.join(ROOT, SCAFFOLD_DIR, 'references');
+  for (const f of fs.readdirSync(refDir)) {
+    if (f.endsWith('.md')) files.push(path.join(SCAFFOLD_DIR, 'references', f));
+  }
+  return files;
+}
+
+// Keys of the `catalog:` block in the pnpm-workspace.yaml the scaffold emits.
+// Parsed from the YAML fence rather than hardcoded here, so adding an entry to
+// the scaffold automatically extends both guards below.
+function catalogKeys() {
+  const skill = fs.readFileSync(path.join(ROOT, SCAFFOLD_DIR, 'SKILL.md'), 'utf8');
+  const block = skill.match(/^catalog:\n([\s\S]*?)\n^\S/m);
+  assert(block, 'SKILL.md must emit a `catalog:` block in pnpm-workspace.yaml');
+  const keys = [];
+  for (const line of block[1].split('\n')) {
+    const m = line.match(/^\s{2}"?([@\w./-]+)"?:\s*\S/);
+    if (m) keys.push(m[1]);
+  }
+  assert(keys.length > 0, 'the catalog block must declare at least one entry');
+  return keys;
+}
+
+check('catalog block declares the expected shared dependencies', () => {
+  const keys = catalogKeys();
+  for (const expected of ['typescript', 'oxlint', 'react', 'react-dom', '@playwright/test']) {
+    assert(keys.includes(expected), `catalog is missing the "${expected}" entry`);
+  }
+});
+
+check('no scaffold-emitted package.json declares a cataloged dep literally', () => {
+  const keys = catalogKeys();
+  const offenders = [];
+  for (const file of scaffoldTemplateFiles()) {
+    const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    // Only inspect ```json fences: those are the package.json bodies the
+    // scaffold writes verbatim. Prose and comparison tables legitimately quote
+    // the literal ranges a CLI generates before reconciliation.
+    for (const fence of content.match(/```json\n[\s\S]*?```/g) || []) {
+      for (const key of keys) {
+        const literal = new RegExp(`"${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\s*:\\s*"(?!catalog:)[^"]+"`);
+        const hit = fence.match(literal);
+        if (hit) offenders.push(`${file}: ${hit[0]}`);
+      }
+    }
+  }
+  assert(offenders.length === 0, `cataloged deps declared with a literal version:\n    ${offenders.join('\n    ')}`);
+});
+
+check('every "catalog:" reference resolves to a catalog entry', () => {
+  const keys = catalogKeys();
+  const offenders = [];
+  for (const file of scaffoldTemplateFiles()) {
+    const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    for (const m of content.matchAll(/"([@\w./-]+)"\s*:\s*"catalog:"/g)) {
+      if (!keys.includes(m[1])) offenders.push(`${file}: "${m[1]}"`);
+    }
+  }
+  assert(offenders.length === 0, `"catalog:" used for keys with no catalog entry (ERR_PNPM_CATALOG_ENTRY_NOT_FOUND at install):\n    ${offenders.join('\n    ')}`);
+});
+
+check('every package with a lint script declares oxlint', () => {
+  const offenders = [];
+  for (const file of scaffoldTemplateFiles()) {
+    const content = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    for (const fence of content.match(/```json\n[\s\S]*?```/g) || []) {
+      // apps/api keeps ESLint by design and has no oxlint script, so it is not
+      // matched here — this only fires on a package.json that runs oxlint.
+      if (/"lint"\s*:\s*"oxlint"/.test(fence) && !/"oxlint"\s*:/.test(fence)) {
+        offenders.push(`${file}: a package.json runs oxlint without declaring it`);
+      }
+    }
+  }
+  assert(offenders.length === 0, `pnpm's isolated node_modules makes this "oxlint: command not found":\n    ${offenders.join('\n    ')}`);
+});
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);

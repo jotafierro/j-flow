@@ -32,13 +32,16 @@ Generate:
   "devDependencies": {
     "@{project}/config": "workspace:*",
     "tsup": "^8.0.0",
-    "vitest": "^2.0.0",
-    "typescript": "^5.4.0",
-    "@types/node": "^22.0.0"
+    "vitest": "catalog:",
+    "typescript": "catalog:",
+    "oxlint": "catalog:",
+    "@types/node": "catalog:"
   }
 }
 ```
 (In `bare-single-package`, omit `@{project}/config` too — same rule as the other `workspace:*` deps: no packages, nothing to reference by name. Its `tsconfig.json` below stays standalone.)
+
+**`catalog:` references only work in a workspace.** `bare-single-package` emits no `pnpm-workspace.yaml`, so there is no catalog to resolve against — in that profile every dependency above keeps a literal range, at the versions in `SKILL.md`'s catalog block. In `minimal-workspace`, `vitest` and `@types/node` are only in the emitted catalog when their condition holds (`vitest`: ≥2 of web/admin/cli; `@types/node`: ≥2 of web/admin/api/cli) — when the condition doesn't hold, `apps/cli` is the sole consumer and keeps a literal range. Never write `catalog:` for a key the catalog doesn't carry: the install fails with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND`.
 
 2. **`{cli_root}/tsup.config.ts`** — bundles `src/index.ts` to a self-contained bin with a shebang banner (do NOT put the shebang in `src/`):
 ```ts
