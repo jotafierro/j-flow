@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`.specs/config.md` — per-project workflow configuration**, seeded by `/j-flow-project` (which now asks) and backfilled by `--update`. Kept separate from `PRODUCT.md` on purpose: that file describes the product and is regenerated, this one is hand-edited policy about how the repo is worked.
+- **`**Workflow mode:** solo`** — trunk-based on `main` with no Pull Requests, for repositories with a single maintainer where a PR would have the same person as author, reviewer and merger. `/j-flow-project` creates no `develop` branch, `/j-flow-finish` merges the feature branch locally with `--no-ff` and deletes it, and `/j-flow-release` skips the release PR since the `vX.Y.Z` tag is the version record. `team` remains the default and an absent config file means `team`, so existing projects are completely unaffected.
+  Feature branches and all seven gates are **unchanged** in `solo`: `/j-flow-review` and QA block exactly as before. The Pull Request was never j-flow's quality control — the gates are. Feature branches stay because `gate-core.md` resolves the active feature from the branch name first.
+
 ### Fixed
 - **Scaffolded workspaces no longer install two majors of the same dependency.** `pnpm-workspace.yaml`'s `catalog` was emitted only when `has_e2e` and carried only Playwright, so every other shared version was repeated literally per package — `typescript` alone was declared in five places at `^5.4.0` while `create-vite` pinned `~6.0.2` and the NestJS CLI pinned `^5.7.3`, leaving a fresh scaffold with a TypeScript major split across `apps/web` and everything else. The catalog is now the default policy for any dependency two or more workspace packages declare (`typescript`, `oxlint`, `@types/node`, `react`, `react-dom`, `@types/react`, `@types/react-dom`, `vitest`), and the versions the official CLIs generate are reconciled to it after each CLI runs. Verified live on a generated workspace: `pnpm why` reports a single version of each. The `react`/`react-dom` entries are the load-bearing ones — `packages/ui`'s components are rendered by `apps/web`, and two resolved React copies fail at runtime with "invalid hook call".
 - **`packages/domain`, `packages/api-client`, `packages/ui` and `apps/cli` now declare `oxlint`.** All four were generated with a `"lint": "oxlint"` script and no `oxlint` dependency; under pnpm's isolated `node_modules` only a package's own dependencies reach its `.bin`, so `pnpm lint` died with `oxlint: command not found` in every package except `apps/web`/`apps/admin`, which get the declaration from `create-vite` by accident.
@@ -14,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The catalog holds `typescript` at `^5.9.0` rather than following `create-vite`'s `~6.0.2`, because a freshly generated NestJS 11 project fails `nest build` under TypeScript 6 (`TS5011`, `TS5101`, both raised against the tsconfig its own CLI writes). The pinned-versions review procedure gained a step to re-test that constraint so the workspace can move up once the Nest CLI catches up.
-- `tests/validate.js` gains four guards for the catalog policy — a cataloged dependency declared with a literal version, a `catalog:` reference with no matching entry (which fails installs with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND`), a missing expected entry, and a package that runs `oxlint` without declaring it. 185 → 189 checks.
+- The base branch is no longer hardcoded to `develop` in `/j-flow-start`, `/j-flow-scaffold`, `/j-flow-finish` and `/j-flow-release` — it resolves from the workflow mode, with `references/workflow-modes.md` as the single place allowed to name a concrete branch. `/j-flow-check --repo` reports the mode and flags a mismatch (a `solo` project carrying a `develop` branch, or a `team` project without one).
+- `tests/validate.js` gains five guards for the workflow modes and four for the catalog policy — a cataloged dependency declared with a literal version, a `catalog:` reference with no matching entry (which fails installs with `ERR_PNPM_CATALOG_ENTRY_NOT_FOUND`), a missing expected entry, and a package that runs `oxlint` without declaring it. 185 → 196 checks.
 
 ## [2.4.0] - 2026-08-08
 
