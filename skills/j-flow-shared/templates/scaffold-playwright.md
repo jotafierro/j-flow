@@ -3,21 +3,24 @@
 End-to-end browser tests in `apps/e2e`. The e2e layer is independent of `web`; its target depends on whether a local web app was scaffolded:
 
 - **With `web`** (local target): runs against the React + Vite web app at `http://localhost:3001`, which `playwright.config.ts` boots automatically via its `webServer` block.
-- **Without `web`** (external target): runs against `process.env.BASE_URL` — a deployed/staging URL or another repo's server. There is no `webServer` block; set `BASE_URL` before running (e.g. `BASE_URL=https://staging.example.com pnpm --filter @{project}/e2e test`).
+- **Without `web`** (external target): runs against `process.env.BASE_URL` — a deployed/staging URL or another repo's server. There is no `webServer` block; set `BASE_URL` before running (e.g. `BASE_URL=https://staging.example.com pnpm e2e`).
 
 > When generating this doc, keep only the bullet that matches the project (`has_web` vs `!has_web`) and drop the other.
 
 ## Run
 
 ```bash
-pnpm --filter @{project}/e2e test            # headless
-pnpm --filter @{project}/e2e test:headed     # headed (visible browser)
+pnpm e2e                                     # headless, from the repo root
+pnpm --filter @{project}/e2e e2e             # same, this package only
+pnpm --filter @{project}/e2e e2e:headed      # headed (visible browser)
 pnpm --filter @{project}/e2e report          # open last HTML report
 ```
 
 **With `web`:** `playwright.config.ts` declares a `webServer` block that boots `pnpm --filter @{project}/web dev` automatically. No need to start the web app separately — locally Playwright reuses a running dev server if one is already up (`reuseExistingServer: !CI`); in CI it starts a fresh one.
 
 **Without `web`:** there is no `webServer` block. `baseURL` is `process.env.BASE_URL` — point it at your running target before invoking the tests.
+
+Note there is deliberately **no `test` script** in `apps/e2e`: the root `pnpm test` stays unit-tests-only, and e2e runs as its own `pnpm e2e` task. That keeps the command your QA gate and CI run on every change fast.
 
 ## Where tests live
 
@@ -65,4 +68,4 @@ pnpm --filter @{project}/e2e exec playwright show-trace test-results/<run>/trace
 
 ## CI
 
-Playwright runs in the GitHub Actions workflow at `.github/workflows/ci.yml`. CI installs browser binaries and runs `pnpm --filter @{project}/e2e test` against a fresh web server boot.
+Playwright runs in the GitHub Actions workflow at `.github/workflows/ci.yml`. CI installs browser binaries and runs `pnpm e2e` as a step of its own, after `pnpm test`, against a fresh web server boot.

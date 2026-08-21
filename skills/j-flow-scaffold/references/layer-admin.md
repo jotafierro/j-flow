@@ -73,6 +73,6 @@ Add `apps/web/src/setup-tests.ts`:
 import '@testing-library/jest-dom';
 ```
 
-Add devDeps to `apps/web/package.json`: `"vitest": "catalog:"` (literal range instead when the catalog's `vitest` condition doesn't hold — see `SKILL.md` Step 2), plus `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@vitest/ui` at real version ranges. Verified live (2026-08-17): `vitest@4.1.10` runs this jsdom + Testing Library setup, so the catalog's `^4.1.10` needs no special casing here.
+Add devDeps to `apps/web/package.json`: `"vitest": "catalog:"` (literal range instead when the catalog's `vitest` condition doesn't hold — see `SKILL.md` Step 2), plus `"jsdom": "^30.0.1"`, `"@testing-library/react": "^16.3.2"`, `"@testing-library/jest-dom": "^7.0.1"`, `"@vitest/ui": "^4.1.11"` — written out for the same reason as the web layer's external deps (see `layer-web.md`): a version invented at scaffold time is drift with no record of it. Verified live (2026-08-17): `vitest@4.1.10` runs this jsdom + Testing Library setup, so the catalog's `^4.1.10` needs no special casing here.
 
 If apps/admin was generated, add the same smoke test files there too. The test title text must be `'{Project Name} — admin'` to match the admin App.tsx.

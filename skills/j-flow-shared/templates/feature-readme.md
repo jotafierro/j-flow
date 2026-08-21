@@ -32,5 +32,5 @@
 
 - Unit: `pnpm --filter @{project}/api test`
 - E2E (NestJS): `pnpm --filter @{project}/api test:e2e`
-- E2E (Playwright): `pnpm --filter @{project}/e2e test`
+- E2E (Playwright): `pnpm e2e`
 - Mobile: `flutter test` + `flutter drive`

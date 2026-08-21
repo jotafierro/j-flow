@@ -827,6 +827,64 @@ check('the language contract freezes the same seven names', () => {
   assert(missing.length === 0, `declared in gate-core.md but not frozen in the contract: ${missing.join(', ')}`);
 });
 
+// ── scaffold output actually runs (plan 048) ────────────────────────────────
+// Three ways a scaffolded repo used to be broken on arrival, each guarded here:
+// apps/e2e kept npm init's `"test": "... exit 1"` so CI went red on the first push;
+// pnpm 11 blocked every command on unresolved allowBuilds placeholders; and two
+// layer files asked the model to invent dependency versions at scaffold time.
+console.log('\nscaffold output runs/');
+
+check('apps/e2e declares an e2e script and no test script', () => {
+  const e2e = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/references/layer-e2e.md'), 'utf8');
+  assert(/"e2e":\s*"playwright test"/.test(e2e), 'layer-e2e.md must write an `e2e` script running playwright');
+  // A `test` script here would pull Playwright into the root `pnpm test`, which is
+  // what /j-flow-qa runs at every gate. The scripts block must not declare one.
+  const block = e2e.match(/"scripts":\s*\{[\s\S]*?\}/);
+  assert(block, 'layer-e2e.md must show the scripts block it writes');
+  assert(!/"test"\s*:/.test(block[0]), 'apps/e2e must not declare a `test` script — see the turbo task note');
+});
+
+check('the e2e turbo task exists and does not collide with NestJS test:e2e', () => {
+  const skill = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/SKILL.md'), 'utf8');
+  assert(/"e2e":\s*\{\s*\n\s*"cache":\s*false/.test(skill), 'turbo.json must declare an `e2e` task with cache disabled');
+  assert(skill.includes('"e2e": "turbo e2e"'), 'the root package.json must expose `pnpm e2e`');
+  // @nestjs/cli already generates test:e2e in apps/api; naming the Playwright task
+  // the same would run both suites under one command.
+  assert(/not a style choice/.test(skill), 'the collision with apps/api test:e2e must stay documented');
+  assert(!/"test:e2e":\s*\{/.test(skill), 'turbo.json must not declare a test:e2e task — that name belongs to apps/api');
+});
+
+check('allowBuilds pre-seeds the entries pnpm 11 otherwise blocks on', () => {
+  const skill = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/SKILL.md'), 'utf8');
+  // Scope to the emitted allowBuilds block, not the whole file: the prose below it
+  // also names these packages, and a whole-file match was satisfied by that prose
+  // even with the YAML entry deleted (caught by its own sabotage repro).
+  const block = skill.match(/^allowBuilds:\n(?:[ \t]+.*\n)+/m);
+  assert(block, 'SKILL.md must emit an allowBuilds block');
+  for (const pkg of ['esbuild', 'bufferutil', 'utf-8-validate']) {
+    assert(block[0].includes(pkg), `the emitted allowBuilds block must carry ${pkg}`);
+  }
+  assert(!/dangerouslyAllowAllBuilds/.test(skill) || /Never reach for `dangerouslyAllowAllBuilds`/.test(skill),
+    'a blanket build allow-list must never be recommended');
+});
+
+check('the generated README explains unresolved allowBuilds placeholders', () => {
+  const readme = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/templates/scaffold-readme.md'), 'utf8');
+  assert(readme.includes('allowBuilds'), 'the README must tell the user what to do when pnpm edits pnpm-workspace.yaml');
+  assert(/set this to true or false/.test(readme), 'it must quote the placeholder text the user will actually see');
+});
+
+check('no scaffold reference asks the model to invent a version', () => {
+  const offenders = [];
+  for (const file of walk(path.join(ROOT, 'skills/j-flow-scaffold'))) {
+    const content = fs.readFileSync(file, 'utf8');
+    // The exact phrasings that shipped this nondeterminism, plus the generic shape.
+    if (/real version ranges?/i.test(content)) offenders.push(path.relative(ROOT, file));
+  }
+  assert(offenders.length === 0,
+    `asks for an unspecified version at scaffold time — spell the range out instead:\n    ${offenders.join('\n    ')}`);
+});
+
 // ── summary ──────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} checks: ${passed} passed, ${failed} failed\n`);
 if (failed > 0) process.exit(1);

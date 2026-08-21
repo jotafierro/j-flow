@@ -17,6 +17,18 @@ cd ..
 
 Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{project}/config": "workspace:*"` to devDependencies and a `"type-check": "tsc --noEmit"` script.
 
+**Write the test scripts, replacing the `npm init` placeholder.** `create-playwright` leaves `"test": "echo \"Error: no test specified\" && exit 1"` behind (see the CLI abort documented below), so this is an overwrite, not an addition:
+```json
+"scripts": {
+  "e2e": "playwright test",
+  "e2e:headed": "playwright test --headed",
+  "report": "playwright show-report",
+  "type-check": "tsc --noEmit"
+}
+```
+
+**There is deliberately no `test` script here.** Turbo runs a task by matching its name against each package's scripts, so a `test` script in this package would pull Playwright — browsers, and a booted web server — into the root `pnpm test`, which is the command `/j-flow-qa` invokes at every gate and CI runs on every push. It must stay unit-tests-in-seconds. `e2e` is its own turbo task instead (see `SKILL.md`'s `turbo.json`), run as a separate CI step. `e2e:headed` and `report` are not turbo tasks at all, so they only ever run through an explicit `--filter`.
+
 **Ensure `"@playwright/test": "catalog:"` is in devDependencies — create it if absent, don't assume the CLI wrote it.** It resolves from the `catalog["@playwright/test"]` entry in `pnpm-workspace.yaml` (Step 2) instead of drifting independently from whatever `packages/ui` ends up with. The catalog needs both the `playwright` and `@playwright/test` keys — pnpm resolves `catalog:` by exact package name, and these are two different npm packages (see Step 2's catalog block).
 
 Create-if-missing rather than rewrite-the-line, because at the pinned version the CLI often does not get as far as declaring it. Verified live (2026-08-17) with this exact invocation: `create-playwright@1.17.139` writes `devEngines.packageManager.version: "^11.20.0"` into the `package.json` it generates, then runs `pnpm add --save-dev @playwright/test` against it and pnpm rejects its own generated file — `Invalid package manager specification in package.json (pnpm@^11.20.0); expected a semver version` — so the CLI aborts leaving only a stub `package.json`. Also strip that `devEngines` block during this post-processing step: the workspace already declares `packageManager` at the root, and leaving a range there keeps breaking every later pnpm command in this package.
@@ -64,8 +76,8 @@ export default defineConfig({
 });
 ```
 
-- **`has_web`**: keep the `webServer` block — `pnpm --filter @{project}/e2e test` boots the web dev server on demand and shuts it down afterward (`reuseExistingServer: !CI` reuses a running one locally).
-- **`!has_web`**: DELETE the entire `webServer` block. Playwright runs against whatever `BASE_URL` points at; there is no local server to boot. Print in the post-scaffold output: "e2e is external-target — set `BASE_URL` (e.g. `BASE_URL=https://staging.example.com pnpm --filter @{project}/e2e test`)."
+- **`has_web`**: keep the `webServer` block — `pnpm --filter @{project}/e2e e2e` boots the web dev server on demand and shuts it down afterward (`reuseExistingServer: !CI` reuses a running one locally).
+- **`!has_web`**: DELETE the entire `webServer` block. Playwright runs against whatever `BASE_URL` points at; there is no local server to boot. Print in the post-scaffold output: "e2e is external-target — set `BASE_URL` (e.g. `BASE_URL=https://staging.example.com pnpm e2e`)."
 
 **Replace `apps/e2e/tests/health.spec.ts`** — branch the smoke by whether a local web app exists:
 
@@ -99,4 +111,4 @@ test('target is reachable', async ({ page }) => {
 ```bash
 cd apps/e2e && pnpm exec playwright install chromium && cd ../..
 ```
-This downloads only the chromium binary so `pnpm test` works first try without pulling firefox/webkit too. One-time download (~120MB), under 30 seconds.
+This downloads only the chromium binary so `pnpm e2e` works first try without pulling firefox/webkit too. One-time download (~120MB), under 30 seconds.

@@ -29,6 +29,13 @@ cp .env.example .env
 docker compose up -d
 ```
 
+**If `pnpm install` edits `pnpm-workspace.yaml`:** pnpm may append entries to `allowBuilds` reading `set this to true or false`. Those are dependencies shipping an install script, which pnpm will not run without a decision — and until you make it, **every `pnpm run` fails**, not just the install. Resolve each one:
+
+- **`false`** by default. Most are optional native accelerators; declining the build costs nothing.
+- **`true`** only when something demonstrably breaks without it. A `true` lets that package's install script run unsandboxed on your machine, so treat it as the supply-chain decision it is.
+
+Commit the resolved file — it is how the next person avoids the same stop.
+
 ## Run
 
 | Service | Command | URL |
@@ -56,7 +63,7 @@ curl http://localhost:3000/api/v1/health
 ```bash
 pnpm test                                    # all unit tests
 pnpm --filter @{project}/api test:e2e        # NestJS E2E
-pnpm --filter @{project}/e2e test            # Playwright E2E
+pnpm e2e                                     # Playwright E2E (separate from pnpm test)
 cd apps/mobile && flutter test               # Flutter unit
 cd apps/mobile && flutter drive --target=integration_test/app_test.dart  # Flutter integration
 ```

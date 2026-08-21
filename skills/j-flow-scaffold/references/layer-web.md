@@ -12,7 +12,16 @@ cd ..
 
 Post-process `apps/web/package.json`:
 - Rename to `@{project}/web`
-- Add external deps: `@tanstack/react-query`, `zustand`, `react-hook-form`, `zod`, `@hookform/resolvers`, `react-router-dom` (use real version ranges) — omit `@tanstack/react-query` if `!has_api` (nothing to fetch)
+- Add external deps at these ranges — omit `@tanstack/react-query` if `!has_api` (nothing to fetch):
+  ```json
+  "@tanstack/react-query": "^5.101.4",
+  "zustand": "^5.0.15",
+  "react-hook-form": "^7.85.0",
+  "zod": "^4.4.3",
+  "@hookform/resolvers": "^5.9.1",
+  "react-router-dom": "^7.18.2"
+  ```
+  These are written out rather than left as "use a real range" because inventing a version at scaffold time makes two runs of the same `PRODUCT.md` produce different `package.json` files, with nothing recording the difference — the exact drift the pinned-versions doctrine exists to stop. They are **not** in the catalog: each has a single consumer (`apps/web`, plus `apps/admin` generated from this same text), so a catalog entry would be indirection with nothing to unify. They are also **not** in the pinned-tool-versions table: that table's review procedure requires a live scaffold per changed row, and application dependencies do not earn that cost — a concrete `^` range already removes the nondeterminism, which was the actual problem.
 - **If `styling: 'tailwind'`:** also add `tailwindcss`, `@tailwindcss/vite` to devDependencies (Tailwind v4 — no `tailwind.config.js` or `postcss.config.js` needed)
 - Add internal workspace deps with `workspace:*` protocol — REQUIRED for pnpm to link locally instead of trying npm registry. Only include `@{project}/api-client` if `has_api`:
   ```json

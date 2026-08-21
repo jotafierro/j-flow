@@ -239,6 +239,8 @@ overrides:
 
 allowBuilds:
   esbuild: true
+  bufferutil: false
+  utf-8-validate: false
 ```
 
 **The catalog is the default version policy, not a Playwright special case.** A dependency belongs in the `catalog` **if and only if two or more packages in the generated workspace declare it**; a single-consumer dependency (`turbo`, `tsup`, `commander`, `storybook`, `@storybook/react-vite`) keeps its literal range, because a one-entry catalog is indirection with nothing to unify. Each package then declares `"<dep>": "catalog:"` instead of a range, so bumping a shared version is one line here rather than one edit per package — the failure mode this prevents is a workspace that installs two majors of the same dependency because someone updated four `package.json` files and missed the fifth.
@@ -253,7 +255,13 @@ Skip the `catalog` block entirely for `bare-single-package` and `flutter-only` �
 
 Deliberately **not** cataloged, so nobody adds them back by reflex: `vite` and `@vitejs/plugin-react`. Both are build-time only and live in separately built packages (`packages/ui` builds Storybook, `apps/web` builds the app) with no shared runtime instance to keep identical — unlike `react`/`react-dom`, where two resolved copies across `packages/ui` and its consuming app produce the "invalid hook call" failure the catalog exists to prevent. Cataloging them would couple Storybook's builder to whatever `create-vite` picked, for no correctness gain.
 
-`overrides` and `allowBuilds` are unconditional — the `esbuild` override pins the version Storybook needs for compatibility (not a security advisory), not tied to any specific layer flag. Judge every future addition to `allowBuilds` on its own — it's explicitly allow-listing a third-party package's install script (arbitrary code) to run unsandboxed; don't add an entry by reflex just because pnpm asked.
+`overrides` and `allowBuilds` are unconditional — the `esbuild` override pins the version Storybook needs for compatibility (not a security advisory), not tied to any specific layer flag.
+
+**`bufferutil: false` and `utf-8-validate: false` are pre-seeded because pnpm 11 blocks the whole workspace without them.** They are optional native peers of `ws`, which arrives transitively through `vite`, and `.npmrc`'s `auto-install-peers=true` materializes them as real root dependencies. Being native, they carry install scripts, and pnpm ≥10 does not run those unasked — pnpm 11 goes further and **rewrites `pnpm-workspace.yaml`**, inserting `bufferutil: set this to true or false` placeholders, then **fails every `pnpm run` until a human resolves them**, not just the install (it runs a dependency-status check before each script). Verified live 2026-08-21: with the placeholders unresolved, `pnpm lint` exits 1; resolved to `false`, everything passes. `false` is the correct answer — they are optional accelerators for `ws`, so declining the build costs no functionality.
+
+**This does not close the problem, only today's case.** Which packages pnpm asks about depends on the dependency tree: a real scaffolded project (`finzas`) needed `@scarf/scarf` and `unrs-resolver` instead, neither of which is in the list above. Because this skill deliberately never runs `pnpm install`, the first install is the user's — so the generated README and review-guide must tell them what to do when pnpm adds a placeholder (see the README's Setup section). Policy to state there: **resolve each new entry to `false`**, and only `true` if something demonstrably breaks without that build.
+
+Judge every future addition on its own — a `true` explicitly allow-lists a third-party package's install script (arbitrary code) to run unsandboxed. Never reach for `dangerouslyAllowAllBuilds` or any blanket equivalent: it would turn a supply-chain decision into an invisible default, which is the opposite of why plan 043 added Dependabot.
 
 **`package.json`** (Turborepo root — name from PRODUCT.md, private, packageManager pnpm@11)
 ```json
@@ -267,6 +275,7 @@ Deliberately **not** cataloged, so nobody adds them back by reflex: `vite` and `
     "dev": "turbo dev",
     "lint": "turbo lint",
     "test": "turbo test",
+    "e2e": "turbo e2e",
     "type-check": "turbo type-check"
   },
   "devDependencies": {
@@ -297,10 +306,17 @@ No `pnpm` field here — see the `overrides`/`allowBuilds` move to `pnpm-workspa
     "test": {
       "dependsOn": ["^build"]
     },
+    "e2e": {
+      "cache": false
+    },
     "type-check": {}
   }
 }
 ```
+
+`e2e` is a separate task from `test`, and only `apps/e2e` declares a script for it (see `references/layer-e2e.md`). Turbo runs a task by matching its name against each package's scripts, so keeping the Playwright script out of `test` is what keeps the root `pnpm test` to unit tests in seconds — it is the command `/j-flow-qa` invokes at every gate and CI runs on every push. `cache: false` because an e2e run depends on a live server, not just on the inputs turbo can hash. Emit the `e2e` task only when `has_e2e`; without that layer nothing would ever run it.
+
+**The task is `e2e`, not `test:e2e`, and that is not a style choice.** `@nestjs/cli` generates `"test:e2e": "jest --config ./test/jest-e2e.json"` in `apps/api` — that name is already taken by the NestJS supertest suite, which `/j-flow-qa` runs as its own Stage 3 and which needs a MongoDB container. A turbo task called `test:e2e` would run both suites under one command.
 
 **`tsconfig.json`** (root)
 ```json
@@ -391,6 +407,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm test
+      - run: pnpm e2e                                                                # only if has_e2e
 
   flutter:                            # entire job omitted if !has_mobile
     runs-on: ubuntu-latest
@@ -710,7 +727,7 @@ Create `.specs/01-infra-base/`. Use the templates:
 **`technical-spec.md`:** Write a short doc with the directory tree generated.
 
 **`review-guide.md`:** Read `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/review-guide.md` and customize for 01-infra-base. Manual Test Steps: include only the steps for layers actually generated, renumbered sequentially:
-1. `pnpm install` succeeds with no errors
+1. `pnpm install` succeeds with no errors — and if it appends `set this to true or false` entries to `allowBuilds` in `pnpm-workspace.yaml`, resolve them (`false` unless something breaks without that build) and commit the file. Until they are resolved, **every** `pnpm run` fails, not just the install; see the README's Setup section
 2. `docker compose up -d` starts MongoDB, Redis, Mailhog                              ← only if has_api
 3. `pnpm --filter @{project}/api dev` starts API                                      ← only if has_api
 4. `curl http://localhost:3000/api/v1/health` returns `{"status":"ok"}`               ← only if has_api
@@ -719,8 +736,8 @@ Create `.specs/01-infra-base/`. Use the templates:
 7. `pnpm --filter @{project}/ui storybook` shows Storybook with example stories at http://localhost:6006  ← only if has_web or has_admin
 8. `cd apps/mobile && flutter pub get && flutter run` runs on emulator/device         ← only if has_mobile
 9. `cd apps/mobile/widgetbook && flutter pub get && flutter run -d chrome` shows Widgetbook  ← only if has_mobile
-10. `pnpm --filter @{project}/e2e test` runs Playwright sample                        ← only if has_e2e
-11. `pnpm lint && pnpm type-check` pass with no errors
+10. `pnpm e2e` runs the Playwright sample (or `pnpm --filter @{project}/e2e e2e` for that package alone)                        ← only if has_e2e
+11. `pnpm lint && pnpm type-check && pnpm test` pass with no errors (`pnpm test` must not run Playwright — e2e is the separate `pnpm e2e` task)
 12. VS Code shows no TypeScript errors when opening the project
 
 **`gate-context.md`:** empty header only — will be written on approval.

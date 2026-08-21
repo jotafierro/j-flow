@@ -27,7 +27,7 @@ pnpm test                                 # unit tests: jest (api) + vitest (web
 
 # Targeted tests
 pnpm --filter @{project}/api test:e2e     # NestJS e2e (requires running MongoDB)
-pnpm --filter @{project}/e2e test         # Playwright e2e (boots web automatically)
+pnpm e2e                                 # Playwright e2e (boots web automatically; not part of pnpm test)
 cd apps/mobile && flutter test            # Flutter unit tests
 
 # Infrastructure
