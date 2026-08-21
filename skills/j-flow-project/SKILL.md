@@ -14,6 +14,8 @@ Flags can be combined: `--from PRODUCT.md --from-design DESIGN.md --update`
 
 **Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template this skill reads (PRODUCT / DESIGN / CONSTITUTION, the agent-memory templates, the backlog/changelog templates) resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default.
 
+**Language:** prose this skill writes follows the project's `**Spec language:**` (and `**Docs language:**` where it writes under `docs/` or the CHANGELOG); headings, gate vocabulary, IDs and code stay English. Canonical: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/language-contract.md`.
+
 ---
 
 ## Mode dispatch

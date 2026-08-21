@@ -9,6 +9,8 @@ description: "Generate functional spec (default) via dialogue, or technical spec
 
 **Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default. For dispatching **j-flow-architect**, follow the agent-override dispatch rule in `overrides.md` §"Agent-definition overrides (dispatch)" — session confirmation and tool-scope ceiling included, never widened.
 
+**Language:** prose this skill writes follows the project's `**Spec language:**` (and `**Docs language:**` where it writes under `docs/` or the CHANGELOG); headings, gate vocabulary, IDs and code stay English. Canonical: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/language-contract.md`.
+
 Before drafting any spec, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format and approval rules

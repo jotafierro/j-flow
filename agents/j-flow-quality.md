@@ -8,6 +8,8 @@ description: >
 tools: [Read, Write, Bash, Grep, Glob]
 ---
 
+**Language:** you are instructed in English, but the prose you write into `.specs/` artifacts follows the project's `**Spec language:**` from `.specs/config.md` (default `en`). Headings, gate vocabulary, IDs, and everything in code — identifiers, field names, enum values, error codes, comments — stay English. Canonical: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/language-contract.md`.
+
 You are j-flow-quality. You run tests and determine QA gate status.
 
 ## Required reading at task start

@@ -173,7 +173,7 @@ for (const tpl of EXPECTED_AGENT_TEMPLATES) {
 const EXPECTED_REFERENCES = [
   'gate-core.md', 'gate-cascade.md', 'gate-symbols.md', 'spec-markers.md',
   'layer-order.md', 'code-style.md', 'agent-scopes.md', 'overrides.md',
-  'workflow-modes.md',
+  'workflow-modes.md', 'language-contract.md',
 ];
 
 console.log('\nshared references/');
@@ -629,6 +629,142 @@ check('/j-flow-project seeds and backfills .specs/config.md', () => {
   assert(init.includes('templates/config.md'), 'init mode must write .specs/config.md from the template');
   assert(update.includes('.specs/config.md'), 'update mode must backfill .specs/config.md');
   assert(fs.existsSync(path.join(ROOT, 'skills/j-flow-shared/templates/config.md')), 'the config template must exist');
+});
+
+// ── language contract (plan 046) ─────────────────────────────────────────────
+// Spec prose can be written in the project's language; the artifact schema cannot.
+// The failure mode is silent: a translated heading raises no error, it just means
+// /j-flow-plan, /j-flow-review and /j-flow-finish stop finding the section and
+// work with less context than they think they have. `npm test` is the only thing
+// standing in front of that, so these guards are the point of the plan, not trim.
+console.log('\nlanguage contract/');
+
+const LANGUAGE_CONTRACT = 'skills/j-flow-shared/references/language-contract.md';
+const TPL_DIR = 'skills/j-flow-shared/templates';
+
+// Snapshot of the section schema of every artifact a skill parses. Translating a
+// heading, or renaming one without meaning to, breaks this. Adding a section
+// deliberately means updating this list — a conscious act, which is the point.
+const TEMPLATE_HEADINGS = {
+  'functional-spec.md': [
+    'Purpose', 'Feature users', 'Trigger', 'Acceptance criteria', 'Scope',
+    'Dependencies', 'Edge cases', 'Risks', 'Functional scenarios (optional)',
+  ],
+  'technical-spec.md': [
+    'Architecture Overview', 'Data Layer', 'Service Layer', 'API Layer', 'Frontend',
+    'Mobile', 'Infrastructure', 'Cross-cutting Concerns', 'Design decisions',
+    'Testing Strategy',
+  ],
+  'qa-report.md': ['Test Results', 'Failures', 'Manual Checklist Results'],
+  'review-findings.md': [
+    'Critical (must fix before approval)', 'Major (should fix)', 'Minor (optional)',
+    'Verdict',
+  ],
+};
+
+for (const [tpl, expected] of Object.entries(TEMPLATE_HEADINGS)) {
+  check(`templates/${tpl} section schema is unchanged`, () => {
+    const content = fs.readFileSync(path.join(ROOT, TPL_DIR, tpl), 'utf8');
+    const actual = [...content.matchAll(/^## (.+?)\s*$/gm)].map((m) => m[1]);
+    assert(JSON.stringify(actual) === JSON.stringify(expected),
+      `heading schema drifted.\n      expected: ${JSON.stringify(expected)}\n      actual:   ${JSON.stringify(actual)}`);
+  });
+}
+
+// The nine headings a skill matches by literal string, plus where each is matched
+// from. These are the ones where a translation breaks a skill immediately rather
+// than eventually, so the contract must name them AND the template must carry them.
+const LOAD_BEARING = [
+  ['## Architecture Overview', 'technical-spec.md'],
+  ['## Design decisions', 'technical-spec.md'],
+  ['## Scope', 'functional-spec.md'],
+  ['## Verdict', 'review-findings.md'],
+  ['## Failures', 'qa-report.md'],
+  ['## Test Results', 'qa-report.md'],
+  ['## Critical (must fix before approval)', 'review-findings.md'],
+  ['## Major (should fix)', 'review-findings.md'],
+  ['## Minor (optional)', 'review-findings.md'],
+];
+
+check('language contract names every literal-matched heading', () => {
+  const contract = fs.readFileSync(path.join(ROOT, LANGUAGE_CONTRACT), 'utf8');
+  const missing = LOAD_BEARING.filter(([h]) => !contract.includes(h)).map(([h]) => h);
+  assert(missing.length === 0, `not declared frozen in the contract: ${missing.join(', ')}`);
+});
+
+check('every literal-matched heading is still in its template', () => {
+  const offenders = [];
+  for (const [heading, tpl] of LOAD_BEARING) {
+    const content = fs.readFileSync(path.join(ROOT, TPL_DIR, tpl), 'utf8');
+    if (!content.includes(heading)) offenders.push(`${heading} (expected in ${tpl})`);
+  }
+  assert(offenders.length === 0, `missing from their template:\n    ${offenders.join('\n    ')}`);
+});
+
+// The frozen vocabulary the gate machinery parses. Asserted as: declared frozen in
+// the contract, AND still present somewhere in the plugin. Deliberately not pinned to
+// a per-literal "canonical source" — writing this guard revealed that no shared
+// reference enumerates the six gate block names: gate-core.md shows two by example,
+// gate-cascade.md carries [QA]/[BUILD]/[REVIEW], and [TASK PLAN] lives only in the
+// skills that consume it. Encoding a canonical home here would assert a tidiness the
+// plugin does not have; the contract records the gap instead.
+const FROZEN_VOCABULARY = [
+  '[FUNCTIONAL SPEC]', '[TECHNICAL SPEC]', '[TASK PLAN]', '[BUILD]', '[QA]', '[REVIEW]',
+  '[stale]', '[NEEDS CLARIFICATION', '[SF]', '[TF]',
+  '**Given**', '**When**', '**Then:**',
+  'current_phase', 'changes-requested',
+];
+
+check('frozen vocabulary is declared in the contract and still used', () => {
+  const contract = fs.readFileSync(path.join(ROOT, LANGUAGE_CONTRACT), 'utf8');
+  const corpus = [...walk(path.join(ROOT, 'skills')), ...walk(path.join(ROOT, 'agents'))]
+    .filter((f) => path.relative(ROOT, f) !== LANGUAGE_CONTRACT)
+    .map((f) => fs.readFileSync(f, 'utf8'))
+    .join('\n');
+  const offenders = [];
+  for (const literal of FROZEN_VOCABULARY) {
+    if (!contract.includes(literal)) offenders.push(`${literal}: not declared frozen in the contract`);
+    if (!corpus.includes(literal)) offenders.push(`${literal}: no longer used anywhere in the plugin`);
+  }
+  assert(offenders.length === 0, offenders.join('\n    '));
+});
+
+check('language contract states the default and the resolving rule', () => {
+  const contract = fs.readFileSync(path.join(ROOT, LANGUAGE_CONTRACT), 'utf8');
+  assert(contract.includes('.specs/config.md'), 'it must name the config file it reads');
+  assert(/default(s)? to `en`|both default to `en`/.test(contract), 'it must state the en default');
+  assert(/if a skill looks for it, it is\s*\n?\s*not translated/i.test(contract.replace(/\*\*/g, '')),
+    'it must carry the catch-all rule for cases not listed');
+});
+
+// Counterpart: the prose-producing templates must keep pointing at the contract, and
+// the docs/-facing one must NOT — that is what encodes the two-language split.
+check('prose templates point at the contract and docs templates do not', () => {
+  const shouldPoint = [
+    'functional-spec.md', 'technical-spec.md', 'review-guide.md', 'qa-report.md',
+    'review-findings.md', 'feature-readme.md', 'system-domain.md', 'product.md',
+    'design.md', 'constitution.md',
+  ];
+  const missing = shouldPoint.filter(
+    (f) => !fs.readFileSync(path.join(ROOT, TPL_DIR, f), 'utf8').includes('language-contract.md'));
+  assert(missing.length === 0, `no language pointer: ${missing.join(', ')}`);
+  const docsTpl = fs.readFileSync(path.join(ROOT, TPL_DIR, 'feature-doc.md'), 'utf8');
+  assert(!docsTpl.includes('language-contract.md'),
+    'feature-doc.md writes under docs/ and follows Docs language — it must not carry the Spec-language pointer');
+});
+
+check('every generator skill and agent declares its output language', () => {
+  const skills = ['spec', 'plan', 'build', 'qa', 'review', 'finish', 'reopen', 'project'];
+  const offenders = [];
+  for (const name of skills) {
+    const f = path.join(ROOT, 'skills', `j-flow-${name}`, 'SKILL.md');
+    if (!fs.readFileSync(f, 'utf8').includes('language-contract.md')) offenders.push(`j-flow-${name}`);
+  }
+  for (const agent of EXPECTED_AGENTS) {
+    const f = path.join(ROOT, 'agents', `${agent}.md`);
+    if (!fs.readFileSync(f, 'utf8').includes('language-contract.md')) offenders.push(agent);
+  }
+  assert(offenders.length === 0, `no language instruction: ${offenders.join(', ')}`);
 });
 
 // ── summary ──────────────────────────────────────────────────────────────────

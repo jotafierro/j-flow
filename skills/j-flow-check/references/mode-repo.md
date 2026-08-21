@@ -57,6 +57,14 @@ Resolve `workflow_mode` per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/referenc
 
 Report only; never create or delete a branch. `/j-flow-check` is read-only in every mode.
 
+### 5c. Language drift
+
+Resolve `**Spec language:**` per `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/language-contract.md` and report it in the header.
+
+Then check the **frozen schema**, not the language of the prose: for each `.specs/*/functional-spec.md` and `technical-spec.md`, confirm the literal-matched headings are still present verbatim — `## Purpose`, `## Acceptance criteria`, `## Scope` in the functional spec; `## Architecture Overview`, `## Design decisions` in the technical one. Report each missing heading as `⚠ {file}: heading "{heading}" not found — translated or renamed?`
+
+This is deliberately a headings check and not language detection. "Is this text in Spanish?" is a different and much harder problem, and not the one that breaks a skill: what breaks a skill is a heading it greps for no longer being there. A spec whose prose is in the wrong language still works; a spec with a translated heading silently loses context.
+
 ### 6. Per-feature integrity & gate consistency
 
 One pass per feature folder under `.specs/` — read `meta.md` and `gate-context.md` once each and run every sub-check below against that single read, rather than re-scanning the same two files four separate times:

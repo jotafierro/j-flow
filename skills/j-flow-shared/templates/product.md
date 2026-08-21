@@ -1,4 +1,5 @@
 # Product Definition — {Name}
+<!-- Prose in the project's Spec language; headings, IDs, gate vocabulary and code stay English — see references/language-contract.md -->
 
 > Save this file as `PRODUCT.md` at the project root.
 > Run `/j-flow-project --update` to sync the backlog after edits.

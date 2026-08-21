@@ -1,4 +1,5 @@
 # {Project Name} — Specs Index
+<!-- Prose in the project's Spec language; headings, IDs, gate vocabulary and code stay English — see references/language-contract.md -->
 
 {One-line product description from PRODUCT.md tagline}
 

@@ -21,6 +21,8 @@ Before dispatching any agent, read:
 
 **Override resolution (applies to every asset-load and agent dispatch in this skill):** follow `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md`. For any `${CLAUDE_PLUGIN_ROOT}/…` reference above, if a matching file exists under `.specs/.overrides/references/`, read that instead. For **agent dispatch**: before dispatching `{agent}`, follow the agent-override dispatch rule in `overrides.md` §"Agent-definition overrides (dispatch)" — session confirmation and tool-scope ceiling included, never widened. Task context, `DESIGN.md` forwarding, and agent memory (`.specs/.agents/{agent}.md`) are still layered on exactly as below.
 
+**Language:** prose this skill writes follows the project's `**Spec language:**` (and `**Docs language:**` where it writes under `docs/` or the CHANGELOG); headings, gate vocabulary, IDs and code stay English. Canonical: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/language-contract.md`.
+
 When dispatching `j-flow-frontend` or `j-flow-mobile`, explicitly include `DESIGN.md` in the agent's context so they can map design tokens to React/Flutter implementation.
 
 ## Gate Check

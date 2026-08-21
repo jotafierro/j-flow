@@ -1,4 +1,5 @@
 # {Feature Name}
+<!-- Prose in the project's Spec language; headings, IDs, gate vocabulary and code stay English — see references/language-contract.md -->
 
 **Slug:** {slug}
 **Branch:** feature/{slug}

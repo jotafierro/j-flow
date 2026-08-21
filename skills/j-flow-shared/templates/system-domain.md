@@ -1,4 +1,5 @@
 # System spec — {domain}
+<!-- Prose in the project's Spec language; headings, IDs, gate vocabulary and code stay English — see references/language-contract.md -->
 
 > Source of truth for the current behavior of this domain.
 > Auto-updated by `/j-flow-finish`. Do not edit manually outside of a finish run.

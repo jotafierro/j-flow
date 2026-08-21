@@ -6,6 +6,7 @@
 /j-flow-project
   └─ git init -b main if no repo yet; asks workflow mode (team|solo), then creates develop after first commit — team only
   └─ PRODUCT.md, DESIGN.md, .specs/README.md, .specs/config.md, CHANGELOG.md, agent memory
+  └─ asks workflow mode (team|solo) + spec/docs language (default en) → .specs/config.md
   └─ first run: auto-triggers /j-flow-scaffold
   └─ --update: syncs backlog from meta.md + triggers /j-flow-scaffold --review
 

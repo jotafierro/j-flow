@@ -1,4 +1,5 @@
 # QA Report — {slug}
+<!-- Prose in the project's Spec language; headings, IDs, gate vocabulary and code stay English — see references/language-contract.md -->
 Date: {YYYY-MM-DD}
 Gate: {green | red}
 

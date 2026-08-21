@@ -5,6 +5,8 @@ description: "Reopen a feature to a prior gate. Clears gate-context.md from the 
 
 # j-flow-reopen
 
+**Language:** prose this skill writes follows the project's `**Spec language:**` (and `**Docs language:**` where it writes under `docs/` or the CHANGELOG); headings, gate vocabulary, IDs and code stay English. Canonical: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/language-contract.md`.
+
 Reopen a finished or blocked feature by clearing gates from a chosen point forward.
 Does NOT revert commits — only gate status in `gate-context.md` is cleared.
 

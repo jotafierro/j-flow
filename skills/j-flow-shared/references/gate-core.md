@@ -54,6 +54,8 @@ Before running a gate's work: find the active feature (above), read `.specs/{slu
 
 ## Approval dialogue (display to user before each gate)
 
+Every dialogue and block message below is emitted in the project's `**Spec language:**` (`.specs/config.md`, default `en`); the bracketed vocabulary and command names are never translated — see `language-contract.md`. Do not duplicate these blocks per language.
+
 ```
 Ready to approve [{Phase}]?
 

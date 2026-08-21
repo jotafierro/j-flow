@@ -39,7 +39,7 @@ This closes the growth gap: the full "add a layer later" flow is **edit `**Layer
 If `.specs/config.md` does not exist, create it from
 `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/config.md` with `**Workflow mode:** team`
 — the documented default for any project that predates the file, so an existing repo keeps
-behaving exactly as it did. Print: `.specs/config.md created (Workflow mode: team) — edit it to switch to solo.`
+behaving exactly as it did. Print: `.specs/config.md created (Workflow mode: team, Spec language: en, Docs language: en) — edit it to change any of them.`
 
 If the file already exists, **leave it completely untouched**, including a field whose value
 you would not have chosen. It is hand-edited policy, not generated state; `--update` fills

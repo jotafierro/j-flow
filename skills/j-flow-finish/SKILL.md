@@ -9,6 +9,8 @@ description: "Generate feature README, update CHANGELOG [Unreleased], consolidat
 
 **Override resolution:** every `${CLAUDE_PLUGIN_ROOT}/…` template or reference this skill reads resolves through `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/overrides.md` — if a matching file exists under `.specs/.overrides/`, use it verbatim instead of the plugin default.
 
+**Language:** prose this skill writes follows the project's `**Spec language:**` (and `**Docs language:**` where it writes under `docs/` or the CHANGELOG); headings, gate vocabulary, IDs and code stay English. Canonical: `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/language-contract.md`.
+
 Before finishing, read:
 
 1. `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/references/gate-core.md` — gate format
@@ -62,7 +64,7 @@ Ensure `docs/features/` exists in the repo root (create if not).
 
 Write `docs/features/{slug}.md` using template `${CLAUDE_PLUGIN_ROOT}/skills/j-flow-shared/templates/feature-doc.md`:
 - Substitute slug, today's date, feature name from meta.md
-- Rewrite the Purpose section in user-facing language (no technical jargon — no "JWT", "MongoDB", "HTTP 302", "DTO")
+- Rewrite the Purpose section in user-facing language (no technical jargon — no "JWT", "MongoDB", "HTTP 302", "DTO"). **This rewrite crosses languages as well as register**: `docs/` follows `**Docs language:**`, while the feature README and `_system/` entry this same run writes follow `**Spec language:**`. When the two differ, translating here is part of the step, not an afterthought.
 - Rewrite Feature users as plain personas
 - Rewrite each AC as a user capability bullet: "you can now X", "the system does Y for you", "users see Z"
 - Link to the architecture doc generated in Step 1b

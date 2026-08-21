@@ -1,5 +1,7 @@
 # Code Style Rules
 
+**Language:** this file governs layer 3 of `references/language-contract.md` — identifiers, field names, enum values, error codes and comments are English regardless of the project's `**Spec language:**`. Which prose follows which language field is decided there, not here.
+
 Used by `/j-flow-spec technical` (when drafting specs) and `/j-flow-build` (when writing code).
 Audited by `/j-flow-review`.
 

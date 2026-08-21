@@ -23,6 +23,7 @@ This skill does not execute. It bundles shared assets that other j-flow skills r
 | Agent scopes (what each agent reads and writes) | `references/agent-scopes.md` |
 | Override resolution — how ejected assets under `.specs/.overrides/` take precedence over plugin defaults | `references/overrides.md` |
 | Workflow modes (`solo`/`team`), base-branch resolution | `references/workflow-modes.md` |
+| Language contract — what is translated and what is frozen | `references/language-contract.md` |
 | meta.md schema | `templates/meta.md` |
 | gate-context.md seed and append format | `templates/gate-context.md` + `references/gate-core.md` |
 | CHANGELOG seed | `templates/changelog.md` |

@@ -1,4 +1,5 @@
 # Constitution — {Project Name}
+<!-- Prose in the project's Spec language; headings, IDs, gate vocabulary and code stay English — see references/language-contract.md -->
 
 > Inviolable principles for this project. Each principle is enforced by `/j-flow-review` as a blocking gate.
 > Keep this list short (3–10 principles). Descriptive context belongs in PRODUCT.md / DESIGN.md.

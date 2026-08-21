@@ -1,4 +1,5 @@
 # {Project Name} Design System
+<!-- Prose in the project's Spec language; headings, IDs, gate vocabulary and code stay English — see references/language-contract.md -->
 
 > Source of truth for design tokens. `packages/ui` mirrors these for React; `apps/mobile/lib/core/theme/` mirrors them for Flutter.
 
