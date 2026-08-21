@@ -161,12 +161,16 @@ git add .specs/{slug}/README.md CHANGELOG.md .specs/.agents/ .specs/_system/ \
 git commit -m "docs({slug}): feature README, changelog entry, agent memory, system spec, architecture and feature docs"
 ```
 
-### Step 4b: Update meta.md
+### Step 4b: Advance the finish gate
 
-Update `.specs/{slug}/meta.md` for the **finish** gate per `references/gate-core.md` §"Advancing a gate" (`finish_status: completed`, `finish_completed_at`, `current_phase: done`).
+Follow `references/gate-core.md` §"Advancing a gate" for the **finish** phase — **all three stores**, not just `meta.md`:
+
+1. **`gate-context.md`** — write the `[FINISH] completed {date}` block, in gate order (it is the last one). Summarize what this run produced: the feature README, the CHANGELOG entry, and how the branch was integrated (Step 5). This step used to be missing: the step was named after `meta.md` and a real run wrote the other two stores and silently skipped this block, because the block's name was declared nowhere. It is enumerated in `gate-core.md` now.
+2. **`meta.md`** — `finish_status: completed`, `finish_completed_at`, `current_phase: done`.
+3. **`.specs/README.md`** — the backlog symbol, recomputed in Step 5.
 
 ```bash
-git add .specs/{slug}/meta.md
+git add .specs/{slug}/gate-context.md .specs/{slug}/meta.md
 git commit -m "chore({slug}): mark feature done in meta"
 ```
 

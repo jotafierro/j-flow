@@ -129,7 +129,9 @@ Current gate state, not history: **one block per gate**, in gate order (function
   → patterns: repository pattern, zod DTOs
 ```
 
-What each gate summarizes: functional → key decisions · technical → architecture + patterns · task plan → N tasks across N layers, N ACs covered · build → layers done · qa → tests passing + checklist · review → findings resolved · finish → README + CHANGELOG + PR.
+The seven block names, in gate order — canonical, never invented, translated or abbreviated: `[FUNCTIONAL SPEC]` · `[TECHNICAL SPEC]` · `[TASK PLAN]` · `[BUILD]` · `[QA]` · `[REVIEW]` · `[FINISH]`. Each maps to the phase of the same name in §"Advancing a gate".
+
+What each gate summarizes: functional → key decisions · technical → architecture + patterns · task plan → N tasks across N layers, N ACs covered · build → layers done · qa → tests passing + checklist · review → findings resolved · finish → README + CHANGELOG + how the branch was integrated (`workflow-modes.md`).
 
 **`[stale]` vs superseded** — different things, both kept. `[stale]` (from `/j-flow-update`) marks a gate's *current* block as invalidated upstream; it stays. Superseded means a newer approval of the same gate replaced it; it leaves for `gate-log.md`. A stale block that is later re-approved is superseded at that point.
 

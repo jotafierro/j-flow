@@ -39,7 +39,7 @@ real consumer.
 
 **`meta.md`** — every key (`feature`, `branch`, `created_at`, `stack`, `fast_track`, `{phase}_status`, `{phase}_approved_at`, `{phase}_completed_at`, `current_phase`) **and every value**: `pending`, `approved`, `green`, `completed`, `red`, `changes-requested`, `stale`, `true`/`false`, and the `current_phase` values `functional`, `technical`, `planning`, `build`, `qa`, `review`, `finish`, `done`.
 
-**Gate block names** in `gate-context.md` / `gate-log.md` — `[FUNCTIONAL SPEC]`, `[TECHNICAL SPEC]`, `[TASK PLAN]`, `[BUILD]`, `[QA]`, `[REVIEW]`, and the `[stale]` suffix. The status word that follows the name is a `meta.md` value and is frozen with it.
+**Gate block names** in `gate-context.md` / `gate-log.md` — the seven enumerated in `gate-core.md` §"gate-context.md format", which is their canonical source: `[FUNCTIONAL SPEC]`, `[TECHNICAL SPEC]`, `[TASK PLAN]`, `[BUILD]`, `[QA]`, `[REVIEW]`, `[FINISH]` — plus the `[stale]` suffix. The status word that follows the name is a `meta.md` value and is frozen with it.
 
 **Backlog symbols** (`gate-symbols.md`) — `[ ]`, `[SF]`, `[TF]`, `[P]`, `[B]`, `[Q]`, `[R]`, `[✓]`.
 
@@ -57,11 +57,9 @@ plus, in `CHANGELOG.md`, `## [Unreleased]` and its `### Added` / `### Fixed` / `
 
 The rest (`## Purpose`, `## Feature users`, `## Trigger`, `## Acceptance criteria`, `## Edge cases`, `## Risks`, `## Dependencies`, the technical-spec layer headings, …) have no literal consumer at the time of writing — they are frozen anyway, because a stable schema is the point and a future skill will grep one of them.
 
-## Two known inconsistencies (pre-existing, do not "fix" while translating)
+## One known inconsistency (pre-existing, do not "fix" while translating)
 
 - `## Acceptance criteria` in `functional-spec.md` vs `## Acceptance Criteria` in `feature-readme.md`. Both are frozen as they are; unifying them is a separate change with its own blast radius.
-- No `[FINISH]` gate block name exists anywhere in the plugin, though the gate order includes finish. Whatever a run writes there today is unspecified — do not invent a translated one.
-- **No shared reference enumerates the six gate block names.** `gate-core.md` shows `[FUNCTIONAL SPEC]` and `[TECHNICAL SPEC]` by example, `gate-cascade.md` carries `[QA]`/`[BUILD]`/`[REVIEW]`, and `[TASK PLAN]` appears only in the skills that consume it. The list above is currently the closest thing to a full enumeration, which is a side effect of writing this contract, not its job — treat it as frozen vocabulary, not as the canonical gate-naming source.
 
 ## What this contract does not cover
 

@@ -702,14 +702,11 @@ check('every literal-matched heading is still in its template', () => {
 });
 
 // The frozen vocabulary the gate machinery parses. Asserted as: declared frozen in
-// the contract, AND still present somewhere in the plugin. Deliberately not pinned to
-// a per-literal "canonical source" — writing this guard revealed that no shared
-// reference enumerates the six gate block names: gate-core.md shows two by example,
-// gate-cascade.md carries [QA]/[BUILD]/[REVIEW], and [TASK PLAN] lives only in the
-// skills that consume it. Encoding a canonical home here would assert a tidiness the
-// plugin does not have; the contract records the gap instead.
+// the contract, AND still present somewhere in the plugin. The gate block names now
+// have a canonical home — gate-core.md enumerates all seven (plan 049) — which the
+// gate-vocabulary guard below asserts separately in both directions.
 const FROZEN_VOCABULARY = [
-  '[FUNCTIONAL SPEC]', '[TECHNICAL SPEC]', '[TASK PLAN]', '[BUILD]', '[QA]', '[REVIEW]',
+  '[FUNCTIONAL SPEC]', '[TECHNICAL SPEC]', '[TASK PLAN]', '[BUILD]', '[QA]', '[REVIEW]', '[FINISH]',
   '[stale]', '[NEEDS CLARIFICATION', '[SF]', '[TF]',
   '**Given**', '**When**', '**Then:**',
   'current_phase', 'changes-requested',
@@ -765,6 +762,69 @@ check('every generator skill and agent declares its output language', () => {
     if (!fs.readFileSync(f, 'utf8').includes('language-contract.md')) offenders.push(agent);
   }
   assert(offenders.length === 0, `no language instruction: ${offenders.join(', ')}`);
+});
+
+// ── gate block vocabulary (plan 049) ────────────────────────────────────────
+// gate-core.md §"Advancing a gate" requires a gate-context block for every phase,
+// and the finish phase is in that table — but the name of its block was declared
+// nowhere, so a real run skipped it silently (finzas/01-infra-base: six blocks,
+// finish_status completed, no finish block). gate-core.md now enumerates all seven.
+// Guarded in both directions so neither half can drift: a declared name that fell
+// out of use, or a new gate name appearing in a skill without being declared.
+console.log('\ngate block vocabulary/');
+
+const GATE_CORE = 'skills/j-flow-shared/references/gate-core.md';
+const GATE_BLOCKS = [
+  '[FUNCTIONAL SPEC]', '[TECHNICAL SPEC]', '[TASK PLAN]',
+  '[BUILD]', '[QA]', '[REVIEW]', '[FINISH]',
+];
+
+// Bracketed uppercase tokens that are deliberately NOT gate blocks. Anything else
+// found in skills/ must be a declared gate block — that is the point of the check.
+const NON_GATE_TOKENS = new Set([
+  '[NEEDS CLARIFICATION]', '[SF]', '[TF]', '[PLAN]', '[WARN]', '[GATE NAME]',
+  '[P]', '[B]', '[Q]', '[R]', '[S]', '[ ]',
+]);
+
+check('gate-core.md enumerates all seven gate block names', () => {
+  const core = fs.readFileSync(path.join(ROOT, GATE_CORE), 'utf8');
+  const missing = GATE_BLOCKS.filter((b) => !core.includes(b));
+  assert(missing.length === 0, `not enumerated in gate-core.md: ${missing.join(', ')}`);
+});
+
+check('every enumerated gate block has a real consumer', () => {
+  // Declared in the two reference files is not "used" — some skill must actually
+  // write or read the block, which is precisely what [FINISH] was missing: it was
+  // designed in gate-core.md's summary line and no skill ever wrote it.
+  const REFERENCES = [GATE_CORE, LANGUAGE_CONTRACT];
+  const skillFiles = walk(path.join(ROOT, 'skills'))
+    .filter((f) => !REFERENCES.includes(path.relative(ROOT, f)));
+  const corpus = skillFiles.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+  const dead = GATE_BLOCKS.filter((b) => !corpus.includes(b));
+  assert(dead.length === 0,
+    `enumerated but no skill writes or reads it: ${dead.join(', ')}`);
+});
+
+check('no undeclared gate block name appears in any skill', () => {
+  const declared = new Set(GATE_BLOCKS);
+  const offenders = new Map();
+  for (const file of walk(path.join(ROOT, 'skills'))) {
+    const rel = path.relative(ROOT, file);
+    const content = fs.readFileSync(file, 'utf8');
+    for (const m of content.match(/\[[A-Z][A-Z ]*[A-Z]\]|\[[A-Z]\]/g) || []) {
+      if (declared.has(m) || NON_GATE_TOKENS.has(m)) continue;
+      if (!offenders.has(m)) offenders.set(m, rel);
+    }
+  }
+  const list = [...offenders].map(([tok, f]) => `${tok} (${f})`);
+  assert(list.length === 0,
+    `bracketed token that is neither a declared gate block nor a known non-gate:\n    ${list.join('\n    ')}\n    If it is a new gate, enumerate it in gate-core.md and the language contract. If not, add it to NON_GATE_TOKENS.`);
+});
+
+check('the language contract freezes the same seven names', () => {
+  const contract = fs.readFileSync(path.join(ROOT, LANGUAGE_CONTRACT), 'utf8');
+  const missing = GATE_BLOCKS.filter((b) => !contract.includes(b));
+  assert(missing.length === 0, `declared in gate-core.md but not frozen in the contract: ${missing.join(', ')}`);
 });
 
 // ── summary ──────────────────────────────────────────────────────────────────
