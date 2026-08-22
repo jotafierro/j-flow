@@ -31,7 +31,14 @@ Post-process `apps/e2e/package.json` — rename to `@{project}/e2e`; add `"@{pro
 
 **Ensure `"@playwright/test": "catalog:"` is in devDependencies — create it if absent, don't assume the CLI wrote it.** It resolves from the `catalog["@playwright/test"]` entry in `pnpm-workspace.yaml` (Step 2) instead of drifting independently from whatever `packages/ui` ends up with. The catalog needs both the `playwright` and `@playwright/test` keys — pnpm resolves `catalog:` by exact package name, and these are two different npm packages (see Step 2's catalog block).
 
-Create-if-missing rather than rewrite-the-line, because at the pinned version the CLI often does not get as far as declaring it. Verified live (2026-08-17) with this exact invocation: `create-playwright@1.17.139` writes `devEngines.packageManager.version: "^11.20.0"` into the `package.json` it generates, then runs `pnpm add --save-dev @playwright/test` against it and pnpm rejects its own generated file — `Invalid package manager specification in package.json (pnpm@^11.20.0); expected a semver version` — so the CLI aborts leaving only a stub `package.json`. Also strip that `devEngines` block during this post-processing step: the workspace already declares `packageManager` at the root, and leaving a range there keeps breaking every later pnpm command in this package.
+Create-if-missing rather than rewrite-the-line, because whether the CLI gets that far depends on context — verified both ways:
+
+- **Inside the workspace** (the normal case, root `pnpm-workspace.yaml` present): the CLI succeeds, and because `@playwright/test` is in the catalog, `pnpm add` writes `"catalog:"` for you. The reconciliation is already done; just confirm it.
+- **Standalone** (no workspace root): `create-playwright@1.17.139` writes `devEngines.packageManager.version: "^11.20.0"` into the `package.json` it generates, then runs `pnpm add --save-dev @playwright/test` against it, and pnpm rejects its own generated file — `Invalid package manager specification in package.json (pnpm@^11.20.0); expected a semver version` — so the CLI aborts leaving a stub.
+
+Either way, assert the end state rather than assuming a path. If a `devEngines` block is present, strip it: the workspace already declares `packageManager` at the root, and a range there breaks later pnpm commands in this package.
+
+**The scripts are missing in both cases** — the CLI never writes them here, which is why the scripts step above is an overwrite-or-create, not an edit.
 
 **Create `apps/e2e/tsconfig.json`** — `create-playwright` doesn't generate one, so `apps/e2e` has no tsconfig at all today:
 ```json
