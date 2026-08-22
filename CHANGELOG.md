@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-08-22
+
 ### Added
 - **`.specs/config.md` — per-project workflow configuration**, seeded by `/j-flow-project` (which now asks) and backfilled by `--update`. Kept separate from `PRODUCT.md` on purpose: that file describes the product and is regenerated, this one is hand-edited policy about how the repo is worked.
 - **`**Spec language:**` and `**Docs language:**` in `.specs/config.md`** — write spec prose and the flow's own dialogues in your own language while the artifact schema stays English. Both default to `en`, so existing projects are unaffected, and the common setup is spec prose in your language with `docs/` and the CHANGELOG left in English for outside contributors.
