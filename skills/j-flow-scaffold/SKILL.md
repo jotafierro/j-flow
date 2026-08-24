@@ -252,7 +252,14 @@ Emit only the entries whose condition holds, and apply the matching rule when po
 
 **`typescript` stays on 5.x deliberately, and the constraint is `apps/api`.** `create-vite@9.1.2` pins `~6.0.2` and `@nestjs/cli@11.0.24` pins `^5.7.3`; the catalog unifies both on `^5.9.0`. Verified live (2026-08-17): the Vite `react-ts` template type-checks and builds cleanly under 5.9.3, but a freshly generated NestJS 11 project **fails `nest build` under 6.0.2** with `TS5011` (`rootDir` must be explicit) and `TS5101` (`baseUrl` deprecated) — both raised against `tsconfig.build.json` as the Nest CLI itself generates it. Do not raise this entry to 6.x until the Nest CLI emits a TS6-clean tsconfig; re-check it during the pinned-versions review.
 
-Skip the `catalog` block entirely for `bare-single-package` and `flutter-only` — neither emits a `pnpm-workspace.yaml` at all, so there is no catalog to reference and every dependency stays literal.
+Skip the `catalog` block entirely for `bare-single-package` and `flutter-only` — neither has workspace packages to unify, so every dependency stays literal.
+
+**`bare-single-package` still needs a `pnpm-workspace.yaml`, for settings only.** Emit one carrying just `allowBuilds` (and `overrides` if the project needs them) — no `packages:` list:
+```yaml
+allowBuilds:
+  esbuild: true
+```
+This looks contradictory in a repo with no workspace, but pnpm 11 left it no alternative: the `pnpm` field in `package.json` is **no longer read** (`[WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored`), so `pnpm-workspace.yaml` is the only home for these settings. Without it, `tsup` pulls `esbuild`, whose install script pnpm blocks, and **`pnpm install` exits 1 and every later `pnpm run` fails** — verified live 2026-08-24, both the failure and the fix. `flutter-only` needs nothing here: it has no Node dependencies at all.
 
 Deliberately **not** cataloged, so nobody adds them back by reflex: `vite` and `@vitejs/plugin-react`. Both are build-time only and live in separately built packages (`packages/ui` builds Storybook, `apps/web` builds the app) with no shared runtime instance to keep identical — unlike `react`/`react-dom`, where two resolved copies across `packages/ui` and its consuming app produce the "invalid hook call" failure the catalog exists to prevent. Cataloging them would couple Storybook's builder to whatever `create-vite` picked, for no correctness gain.
 

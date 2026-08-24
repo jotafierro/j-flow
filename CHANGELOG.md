@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **The `bare-single-package` profile could not install.** It emits no `pnpm-workspace.yaml`, and pnpm 11 no longer reads the `pnpm` field in `package.json` — so there was nowhere to declare `allowBuilds`, and `esbuild` (via `tsup`) made `pnpm install` exit 1, taking every later `pnpm run` with it. The profile now emits a settings-only `pnpm-workspace.yaml` with no `packages:` list, which looks odd in a workspace-less repo but is the only home pnpm 11 leaves for those settings.
+- **An e2e-only project could pass green having tested a different project.** With `!has_web` the Playwright config kept `baseURL: process.env.BASE_URL ?? 'http://localhost:3001'`, but that profile serves nothing on 3001 — so an unset `BASE_URL` silently ran the suite against whatever else answered there. Reproduced against an unrelated app's dev server. The fallback is now dropped in that branch, so an unset `BASE_URL` fails loudly.
+
 ## [2.5.0] - 2026-08-22
 
 ### Added

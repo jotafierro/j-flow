@@ -84,7 +84,7 @@ export default defineConfig({
 ```
 
 - **`has_web`**: keep the `webServer` block — `pnpm --filter @{project}/e2e e2e` boots the web dev server on demand and shuts it down afterward (`reuseExistingServer: !CI` reuses a running one locally).
-- **`!has_web`**: DELETE the entire `webServer` block. Playwright runs against whatever `BASE_URL` points at; there is no local server to boot. Print in the post-scaffold output: "e2e is external-target — set `BASE_URL` (e.g. `BASE_URL=https://staging.example.com pnpm e2e`)."
+- **`!has_web`**: DELETE the entire `webServer` block **and the `?? 'http://localhost:3001'` fallback**, leaving `baseURL: process.env.BASE_URL`. There is no local web app in this profile, so the fallback points at a port this project never serves — and if anything else on the machine happens to answer there, the suite passes green having tested a different project entirely. Verified live 2026-08-24: an e2e-only run with `BASE_URL` unset passed against an unrelated app's dev server. With no fallback, an unset `BASE_URL` fails loudly instead. Playwright runs against whatever `BASE_URL` points at; there is no local server to boot. Print in the post-scaffold output: "e2e is external-target — set `BASE_URL` (e.g. `BASE_URL=https://staging.example.com pnpm e2e`)."
 
 **Replace `apps/e2e/tests/health.spec.ts`** — branch the smoke by whether a local web app exists:
 

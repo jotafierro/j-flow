@@ -868,6 +868,23 @@ check('allowBuilds pre-seeds the entries pnpm 11 otherwise blocks on', () => {
     'a blanket build allow-list must never be recommended');
 });
 
+check('bare-single-package still emits pnpm-workspace.yaml for settings', () => {
+  const skill = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/SKILL.md'), 'utf8');
+  // pnpm 11 ignores the `pnpm` field in package.json, so a workspace-less repo has
+  // nowhere else to put allowBuilds — without it `pnpm install` exits 1 on esbuild.
+  assert(/`bare-single-package` still needs a `pnpm-workspace.yaml`/.test(skill),
+    'the bare profile must be told to emit a settings-only pnpm-workspace.yaml');
+  assert(/no longer read/.test(skill), 'the reason (pnpm field ignored in pnpm 11) must stay recorded');
+});
+
+check('the e2e external-target profile drops the localhost fallback', () => {
+  const e2e = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/references/layer-e2e.md'), 'utf8');
+  // With !has_web there is no local web app; a localhost fallback makes an unset
+  // BASE_URL pass green against whatever else answers on that port.
+  assert(/DELETE the entire `webServer` block \*\*and the `\?\? 'http:\/\/localhost:3001'` fallback\*\*/.test(e2e),
+    '!has_web must drop the baseURL fallback, not just the webServer block');
+});
+
 check('the generated README explains unresolved allowBuilds placeholders', () => {
   const readme = fs.readFileSync(path.join(ROOT, 'skills/j-flow-shared/templates/scaffold-readme.md'), 'utf8');
   assert(readme.includes('allowBuilds'), 'the README must tell the user what to do when pnpm edits pnpm-workspace.yaml');
