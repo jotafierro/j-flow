@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-08-25
+
 ### Fixed
 - **The `bare-single-package` profile could not install.** It emits no `pnpm-workspace.yaml`, and pnpm 11 no longer reads the `pnpm` field in `package.json` — so there was nowhere to declare `allowBuilds`, and `esbuild` (via `tsup`) made `pnpm install` exit 1, taking every later `pnpm run` with it. The profile now emits a settings-only `pnpm-workspace.yaml` with no `packages:` list, which looks odd in a workspace-less repo but is the only home pnpm 11 leaves for those settings.
 - **`turbo` never passed `BASE_URL` into the `e2e` task.** Turbo does not forward ambient environment variables unless the task declares them, so `BASE_URL=… pnpm e2e` ran as if it were unset — while `pnpm exec playwright test` with the same variable worked, which is what made it invisible. The task now declares `env: ["BASE_URL"]`. This is also what hid the fallback bug below: with the variable dropped, every external-target run quietly used the localhost fallback.
