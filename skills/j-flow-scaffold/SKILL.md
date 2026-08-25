@@ -317,14 +317,15 @@ No `pnpm` field here — see the `overrides`/`allowBuilds` move to `pnpm-workspa
       "dependsOn": ["^build"]
     },
     "e2e": {
-      "cache": false
+      "cache": false,
+      "env": ["BASE_URL"]
     },
     "type-check": {}
   }
 }
 ```
 
-`e2e` is a separate task from `test`, and only `apps/e2e` declares a script for it (see `references/layer-e2e.md`). Turbo runs a task by matching its name against each package's scripts, so keeping the Playwright script out of `test` is what keeps the root `pnpm test` to unit tests in seconds — it is the command `/j-flow-qa` invokes at every gate and CI runs on every push. `cache: false` because an e2e run depends on a live server, not just on the inputs turbo can hash. Emit the `e2e` task only when `has_e2e`; without that layer nothing would ever run it.
+`e2e` is a separate task from `test`, and only `apps/e2e` declares a script for it (see `references/layer-e2e.md`). Turbo runs a task by matching its name against each package's scripts, so keeping the Playwright script out of `test` is what keeps the root `pnpm test` to unit tests in seconds — it is the command `/j-flow-qa` invokes at every gate and CI runs on every push. `cache: false` because an e2e run depends on a live server, not just on the inputs turbo can hash. **`env: ["BASE_URL"]` is required, not decoration:** turbo does not pass ambient environment variables into a task unless they are declared, so without it `BASE_URL=… pnpm e2e` silently runs with `BASE_URL` unset. Verified live 2026-08-25 — `pnpm exec playwright test` with the variable set passes, the same run through turbo fails with `Cannot navigate to invalid URL`. Combined with a localhost fallback in the config, it fails worse than that: the run goes green against whatever else answers on that port. Emit the `e2e` task only when `has_e2e`; without that layer nothing would ever run it.
 
 **The task is `e2e`, not `test:e2e`, and that is not a style choice.** `@nestjs/cli` generates `"test:e2e": "jest --config ./test/jest-e2e.json"` in `apps/api` — that name is already taken by the NestJS supertest suite, which `/j-flow-qa` runs as its own Stage 3 and which needs a MongoDB container. A turbo task called `test:e2e` would run both suites under one command.
 

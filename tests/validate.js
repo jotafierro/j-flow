@@ -847,6 +847,9 @@ check('apps/e2e declares an e2e script and no test script', () => {
 check('the e2e turbo task exists and does not collide with NestJS test:e2e', () => {
   const skill = fs.readFileSync(path.join(ROOT, 'skills/j-flow-scaffold/SKILL.md'), 'utf8');
   assert(/"e2e":\s*\{\s*\n\s*"cache":\s*false/.test(skill), 'turbo.json must declare an `e2e` task with cache disabled');
+  // turbo drops ambient env vars unless declared, so an external-target run would
+  // execute with BASE_URL unset — green against whatever answers the fallback port.
+  assert(/"env":\s*\["BASE_URL"\]/.test(skill), 'the e2e task must declare env: ["BASE_URL"]');
   assert(skill.includes('"e2e": "turbo e2e"'), 'the root package.json must expose `pnpm e2e`');
   // @nestjs/cli already generates test:e2e in apps/api; naming the Playwright task
   // the same would run both suites under one command.
